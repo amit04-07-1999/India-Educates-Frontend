@@ -743,7 +743,7 @@ const Member = () => {
                     <div className="card border-0 mb-4 no-bg">
                       <div className="card-header py-3 px-0 d-sm-flex align-items-center  justify-content-between border-bottom">
                         <h3 className=" fw-bold flex-fill mb-0 mt-sm-0">
-                          Employees
+                          AGENTS
                         </h3>
                         <button
                           type="button"
@@ -752,37 +752,13 @@ const Member = () => {
                           data-bs-target="#createemp"
                         >
                           <i className="icofont-plus-circle me-2 fs-6" />
-                          Add Employee
+                          Add Agent
                         </button>
-                        <div className="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
-                          <div className="input-group">
-                            <input
-                              type="search"
-                              className="form-control"
-                              aria-label="search"
-                              aria-describedby="addon-wrapping"
-                              value={searchQuery}
-                              onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                handleSearch(e.target.value);
-                              }}
-                              placeholder="Enter Employee Name"
-                            />
-                            <button
-                              type="button"
-                              className="input-group-text"
-                              id="addon-wrapping"
-                              onClick={handleSearch}
-                            >
-                              <i className="fa fa-search" />
-                            </button>
-                          </div>
-                        </div>
+
                       </div>
 
-                      <div className="d-flex justify-content-between">
-                        <div></div>
-                        <div className="d-flex">
+                      <div className="d-flex justify-content-between mt-3 border-bottom">
+                        <div className="d-flex mb-3">
                           {viewMode === 'grid' ? (
                             <button
                               className="btn btn-outline-primary"
@@ -801,6 +777,30 @@ const Member = () => {
                             </button>
                           )}
                         </div>
+                        <div className="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
+                          <div className="input-group">
+                            <input
+                              type="search"
+                              className="form-control"
+                              aria-label="search"
+                              aria-describedby="addon-wrapping"
+                              value={searchQuery}
+                              onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                handleSearch(e.target.value);
+                              }}
+                              placeholder="Enter Agent Name"
+                            />
+                            <button
+                              type="button"
+                              className="input-group-text"
+                              id="addon-wrapping"
+                              onClick={handleSearch}
+                            >
+                              <i className="fa fa-search" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -809,379 +809,382 @@ const Member = () => {
                 {/* Row End */}
                 {loading ? (
                   <div className="custom-loader "></div>
-                ) : (
-                  viewMode === 'grid' ? (
-                    <div className="row g-3 row-cols-1 row-cols-sm-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2 row-cols-xxl-2 row-deck py-1 pb-4">
-                      {employees.map((employee) => {
-                        const newDate = new Date(employee?.joiningDate);
-                        const date = newDate.getDate();
-                        const month = newDate.getMonth() + 1; // months are 0-indexed
-                        const year = newDate.getFullYear();
-                        return (
-                          <div className="col" key={employee.employeeId}>
-                            <div className="card teacher-card">
-                              <div className="card-body d-flex">
+                ) : Member.length === 0 ? (
+                  <div className="text-center mt-4">
+                    <h1 className="text-muted">No agents available. Please add a agent.</h1>
+                  </div>
+                ) : (viewMode === 'grid' ? (
+                  <div className="row g-3 row-cols-1 row-cols-sm-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2 row-cols-xxl-2 row-deck py-1 pb-4">
+                    {employees.map((employee) => {
+                      const newDate = new Date(employee?.joiningDate);
+                      const date = newDate.getDate();
+                      const month = newDate.getMonth() + 1; // months are 0-indexed
+                      const year = newDate.getFullYear();
+                      return (
+                        <div className="col" key={employee.employeeId}>
+                          <div className="card teacher-card">
+                            <div className="card-body d-flex">
 
-                                <div className="profile-av pe-xl-4 pe-md-2 pe-sm-4 pe-4 text-center w-75">
-                                  <div className="position-relative d-inline-block">
-                                    <img
-                                      src={`${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`}
-                                      alt=""
-                                      className="avatar xl rounded-circle img-thumbnail shadow-sm"
-                                      style={{
-                                        transition: 'transform 0.3s ease-in-out',
-                                        cursor: 'pointer',
-                                        objectFit: 'cover',
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        e.target.style.transform = 'scale(2.5)';
-                                        e.target.style.zIndex = '100';
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        e.target.style.transform = 'scale(1)';
-                                        e.target.style.zIndex = '1';
-                                      }}
-                                      onClick={() => handleImageClick(
-                                        `${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`,
-                                        employee.employeeName
-                                      )}
-                                    />
+                              <div className="profile-av pe-xl-4 pe-md-2 pe-sm-4 pe-4 text-center w-75">
+                                <div className="position-relative d-inline-block">
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`}
+                                    alt=""
+                                    className="avatar xl rounded-circle img-thumbnail shadow-sm"
+                                    style={{
+                                      transition: 'transform 0.3s ease-in-out',
+                                      cursor: 'pointer',
+                                      objectFit: 'cover',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.target.style.transform = 'scale(2.5)';
+                                      e.target.style.zIndex = '100';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.target.style.transform = 'scale(1)';
+                                      e.target.style.zIndex = '1';
+                                    }}
+                                    onClick={() => handleImageClick(
+                                      `${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`,
+                                      employee.employeeName
+                                    )}
+                                  />
+                                </div>
+
+                                <div className="about-info mt-3">
+                                  <div className="followers me-2">
                                   </div>
-
-                                  <div className="about-info mt-3">
-                                    <div className="followers me-2">
-                                    </div>
-                                    <div className="own-video">
-                                      <i className="bi bi-telephone-fill text-success fs-6 me-2" />
-                                      <span>{employee.phone}</span>
-                                    </div>
-                                    <p className="rounded-1 d-inline-block fw-bold small-11 mb-1 d-flex justify-content-center">
-                                      <i className="bi bi-envelope-at-fill text-primary fs-6 me-1" />
-                                      {employee.emailid}
-                                    </p>
+                                  <div className="own-video">
+                                    <i className="bi bi-telephone-fill text-success fs-6 me-2" />
+                                    <span>{employee.phone}</span>
                                   </div>
+                                  <p className="rounded-1 d-inline-block fw-bold small-11 mb-1 d-flex justify-content-center">
+                                    <i className="bi bi-envelope-at-fill text-primary fs-6 me-1" />
+                                    {employee.emailid}
+                                  </p>
+                                </div>
 
-                                  <div className="mt-2 text-start border-top pt-2">
-                                    {/* Aadhaar Card Row */}
-                                    <div className="row border-bottom pb-2 mb-2">
-                                      <div className="col-md-6 d-flex align-items-center">
-                                        <strong>Aadhaar -</strong>
-                                      </div>
-                                      <div className="col-md-6">
-                                        {employee.aadhaarCard ? (
-                                          <div className="row align-items-center g-2">
-                                            <div className="col-6">
-                                              {employee.aadhaarCard.toLowerCase().endsWith('.pdf') ? (
-                                                <a href="#" onClick={(e) => handleFileClick(
+                                <div className="mt-2 text-start border-top pt-2">
+                                  {/* Aadhaar Card Row */}
+                                  <div className="row border-bottom pb-2 mb-2">
+                                    <div className="col-md-6 d-flex align-items-center">
+                                      <strong>Aadhaar -</strong>
+                                    </div>
+                                    <div className="col-md-6">
+                                      {employee.aadhaarCard ? (
+                                        <div className="row align-items-center g-2">
+                                          <div className="col-6">
+                                            {employee.aadhaarCard.toLowerCase().endsWith('.pdf') ? (
+                                              <a href="#" onClick={(e) => handleFileClick(
+                                                e,
+                                                `${import.meta.env.VITE_BASE_URL}${employee.aadhaarCard.replace('uploads/', '')}`,
+                                                'pdf',
+                                                employee.employeeName
+                                              )}>View</a>
+                                            ) : (
+                                              <img
+                                                src={`${import.meta.env.VITE_BASE_URL}${employee.aadhaarCard.replace('uploads/', '')}`}
+                                                alt=""
+                                                className="avatar sm img-thumbnail shadow-sm"
+                                                onClick={(e) => handleFileClick(
                                                   e,
                                                   `${import.meta.env.VITE_BASE_URL}${employee.aadhaarCard.replace('uploads/', '')}`,
-                                                  'pdf',
+                                                  'image',
                                                   employee.employeeName
-                                                )}>View</a>
-                                              ) : (
-                                                <img
-                                                  src={`${import.meta.env.VITE_BASE_URL}${employee.aadhaarCard.replace('uploads/', '')}`}
-                                                  alt=""
-                                                  className="avatar sm img-thumbnail shadow-sm"
-                                                  onClick={(e) => handleFileClick(
-                                                    e,
-                                                    `${import.meta.env.VITE_BASE_URL}${employee.aadhaarCard.replace('uploads/', '')}`,
-                                                    'image',
-                                                    employee.employeeName
-                                                  )}
-                                                  style={{ cursor: 'pointer' }}
-                                                />
-                                              )}
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-download text-primary"
+                                                )}
                                                 style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDownload(employee.aadhaarCard, `${employee.employeeName}_aadhaar${employee.aadhaarCard.substr(employee.aadhaarCard.lastIndexOf('.'))}`)}
-                                                title="Download Aadhaar Card"
-                                              ></i>
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-trash text-danger"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDocumentDelete(employee._id, 'aadhaarCard')}
-                                                title="Delete Aadhaar Card"
-                                              ></i>
-                                            </div>
+                                              />
+                                            )}
                                           </div>
-                                        ) : (
-                                          <i className="bi bi-x-lg text-danger"></i>
-                                        )}
-                                      </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-download text-primary"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDownload(employee.aadhaarCard, `${employee.employeeName}_aadhaar${employee.aadhaarCard.substr(employee.aadhaarCard.lastIndexOf('.'))}`)}
+                                              title="Download Aadhaar Card"
+                                            ></i>
+                                          </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-trash text-danger"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDocumentDelete(employee._id, 'aadhaarCard')}
+                                              title="Delete Aadhaar Card"
+                                            ></i>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <i className="bi bi-x-lg text-danger"></i>
+                                      )}
                                     </div>
+                                  </div>
 
-                                    {/* PAN Card Row */}
-                                    <div className="row border-bottom pb-2 mb-2">
-                                      <div className="col-md-6 d-flex align-items-center">
-                                        <strong>Pan -</strong>
-                                      </div>
-                                      <div className="col-md-6">
-                                        {employee.panCard ? (
-                                          <div className="row align-items-center g-2">
-                                            <div className="col-6">
-                                              {employee.panCard.toLowerCase().endsWith('.pdf') ? (
-                                                <a href="#" onClick={(e) => handleFileClick(
+                                  {/* PAN Card Row */}
+                                  <div className="row border-bottom pb-2 mb-2">
+                                    <div className="col-md-6 d-flex align-items-center">
+                                      <strong>Pan -</strong>
+                                    </div>
+                                    <div className="col-md-6">
+                                      {employee.panCard ? (
+                                        <div className="row align-items-center g-2">
+                                          <div className="col-6">
+                                            {employee.panCard.toLowerCase().endsWith('.pdf') ? (
+                                              <a href="#" onClick={(e) => handleFileClick(
+                                                e,
+                                                `${import.meta.env.VITE_BASE_URL}${employee.panCard.replace('uploads/', '')}`,
+                                                'pdf',
+                                                employee.employeeName
+                                              )}>View</a>
+                                            ) : (
+                                              <img
+                                                src={`${import.meta.env.VITE_BASE_URL}${employee.panCard.replace('uploads/', '')}`}
+                                                alt=""
+                                                className="avatar sm img-thumbnail shadow-sm"
+                                                onClick={(e) => handleFileClick(
                                                   e,
                                                   `${import.meta.env.VITE_BASE_URL}${employee.panCard.replace('uploads/', '')}`,
-                                                  'pdf',
+                                                  'image',
                                                   employee.employeeName
-                                                )}>View</a>
-                                              ) : (
-                                                <img
-                                                  src={`${import.meta.env.VITE_BASE_URL}${employee.panCard.replace('uploads/', '')}`}
-                                                  alt=""
-                                                  className="avatar sm img-thumbnail shadow-sm"
-                                                  onClick={(e) => handleFileClick(
-                                                    e,
-                                                    `${import.meta.env.VITE_BASE_URL}${employee.panCard.replace('uploads/', '')}`,
-                                                    'image',
-                                                    employee.employeeName
-                                                  )}
-                                                  style={{ cursor: 'pointer' }}
-                                                />
-                                              )}
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-download text-primary"
+                                                )}
                                                 style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDownload(employee.panCard, `${employee.employeeName}_pan${employee.panCard.substr(employee.panCard.lastIndexOf('.'))}`)}
-                                                title="Download Pan Card"
-                                              ></i>
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-trash text-danger"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDocumentDelete(employee._id, 'panCard')}
-                                                title="Delete Pan Card"
-                                              ></i>
-                                            </div>
+                                              />
+                                            )}
                                           </div>
-                                        ) : (
-                                          <i className="bi bi-x-lg text-danger"></i>
-                                        )}
-                                      </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-download text-primary"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDownload(employee.panCard, `${employee.employeeName}_pan${employee.panCard.substr(employee.panCard.lastIndexOf('.'))}`)}
+                                              title="Download Pan Card"
+                                            ></i>
+                                          </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-trash text-danger"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDocumentDelete(employee._id, 'panCard')}
+                                              title="Delete Pan Card"
+                                            ></i>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <i className="bi bi-x-lg text-danger"></i>
+                                      )}
                                     </div>
+                                  </div>
 
-                                    {/* Resume Row */}
-                                    <div className="row border-bottom pb-2 mb-2">
-                                      <div className="col-md-6 d-flex align-items-center">
-                                        <strong>Resume -</strong>
-                                      </div>
-                                      <div className="col-md-6">
-                                        {employee.resume ? (
-                                          <div className="row align-items-center g-2">
-                                            <div className="col-6">
-                                              {employee.resume.toLowerCase().endsWith('.pdf') ? (
-                                                <a href="#" onClick={(e) => handleFileClick(
+                                  {/* Resume Row */}
+                                  <div className="row border-bottom pb-2 mb-2">
+                                    <div className="col-md-6 d-flex align-items-center">
+                                      <strong>Resume -</strong>
+                                    </div>
+                                    <div className="col-md-6">
+                                      {employee.resume ? (
+                                        <div className="row align-items-center g-2">
+                                          <div className="col-6">
+                                            {employee.resume.toLowerCase().endsWith('.pdf') ? (
+                                              <a href="#" onClick={(e) => handleFileClick(
+                                                e,
+                                                `${import.meta.env.VITE_BASE_URL}${employee.resume.replace('uploads/', '')}`,
+                                                'pdf',
+                                                employee.employeeName
+                                              )}><i className="bi bi-filetype-pdf"></i></a>
+                                            ) : (
+                                              <img
+                                                src={`${import.meta.env.VITE_BASE_URL}${employee.resume.replace('uploads/', '')}`}
+                                                alt=""
+                                                className="avatar sm img-thumbnail shadow-sm"
+                                                onClick={(e) => handleFileClick(
                                                   e,
                                                   `${import.meta.env.VITE_BASE_URL}${employee.resume.replace('uploads/', '')}`,
-                                                  'pdf',
+                                                  'image',
                                                   employee.employeeName
-                                                )}><i className="bi bi-filetype-pdf"></i></a>
-                                              ) : (
-                                                <img
-                                                  src={`${import.meta.env.VITE_BASE_URL}${employee.resume.replace('uploads/', '')}`}
-                                                  alt=""
-                                                  className="avatar sm img-thumbnail shadow-sm"
-                                                  onClick={(e) => handleFileClick(
-                                                    e,
-                                                    `${import.meta.env.VITE_BASE_URL}${employee.resume.replace('uploads/', '')}`,
-                                                    'image',
-                                                    employee.employeeName
-                                                  )}
-                                                  style={{ cursor: 'pointer' }}
-                                                />
-                                              )}
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-download text-primary"
+                                                )}
                                                 style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDownload(employee.resume, `${employee.employeeName}_resume${employee.resume.substr(employee.resume.lastIndexOf('.'))}`)}
-                                                title="Download Resume"
-                                              ></i>
-                                            </div>
-                                            <div className="col-3 text-center">
-                                              <i
-                                                className="bi bi-trash text-danger"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => handleDocumentDelete(employee._id, 'resume')}
-                                                title="Delete Resume"
-                                              ></i>
-                                            </div>
+                                              />
+                                            )}
                                           </div>
-                                        ) : (
-                                          <i className="bi bi-x-lg text-danger"></i>
-                                        )}
-                                      </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-download text-primary"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDownload(employee.resume, `${employee.employeeName}_resume${employee.resume.substr(employee.resume.lastIndexOf('.'))}`)}
+                                              title="Download Resume"
+                                            ></i>
+                                          </div>
+                                          <div className="col-3 text-center">
+                                            <i
+                                              className="bi bi-trash text-danger"
+                                              style={{ cursor: 'pointer' }}
+                                              onClick={() => handleDocumentDelete(employee._id, 'resume')}
+                                              title="Delete Resume"
+                                            ></i>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <i className="bi bi-x-lg text-danger"></i>
+                                      )}
                                     </div>
-
                                   </div>
 
                                 </div>
 
-                                <div className="teacher-info border-start ps-xl-4 ps-md-3 ps-sm-4 ps-4 w-100">
-                                  <div>
-                                    <div className="d-flex justify-content-between">
+                              </div>
 
-                                      <div>
-                                        <h6
-                                          className="mb-0 mt-2 fw-bold d-block fs-6"
-                                          onClick={() => handleEmployeeClick(employee)}
-                                          style={{ cursor: 'pointer' }}
-                                          title="Click to View Employee Dashboard"
-                                        >
-                                          {employee.employeeName}
-                                        </h6>
-                                        <div className="followers me-2">
-                                          <i className="bi bi-person-vcard-fill text-danger fs-6 me-2" />
-                                          <span>{employee.employeeId}</span>
-                                        </div>
-                                      </div>
+                              <div className="teacher-info border-start ps-xl-4 ps-md-3 ps-sm-4 ps-4 w-100">
+                                <div>
+                                  <div className="d-flex justify-content-between">
 
-                                      <div>
-                                        <div
-                                          className="btn-group"
-                                          role="group"
-                                          aria-label="Basic outlined example"
-                                        >
-                                          <button
-                                            type="button"
-                                            className="btn btn-outline-secondary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editemp"
-                                            onClick={() => handleEditClick(employee)}
-                                          >
-                                            <i className="icofont-edit text-success" />
-                                          </button>
-                                          <button
-                                            type="button"
-                                            className="btn btn-outline-secondary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteproject"
-                                            onClick={() => {
-                                              setDeletableId(employee._id);
-                                            }}
-                                          >
-                                            <i className="icofont-ui-delete text-danger" />
-                                          </button>
-                                        </div>
+                                    <div>
+                                      <h6
+                                        className="mb-0 mt-2 fw-bold d-block fs-6"
+                                        onClick={() => handleEmployeeClick(employee)}
+                                        style={{ cursor: 'pointer' }}
+                                        title="Click to View Employee Dashboard"
+                                      >
+                                        {employee.employeeName}
+                                      </h6>
+                                      <div className="followers me-2">
+                                        <i className="bi bi-person-vcard-fill text-danger fs-6 me-2" />
+                                        <span>{employee.employeeId}</span>
                                       </div>
                                     </div>
-                                    <div className="d-flex justify-content-between">
-                                      <span className="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">
-                                        <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
-                                        {date}/{month}/{year}
-                                      </span>
-                                      <span className="light-info-bg p-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">
-                                        {employee.designation}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="video-setting-icon mt-2 pt-2 border-top">
-                                    <p>{employee.description}</p>
-                                  </div>
-                                  <div className="mt-2">
-                                    <div className="d-flex gap-2 fw-bold">
-                                      Projects :
-                                      <span className="text-primary">
-                                        {employeeProjects[employee._id] || 0}
-                                      </span>
-                                      <Link
-                                        to="/projects"
-                                        state={{ employeeName: employee.employeeName }}
-                                        className="arrow-link"
-                                        title={`Click to View Projects of ${employee.employeeName}`}
+
+                                    <div>
+                                      <div
+                                        className="btn-group"
+                                        role="group"
+                                        aria-label="Basic outlined example"
                                       >
-                                        <i className="bi bi-arrow-right" />
-                                      </Link>
-                                    </div>
-                                    <div className="d-flex gap-2 fw-bold">
-                                      Tasks :
-                                      <span className="text-success">
-                                        {employeeTasks[employee._id] || 0}
-                                      </span>
-                                      <Link
-                                        to="/tasks"
-                                        state={{ employeeName: employee.employeeName }}
-                                        className="arrow-link"
-                                        title={`Click to View Tasks of ${employee.employeeName}`}
-                                      >
-                                        <i className="bi bi-arrow-right" />
-                                      </Link>
-                                    </div>
-                                  </div>
-
-                                  {/* bank details */}
-                                  <button
-                                    className="btn btn-sm btn-outline-primary mt-2"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#bankDetailsModal"
-                                    onClick={() => setSelectedEmployee(employee)}
-                                  >
-                                    <i className="bi bi-bank me-2"></i>
-                                    View Bank Details
-                                  </button>
-
-                                  {/* social links */}
-                                  <div className="social-links mt-3">
-                                    <div className="d-flex flex-wrap gap-2">
-                                      {employee.socialLinks?.linkedin && (
-                                        <a href={employee.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-primary">
-                                          <i className="bi bi-linkedin"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.instagram && (
-                                        <a href={employee.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-danger">
-                                          <i className="bi bi-instagram"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.youtube && (
-                                        <a href={employee.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-danger">
-                                          <i className="bi bi-youtube"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.facebook && (
-                                        <a href={employee.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-primary">
-                                          <i className="bi bi-facebook"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.github && (
-                                        <a href={employee.socialLinks.github} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-dark">
-                                          <i className="bi bi-github"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.website && (
-                                        <a href={employee.socialLinks.website} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-info">
-                                          <i className="bi bi-globe"></i>
-                                        </a>
-                                      )}
-                                      {employee.socialLinks?.other && (
-                                        <a href={employee.socialLinks.other} target="_blank" rel="noopener noreferrer"
-                                          className="btn btn-sm btn-outline-secondary">
-                                          <i className="bi bi-link-45deg"></i>
-                                        </a>
-                                      )}
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-secondary"
+                                          data-bs-toggle="modal"
+                                          data-bs-target="#editemp"
+                                          onClick={() => handleEditClick(employee)}
+                                        >
+                                          <i className="icofont-edit text-success" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-secondary"
+                                          data-bs-toggle="modal"
+                                          data-bs-target="#deleteproject"
+                                          onClick={() => {
+                                            setDeletableId(employee._id);
+                                          }}
+                                        >
+                                          <i className="icofont-ui-delete text-danger" />
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
+                                  <div className="d-flex justify-content-between">
+                                    <span className="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">
+                                      <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
+                                      {date}/{month}/{year}
+                                    </span>
+                                    <span className="light-info-bg p-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">
+                                      {employee.designation}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="video-setting-icon mt-2 pt-2 border-top">
+                                  <p>{employee.description}</p>
+                                </div>
+                                <div className="mt-2">
+                                  <div className="d-flex gap-2 fw-bold">
+                                    Projects :
+                                    <span className="text-primary">
+                                      {employeeProjects[employee._id] || 0}
+                                    </span>
+                                    <Link
+                                      to="/projects"
+                                      state={{ employeeName: employee.employeeName }}
+                                      className="arrow-link"
+                                      title={`Click to View Projects of ${employee.employeeName}`}
+                                    >
+                                      <i className="bi bi-arrow-right" />
+                                    </Link>
+                                  </div>
+                                  <div className="d-flex gap-2 fw-bold">
+                                    Tasks :
+                                    <span className="text-success">
+                                      {employeeTasks[employee._id] || 0}
+                                    </span>
+                                    <Link
+                                      to="/tasks"
+                                      state={{ employeeName: employee.employeeName }}
+                                      className="arrow-link"
+                                      title={`Click to View Tasks of ${employee.employeeName}`}
+                                    >
+                                      <i className="bi bi-arrow-right" />
+                                    </Link>
+                                  </div>
+                                </div>
+
+                                {/* bank details */}
+                                <button
+                                  className="btn btn-sm btn-outline-primary mt-2"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#bankDetailsModal"
+                                  onClick={() => setSelectedEmployee(employee)}
+                                >
+                                  <i className="bi bi-bank me-2"></i>
+                                  View Bank Details
+                                </button>
+
+                                {/* social links */}
+                                <div className="social-links mt-3">
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {employee.socialLinks?.linkedin && (
+                                      <a href={employee.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-primary">
+                                        <i className="bi bi-linkedin"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.instagram && (
+                                      <a href={employee.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-danger">
+                                        <i className="bi bi-instagram"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.youtube && (
+                                      <a href={employee.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-danger">
+                                        <i className="bi bi-youtube"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.facebook && (
+                                      <a href={employee.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-primary">
+                                        <i className="bi bi-facebook"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.github && (
+                                      <a href={employee.socialLinks.github} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-dark">
+                                        <i className="bi bi-github"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.website && (
+                                      <a href={employee.socialLinks.website} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-info">
+                                        <i className="bi bi-globe"></i>
+                                      </a>
+                                    )}
+                                    {employee.socialLinks?.other && (
+                                      <a href={employee.socialLinks.other} target="_blank" rel="noopener noreferrer"
+                                        className="btn btn-sm btn-outline-secondary">
+                                        <i className="bi bi-link-45deg"></i>
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
 
 
 
-                                  {/* <button
+                                {/* <button
                                     className="btn btn-sm btn-outline-secondary mt-2 ms-2"
                                     data-bs-toggle="modal"
                                     data-bs-target="#viewDocumentsModal"
@@ -1195,148 +1198,148 @@ const Member = () => {
 
 
 
-                                </div>
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="row clearfix">
-                      <div className="col-md-12">
-                        <div className="card">
-                          <div className="card-body">
-                            <div className="table-responsive">
-                              <table className="table table-hover align-middle mb-0">
-                                <thead>
-                                  <tr>
-                                    <th>Employee</th>
-                                    <th>Contact</th>
-                                    <th>Department</th>
-                                    <th>Projects</th>
-                                    <th>Actions</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {employees.map((employee) => {
-                                    const newDate = new Date(employee?.joiningDate);
-                                    const date = newDate.getDate();
-                                    const month = newDate.getMonth() + 1; // months are 0-indexed
-                                    const year = newDate.getFullYear();
-                                    return (
-                                      <tr key={employee.employeeId}>
-                                        <td>
-                                          <div className="d-flex align-items-center">
-                                            <img
-                                              src={`${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`}
-                                              alt=""
-                                              className="avatar rounded-circle me-2"
-                                              style={{
-                                                width: '40px',
-                                                height: '40px',
-                                                objectFit: 'cover',
-                                                cursor: 'pointer'
-                                              }}
-                                              onClick={() => handleImageClick(
-                                                `${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`,
-                                                employee.employeeName
-                                              )}
-                                            />
-                                            <div>
-                                              <h6 className="mb-0">{employee.employeeName}</h6>
-                                              <small>{employee.employeeId}</small>
-                                            </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="row clearfix">
+                    <div className="col-md-12">
+                      <div className="card">
+                        <div className="card-body">
+                          <div className="table-responsive">
+                            <table className="table table-hover align-middle mb-0">
+                              <thead>
+                                <tr>
+                                  <th>Employee</th>
+                                  <th>Contact</th>
+                                  <th>Department</th>
+                                  <th>Projects</th>
+                                  <th>Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {employees.map((employee) => {
+                                  const newDate = new Date(employee?.joiningDate);
+                                  const date = newDate.getDate();
+                                  const month = newDate.getMonth() + 1; // months are 0-indexed
+                                  const year = newDate.getFullYear();
+                                  return (
+                                    <tr key={employee.employeeId}>
+                                      <td>
+                                        <div className="d-flex align-items-center">
+                                          <img
+                                            src={`${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`}
+                                            alt=""
+                                            className="avatar rounded-circle me-2"
+                                            style={{
+                                              width: '40px',
+                                              height: '40px',
+                                              objectFit: 'cover',
+                                              cursor: 'pointer'
+                                            }}
+                                            onClick={() => handleImageClick(
+                                              `${import.meta.env.VITE_BASE_URL}${employee.employeeImage}`,
+                                              employee.employeeName
+                                            )}
+                                          />
+                                          <div>
+                                            <h6 className="mb-0">{employee.employeeName}</h6>
+                                            <small>{employee.employeeId}</small>
                                           </div>
-                                        </td>
-                                        <td>
-                                          <div>{employee.phone}</div>
-                                          <small>{employee.emailid}</small>
-                                          <div> <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
-                                            {date}/{month}/{year}</div>
-                                        </td>
-                                        <td>
-                                          <div>{employee.department}</div>
-                                          <small>{employee.designation}</small>
-                                        </td>
-                                        <td>
-                                          <div className="d-flex flex-column gap-1">
-                                            <Link
-                                              to="/projects"
-                                              state={{ employeeName: employee.employeeName }}
-                                              title={`Click to View Projects of ${employee.employeeName}`}
-                                            >
-                                              <span className="badge bg-primary px-3">
-                                                Projects: {employeeProjects[employee._id] || 0}
-                                              </span>
-                                            </Link>
-                                            <Link
-                                              to="/tasks"
-                                              state={{ employeeName: employee.employeeName }}
-                                              title={`Click to View Tasks of ${employee.employeeName}`}
-                                            >
-                                              <span className="badge bg-success px-3">
-                                                Tasks: {employeeTasks[employee._id] || 0}
-                                              </span>
-                                            </Link>
-                                          </div>
-                                        </td>
-                                        <td>
+                                        </div>
+                                      </td>
+                                      <td>
+                                        <div>{employee.phone}</div>
+                                        <small>{employee.emailid}</small>
+                                        <div> <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
+                                          {date}/{month}/{year}</div>
+                                      </td>
+                                      <td>
+                                        <div>{employee.department}</div>
+                                        <small>{employee.designation}</small>
+                                      </td>
+                                      <td>
+                                        <div className="d-flex flex-column gap-1">
+                                          <Link
+                                            to="/projects"
+                                            state={{ employeeName: employee.employeeName }}
+                                            title={`Click to View Projects of ${employee.employeeName}`}
+                                          >
+                                            <span className="badge bg-primary px-3">
+                                              Projects: {employeeProjects[employee._id] || 0}
+                                            </span>
+                                          </Link>
+                                          <Link
+                                            to="/tasks"
+                                            state={{ employeeName: employee.employeeName }}
+                                            title={`Click to View Tasks of ${employee.employeeName}`}
+                                          >
+                                            <span className="badge bg-success px-3">
+                                              Tasks: {employeeTasks[employee._id] || 0}
+                                            </span>
+                                          </Link>
+                                        </div>
+                                      </td>
+                                      <td>
+                                        <div className="btn-group" role="group">
+                                          <button
+                                            className="btn btn-sm btn-outline-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editemp"
+                                            onClick={() => handleEditClick(employee)}
+                                          >
+                                            <i className="icofont-edit text-success"></i>
+                                          </button>
+                                          <button
+                                            className="btn btn-sm btn-outline-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteproject"
+                                            onClick={() => setDeletableId(employee._id)}
+                                          >
+                                            <i className="icofont-ui-delete text-danger"></i>
+                                          </button>
+                                        </div>
+                                        <div className="mt-2">
                                           <div className="btn-group" role="group">
+                                            {/* DOCUMENTS */}
                                             <button
                                               className="btn btn-sm btn-outline-secondary"
                                               data-bs-toggle="modal"
-                                              data-bs-target="#editemp"
-                                              onClick={() => handleEditClick(employee)}
+                                              data-bs-target="#viewDocumentsModal"
+                                              onClick={() => setSelectedEmployee(employee)}
+                                              title="Click to View Documents of Employee"
                                             >
-                                              <i className="icofont-edit text-success"></i>
-                                            </button>
-                                            <button
-                                              className="btn btn-sm btn-outline-secondary"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#deleteproject"
-                                              onClick={() => setDeletableId(employee._id)}
-                                            >
-                                              <i className="icofont-ui-delete text-danger"></i>
-                                            </button>
-                                          </div>
-                                          <div className="mt-2">
-                                            <div className="btn-group" role="group">
-                                              {/* DOCUMENTS */}
-                                              <button
-                                                className="btn btn-sm btn-outline-secondary"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#viewDocumentsModal"
-                                                onClick={() => setSelectedEmployee(employee)}
-                                                title="Click to View Documents of Employee"
-                                              >
-                                                <i className="bi bi-file-earmark-text"></i>
+                                              <i className="bi bi-file-earmark-text"></i>
 
-                                              </button>
-                                              {/* BANK DETAILS */}
-                                              <button
-                                                className="btn btn-sm btn-outline-secondary"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#bankDetailsModal"
-                                                onClick={() => setSelectedEmployee(employee)}
-                                                title="Click to View Bank Details of Employee"
-                                              >
-                                                <i className="bi bi-bank"></i>
-                                              </button>
-                                            </div>
+                                            </button>
+                                            {/* BANK DETAILS */}
+                                            <button
+                                              className="btn btn-sm btn-outline-secondary"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#bankDetailsModal"
+                                              onClick={() => setSelectedEmployee(employee)}
+                                              title="Click to View Bank Details of Employee"
+                                            >
+                                              <i className="bi bi-bank"></i>
+                                            </button>
                                           </div>
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
                     </div>
-                  )
+                  </div>
+                )
                 )}
               </div>
             </div>
@@ -1356,7 +1359,7 @@ const Member = () => {
                       id="createprojectlLabel"
                     >
                       {" "}
-                      Edit Employee
+                      Edit Agent
                     </h5>
                     <button
                       type="button"
@@ -1371,7 +1374,7 @@ const Member = () => {
                         htmlFor="exampleFormControlInput877"
                         className="form-label"
                       >
-                        Employee Name
+                        Agent Name
                       </label>
                       <input
                         type="text"
@@ -1388,7 +1391,7 @@ const Member = () => {
                         htmlFor="updateEmployeeImage"
                         className="form-label"
                       >
-                        Employee Image
+                        Agent Image
                       </label>
                       <input
                         className="form-control"
@@ -1451,7 +1454,7 @@ const Member = () => {
                               htmlFor="exampleFormControlInput1778"
                               className="form-label"
                             >
-                              Employee ID
+                              Agent ID
                             </label>
                             <input
                               type="text"
@@ -1836,7 +1839,8 @@ const Member = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn close text-white"
+                      style={{backgroundColor:"#0a9400"}}
                       onClick={updateSubmit}
                     >
                       Update
@@ -1860,7 +1864,7 @@ const Member = () => {
                       id="createprojectlLabel"
                     >
                       {" "}
-                      Add Employee
+                      Add Agent
                     </h5>
                     <button
                       type="button"
@@ -1875,13 +1879,13 @@ const Member = () => {
                         htmlFor="exampleFormControlInput877"
                         className="form-label"
                       >
-                        Employee Name <span className="text-danger">*</span>
+                        Agent Name<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
                         id="exampleFormControlInput877"
-                        placeholder="Employee Name"
+                        placeholder="Agent Name"
                         name="employeeName"
                         value={formData.employeeName}
                         onChange={handleChange}
@@ -1892,7 +1896,7 @@ const Member = () => {
                         htmlFor="formFileMultipleoneone"
                         className="form-label"
                       >
-                        Employee Image <span className="text-danger">*</span>
+                        Agent Image <span className="text-danger">*</span>
                       </label>
                       <input
                         className="form-control"
@@ -1955,13 +1959,13 @@ const Member = () => {
                               htmlFor="exampleFormControlInput1778"
                               className="form-label"
                             >
-                              Employee ID <span className="text-danger">*</span>
+                              Agent ID <span className="text-danger">*</span>
                             </label>
                             <input
                               type="text"
                               className="form-control"
                               id="exampleFormControlInput1778"
-                              placeholder="Employee ID"
+                              placeholder="Agent ID"
                               name="employeeId"
                               value={formData.employeeId}
                               onChange={handleChange}
@@ -2352,7 +2356,8 @@ const Member = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn close text-white"
+                      style={{backgroundColor:"#0a9400"}}
                       onClick={handleSubmit}
                     >
                       Create

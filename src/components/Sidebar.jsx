@@ -14,7 +14,7 @@ const Sidebar = () => {
   const [role, setRole] = useState('');
   const [isHolidayTomorrow, setIsHolidayTomorrow] = useState(false); // State to check if tomorrow is a holiday
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [sidebarColor, setSidebarColor] = useState('#16790d');
+  const [sidebarColor, setSidebarColor] = useState('#0a9400');
   const { isDarkMode, toggleTheme } = useTheme();
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -251,13 +251,13 @@ const Sidebar = () => {
                 data-bs-target="#client-Components"
                 href="#"
               >
-                <i className={`icofont-user-male ${textColorClass}`} /> <span>Our Clients</span>{" "}
+                <i className={`icofont-user-male ${textColorClass}`} /> <span>Our Associates</span>{" "}
                 <span className={`arrow icofont-dotted-down ms-auto text-end fs-5 ${textColorClass}`} />
               </a>
               <ul className="sub-menu collapse" id="client-Components">
                 <li>
                   <Link className="ms-link" to="/clients">
-                    <span>Clients</span>
+                    <span>Associates</span>
                   </Link>
                 </li>
               </ul>
@@ -269,7 +269,7 @@ const Sidebar = () => {
                 data-bs-target="#emp-Components"
                 href="#"
               >
-                <i className={`icofont-users-alt-5 ${textColorClass}`} /> <span>Employees</span>{" "}
+                <i className={`icofont-users-alt-5 ${textColorClass}`} /> <span>Our Agents</span>{" "}
                 <span className={`arrow icofont-dotted-down ms-auto text-end fs-5 ${textColorClass}`} />
               </a>
               <ul className="sub-menu collapse" id="emp-Components">

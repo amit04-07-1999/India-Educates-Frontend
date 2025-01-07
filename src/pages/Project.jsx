@@ -806,6 +806,30 @@ const Project = () => {
     modal.show();
   };
 
+  // Add state for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [projectsPerPage, setProjectsPerPage] = useState(10); // Default to 10 projects per page
+
+  // Calculate the index of the last and first project
+  const indexOfLastProject = currentPage * projectsPerPage;
+  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+  const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Next page
+  const nextPage = () => setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(filteredProjects.length / projectsPerPage)));
+
+  // Previous page
+  const prevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+
+  // Logic for page number chunking (5 page limit)
+  const pageLimit = 5;
+  const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+  const startPage = Math.floor((currentPage - 1) / pageLimit) * pageLimit + 1;
+  const endPage = Math.min(startPage + pageLimit - 1, totalPages);
+
   return (
     <>
       <div id="mytask-layout">
@@ -938,6 +962,10 @@ const Project = () => {
                 {/* Row end  */}
                 {loading ? (
                   <div className="custom-loader "></div>
+                ) : filteredProjects.length === 0 ? (
+                  <div className="text-center mt-4">
+                    <h1 className="text-muted">No projects available. Please create a project.</h1>
+                  </div>
                 ) : (
                   <div className="row g-3 mb-3 row-deck">
                     <div className="col-md-12">
@@ -1500,6 +1528,7 @@ const Project = () => {
                         value={formData.projectCategory}
                         onChange={handleChange}
                       />
+                      <span className="d-flex justify-content-center text-muted">OR</span>
                       <select
                         className="form-select"
                         aria-label="Default select Project Category"
@@ -1608,7 +1637,7 @@ const Project = () => {
                         <div className="row g-3 mb-3">
                           <div className="col-sm-12">
                             <label className="form-label">
-                              Project Assign Client
+                              Project Assign Associate
                             </label>
                             <div>
                               <MultiSelect
@@ -1675,7 +1704,8 @@ const Project = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-primary close"
+                      className="btn close text-white"
+                      style={{backgroundColor:"#0a9400"}}
                       data-dismiss="modal"
                       onClick={handleSubmit}
                     >
@@ -1820,7 +1850,7 @@ const Project = () => {
                         <div className="row g-3 mb-3">
                           <div className="col-sm-12">
                             <label className="form-label">
-                              Project Assign Client
+                              Project Assign Associate
                             </label>
                             <div>
                               <MultiSelect
@@ -1913,7 +1943,8 @@ const Project = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn close text-white"
+                      style={{backgroundColor:"#0a9400"}}
                       onClick={projectHandleSubmit}
                     >
                       Update
@@ -2138,6 +2169,56 @@ const Project = () => {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Add this section for pagination controls in the return statement */}
+            <div className="row mt-3">
+              <div className="col-12 col-md-6 mb-3">
+                <div className="d-flex align-items-center">
+                  <label htmlFor="projectsPerPage" className="form-label me-2 mb-0">Projects per page:</label>
+                  <select
+                    id="projectsPerPage"
+                    className="form-select"
+                    style={{ width: 'auto' }}
+                    value={projectsPerPage}
+                    onChange={(e) => {
+                      setProjectsPerPage(e.target.value === 'all' ? filteredProjects.length : parseInt(e.target.value, 10));
+                      setCurrentPage(1); // Reset to first page when changing the number of projects per page
+                    }}
+                  >
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Show All</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-12 col-md-6">
+                <nav aria-label="Page navigation">
+                  <ul className="pagination justify-content-md-end">
+                    <li className="page-item">
+                      <button onClick={prevPage} className="page-link" disabled={currentPage === 1}>
+                        &laquo;
+                      </button>
+                    </li>
+                    {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((page) => (
+                      <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                        <button onClick={() => paginate(page)} className="page-link bg-white">
+                          {page}
+                        </button>
+                      </li>
+                    ))}
+                    {endPage < totalPages && (
+                      <li className="page-item">
+                        <button onClick={() => paginate(endPage + 1)} className="page-link">
+                          &raquo;
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </nav>
               </div>
             </div>
 

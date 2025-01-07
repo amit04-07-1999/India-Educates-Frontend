@@ -507,7 +507,7 @@ const Tasks = () => {
       if (fileInput) {
         fileInput.value = '';
       }
-      
+
       // Add a small delay before scrolling
       setTimeout(() => {
         if (messageContainerRef.current) {
@@ -527,7 +527,7 @@ const Tasks = () => {
     setSelectTask(task);
     setSelectedTaskId(task._id);
     fetchTaskMessages(task._id);
-    
+
     // Add a small delay to ensure messages are loaded before scrolling
     setTimeout(() => {
       if (messageContainerRef.current) {
@@ -603,7 +603,7 @@ const Tasks = () => {
             <div className="body d-flex py-lg-3 py-md-2">
               <div className="container-xxl">
                 <div className="row align-items-center">
-                  <div className="border-0 mb-4">
+                  <div className="border-0 mb-3">
                     <div className="card-header py-3 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
                       <h3 className="fw-bold mb-0">Task Management</h3>
 
@@ -669,8 +669,8 @@ const Tasks = () => {
                     </div>
                   </div>
                 </div>{" "}
-                <div className="row g-3 mb-3">
-                  <div className="col-12 col-md-4">
+                <div className="row g-3 border-bottom">
+                  <div className="col-12 col-md-4 mb-3">
                     <div className="d-flex">
                       {viewMode === 'row' ? (
                         <button
@@ -726,36 +726,168 @@ const Tasks = () => {
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
                       />
-
                     </div>
                   </div>
                 </div>
 
                 {/* Row end  */}
-                {viewMode === 'list' ? (
-                  <div className="table-responsive">
-                    <table className="table table-bordered table-hover">
-                      <thead>
-                        <tr>
-                          <th scope="col" >SrNo.</th>
-                          <th scope="col" style={{ width: '6rem' }}>Project name</th>
-                          <th scope="col">Task name</th>
-                          <th scope="col" style={{ width: '7rem' }}>Assignee</th>
-                          <th scope="col" style={{ width: '6rem' }}>Due Date</th>
-                          <th scope="col" style={{ width: '6rem' }}>Priority</th>
-                          <th scope="col" style={{ width: '' }}>U/D</th>
-                          <th scope="col" style={{ width: '' }}>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {loading ? (
-                          <tr>
-                            <td colSpan="8">
-                              <div className="custom-loader" style={{ margin: "20px auto" }}></div>
-                            </td>
-                          </tr>
-                        ) : (
-                          currentTasks.map((task, index) => {
+
+                {loading ? (
+                  <tr>
+                    <td colSpan="8">
+                      <div className="custom-loader" style={{ margin: "20px auto" }}></div>
+                    </td>
+                  </tr>
+                ) : filteredTasks.length === 0 ? (
+                  <div className="text-center mt-4">
+                    <h1 className="text-muted">No tasks available. Please create a tasks.</h1>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      {viewMode === 'list' ? (
+                        <div className="table-responsive">
+                          <table className="table table-bordered table-hover">
+                            <thead>
+                              <tr>
+                                <th scope="col" >SrNo.</th>
+                                <th scope="col" style={{ width: '6rem' }}>Project name</th>
+                                <th scope="col">Task name</th>
+                                <th scope="col" style={{ width: '7rem' }}>Assignee</th>
+                                <th scope="col" style={{ width: '6rem' }}>Due Date</th>
+                                <th scope="col" style={{ width: '6rem' }}>Priority</th>
+                                <th scope="col" style={{ width: '' }}>U/D</th>
+                                <th scope="col" style={{ width: '' }}>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {currentTasks.map((task, index) => {
+                                const currentDate = new Date();
+                                const taskEndDate = new Date(task.taskEndDate);
+                                const isOverdue = taskEndDate < currentDate && task.taskStatus !== 'Completed';
+
+                                let backgroundColor = '';
+                                if (isOverdue) {
+                                  backgroundColor = '#f6c8b7';
+                                }
+
+                                return (
+                                  <tr
+                                    key={task._id}
+                                    style={{ backgroundColor }}
+                                  >
+                                    <td><span className="fw-bold fs-6">{index + 1}. </span></td>
+                                    <td style={{ backgroundColor }}>
+                                      {task.projectName}
+                                      <p>{task.taskDate}</p>
+                                      <Link
+                                        to="/images"
+                                        state={{
+                                          images: task.taskImages,
+                                          projectName: task.projectName,
+                                        }}
+                                        style={{ marginLeft: "33px" }}
+                                      >
+                                        <i className="bi-paperclip fs-6" />
+                                      </Link>
+                                    </td>
+                                    <td className="" style={{ backgroundColor }}>
+                                      <input
+                                        className="form-control fw-bold"
+                                        type="text"
+                                        name="taskTitle"
+                                        placeholder="Task Title"
+                                        value={task.taskTitle}
+                                        onChange={(e) => taskHandleChange(e, task._id)}
+                                        style={{ backgroundColor: 'transparent', border: 'none' }}
+                                      />
+                                      <textarea
+                                        className="w-100 form-control"
+                                        type="text"
+                                        placeholder="Explain The Task What To Do & How To Do"
+                                        name="description"
+                                        value={task.description}
+                                        onChange={(e) => taskHandleChange(e, task._id)}
+                                        style={{ outline: 'none', border: 'none', textWrap: 'wrap' }}
+                                      />
+                                    </td>
+                                    <td style={{ backgroundColor }}>
+                                      {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}
+                                      <p className="text-muted">By:-{task.assignedBy}</p>
+                                    </td>
+                                    <td style={{ backgroundColor }}>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        name="taskEndDate"
+                                        value={task.taskEndDate}
+                                        onChange={(e) => taskHandleChange(e, task._id)}
+                                        style={{ width: '120px', fontSize: '0.8rem' }} // Adjusted width and font size
+                                      />
+                                    </td>
+                                    <td style={{ backgroundColor }}>
+                                      <select
+                                        className="form-select"
+                                        aria-label="Default select Priority"
+                                        name="taskPriority"
+                                        value={task.taskPriority}
+                                        onChange={(e) => taskHandleChange(e, task._id)}
+                                        style={{ width: '120px', fontSize: '0.8rem' }}
+                                      >
+                                        <option value="">Set Priority</option>
+                                        <option value="Highest">Highest</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Lowest">Lowest</option>
+                                      </select>
+                                    </td>
+                                    <td className="bg-transparent">
+                                      <div className="d-flex gap-2 bg-transparent">
+                                        <button
+                                          onClick={() => taskHandleSubmit(task._id)}
+                                          className="bi bi-check2 bg-primary text-white border-0 rounded"
+                                        />
+                                        <button
+                                          data-bs-toggle="modal"
+                                          data-bs-target="#dremovetask"
+                                          onClick={() => setDeletableId(task._id)}
+                                          className="bi bi-trash bg-danger text-white border-0 rounded"
+                                        />
+                                      </div>
+                                    </td>
+                                    <td style={{ backgroundColor }} className="">
+                                      {task.taskStatus === 'Not Started' && (
+                                        <span className="badge bg-warning text-dark">Not Started</span>
+                                      )}
+                                      {task.taskStatus === 'In Progress' && (
+                                        <span className="badge bg-info text-dark">In Progress</span>
+                                      )}
+                                      {task.taskStatus === 'Completed' && (
+                                        <span className="badge bg-success">Completed</span>
+                                      )}
+
+                                      <button
+                                        className="btn btn-sm position-relative"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#taskMessage"
+                                        onClick={() => handleOpenMessages(task)}
+                                      >
+                                        <i className="bi bi-chat-left-dots"></i>
+                                        {notifications[task._id] > 0 && (
+                                          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {notifications[task._id]}
+                                          </span>
+                                        )}
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="row">
+                          {currentTasks.map((task, index) => {
                             const currentDate = new Date();
                             const taskEndDate = new Date(task.taskEndDate);
                             const isOverdue = taskEndDate < currentDate && task.taskStatus !== 'Completed';
@@ -766,243 +898,116 @@ const Tasks = () => {
                             }
 
                             return (
-                              <tr
-                                key={task._id}
-                                style={{ backgroundColor }}
-                              >
-                                <td><span className="fw-bold fs-6">{index + 1}. </span></td>
-                                <td style={{ backgroundColor }}>
+                              <div key={task._id} className="col-12 col-sm-6 col-md-4 col-lg-4 mb-4">
+                                <div className="card task-card h-100" style={{ backgroundColor }}>
+                                  <div className="card-body">
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                      <span className="fw-bold fs-6">{index + 1}. </span>
+                                      <h5 className="fw-bold mb-0">{task.projectName}</h5>
 
-                                  {task.projectName}
-                                  <p>{task.taskDate}</p>
-                                  <Link
-                                    to="/images"
-                                    state={{
-                                      images: task.taskImages,
-                                      projectName: task.projectName,
-                                    }}
-                                    style={{ marginLeft: "33px" }}
-                                  >
-                                    <i className="bi-paperclip fs-6" />
-                                  </Link>
-                                </td>
-                                <td className="" style={{ backgroundColor }}>
-                                  <input
-                                    className="form-control fw-bold"
-                                    type="text"
-                                    name="taskTitle"
-                                    placeholder="Task Title"
-                                    value={task.taskTitle}
-                                    onChange={(e) => taskHandleChange(e, task._id)}
-                                    style={{ backgroundColor: 'transparent', border: 'none' }}
-                                  />
-                                  <textarea
-                                    className="w-100 form-control"
-                                    type="text"
-                                    placeholder="Explain The Task What To Do & How To Do"
-                                    name="description"
-                                    value={task.description}
-                                    onChange={(e) => taskHandleChange(e, task._id)}
-                                    style={{ outline: 'none', border: 'none', textWrap: 'wrap' }}
-                                  />
-                                </td>
-                                <td style={{ backgroundColor }}>
-                                  {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}
-                                  <p className="text-muted">By:-{task.assignedBy}</p>
-                                </td>
-                                <td style={{ backgroundColor }}>
-                                  <input
-                                    type="date"
-                                    className="form-control"
-                                    name="taskEndDate"
-                                    value={task.taskEndDate}
-                                    onChange={(e) => taskHandleChange(e, task._id)}
-                                    style={{ width: '120px', fontSize: '0.8rem' }} // Adjusted width and font size
-                                  />
-                                </td>
-                                <td style={{ backgroundColor }}>
-                                  <select
-                                    className="form-select"
-                                    aria-label="Default select Priority"
-                                    name="taskPriority"
-                                    value={task.taskPriority}
-                                    onChange={(e) => taskHandleChange(e, task._id)}
-                                    style={{ width: '120px', fontSize: '0.8rem' }}
-                                  >
-                                    <option value="">Set Priority</option>
-                                    <option value="Highest">Highest</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Lowest">Lowest</option>
-                                  </select>
-                                </td>
-                                <td className="bg-transparent">
-                                  <div className="d-flex gap-2 bg-transparent">
-                                    <button
-                                      onClick={() => taskHandleSubmit(task._id)}
-                                      className="bi bi-check2 bg-primary text-white border-0 rounded"
+                                      <Link
+                                        to="/images"
+                                        state={{
+                                          images: task.taskImages,
+                                          projectName: task.projectName,
+                                        }}
+                                      >
+                                        <i className="bi-paperclip fs-6" />
+                                      </Link>
+                                    </div>
+                                    <input
+                                      className="form-control"
+                                      type="text"
+                                      name="taskTitle"
+                                      placeholder="Task Title"
+                                      value={task.taskTitle}
+                                      onChange={(e) => taskHandleChange(e, task._id)}
+                                      style={{
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        fontWeight: 'bold',
+                                        width: '80%'
+                                      }}
                                     />
-                                    <button
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#dremovetask"
-                                      onClick={() => setDeletableId(task._id)}
-                                      className="bi bi-trash bg-danger text-white border-0 rounded"
+                                    <textarea
+                                      className="form-control mb-2"
+                                      rows="3"
+                                      name="description"
+                                      value={task.description}
+                                      onChange={(e) => taskHandleChange(e, task._id)}
+                                      style={{ resize: 'none' }}
                                     />
+                                    <p className="mb-1">Assigned to: {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}</p>
+                                    <p className="mb-1">By: {task.assignedBy}</p>
+                                    <input
+                                      type="date"
+                                      className="form-control mb-2"
+                                      name="taskEndDate"
+                                      value={task.taskEndDate}
+                                      onChange={(e) => taskHandleChange(e, task._id)}
+                                    />
+                                    <select
+                                      className="form-select mb-2"
+                                      name="taskPriority"
+                                      value={task.taskPriority}
+                                      onChange={(e) => taskHandleChange(e, task._id)}
+                                    >
+                                      <option value="">Set Priority</option>
+                                      <option value="Highest">Highest</option>
+                                      <option value="Medium">Medium</option>
+                                      <option value="Lowest">Lowest</option>
+                                    </select>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                      <button
+                                        onClick={() => taskHandleSubmit(task._id)}
+                                        className="btn btn-sm btn-primary"
+                                      >
+                                        <i className="bi bi-check2"></i> Update
+                                      </button>
+                                      <button
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#dremovetask"
+                                        onClick={() => setDeletableId(task._id)}
+                                        className="btn btn-sm btn-danger text-white"
+                                      >
+                                        <i className="bi bi-trash"></i> Delete
+                                      </button>
+                                    </div>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                      {task.taskStatus === 'Not Started' && (
+                                        <span className="badge bg-warning text-dark">Not Started</span>
+                                      )}
+                                      {task.taskStatus === 'In Progress' && (
+                                        <span className="badge bg-info text-dark">In Progress</span>
+                                      )}
+                                      {task.taskStatus === 'Completed' && (
+                                        <span className="badge bg-success">Completed</span>
+                                      )}
+                                      <button
+                                        className="btn btn-sm position-relative"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#taskMessage"
+                                        onClick={() => handleOpenMessages(task)}
+                                      >
+                                        <i className="bi bi-chat-left-dots"></i>
+                                        {notifications[task._id] > 0 && (
+                                          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {notifications[task._id]}
+                                          </span>
+                                        )}
+                                      </button>
+                                    </div>
                                   </div>
-                                </td>
-                                <td style={{ backgroundColor }} className="">
-                                  {task.taskStatus === 'Not Started' && (
-                                    <span className="badge bg-warning text-dark">Not Started</span>
-                                  )}
-                                  {task.taskStatus === 'In Progress' && (
-                                    <span className="badge bg-info text-dark">In Progress</span>
-                                  )}
-                                  {task.taskStatus === 'Completed' && (
-                                    <span className="badge bg-success">Completed</span>
-                                  )}
-
-                                  <button
-                                    className="btn btn-sm position-relative"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#taskMessage"
-                                    onClick={() => handleOpenMessages(task)}
-                                  >
-                                    <i className="bi bi-chat-left-dots"></i>
-                                    {notifications[task._id] > 0 && (
-                                      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {notifications[task._id]}
-                                      </span>
-                                    )}
-                                  </button>
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             );
-                          })
-                        )}
-                      </tbody>
-
-
-
-                    </table>
-                  </div>
-                ) : (
-                  <div className="row">
-                    {currentTasks.map((task, index) => {
-                      const currentDate = new Date();
-                      const taskEndDate = new Date(task.taskEndDate);
-                      const isOverdue = taskEndDate < currentDate && task.taskStatus !== 'Completed';
-
-                      let backgroundColor = '';
-                      if (isOverdue) {
-                        backgroundColor = '#f6c8b7';
-                      }
-
-                      return (
-                        <div key={task._id} className="col-12 col-sm-6 col-md-4 col-lg-4 mb-4">
-                          <div className="card task-card h-100" style={{ backgroundColor }}>
-                            <div className="card-body">
-                              <div className="d-flex justify-content-between align-items-center mb-2">
-                                <span className="fw-bold fs-6">{index + 1}. </span>
-                                <h5 className="fw-bold mb-0">{task.projectName}</h5>
-
-                                <Link
-                                  to="/images"
-                                  state={{
-                                    images: task.taskImages,
-                                    projectName: task.projectName,
-                                  }}
-                                >
-                                  <i className="bi-paperclip fs-6" />
-                                </Link>
-                              </div>
-                              <input
-                                className="form-control"
-                                type="text"
-                                name="taskTitle"
-                                placeholder="Task Title"
-                                value={task.taskTitle}
-                                onChange={(e) => taskHandleChange(e, task._id)}
-                                style={{
-                                  backgroundColor: 'transparent',
-                                  border: 'none',
-                                  fontWeight: 'bold',
-                                  width: '80%'
-                                }}
-                              />
-                              <textarea
-                                className="form-control mb-2"
-                                rows="3"
-                                name="description"
-                                value={task.description}
-                                onChange={(e) => taskHandleChange(e, task._id)}
-                                style={{ resize: 'none' }}
-                              />
-                              <p className="mb-1">Assigned to: {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}</p>
-                              <p className="mb-1">By: {task.assignedBy}</p>
-                              <input
-                                type="date"
-                                className="form-control mb-2"
-                                name="taskEndDate"
-                                value={task.taskEndDate}
-                                onChange={(e) => taskHandleChange(e, task._id)}
-                              />
-                              <select
-                                className="form-select mb-2"
-                                name="taskPriority"
-                                value={task.taskPriority}
-                                onChange={(e) => taskHandleChange(e, task._id)}
-                              >
-                                <option value="">Set Priority</option>
-                                <option value="Highest">Highest</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Lowest">Lowest</option>
-                              </select>
-                              <div className="d-flex justify-content-between align-items-center mb-2">
-                                <button
-                                  onClick={() => taskHandleSubmit(task._id)}
-                                  className="btn btn-sm btn-primary"
-                                >
-                                  <i className="bi bi-check2"></i> Update
-                                </button>
-                                <button
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#dremovetask"
-                                  onClick={() => setDeletableId(task._id)}
-                                  className="btn btn-sm btn-danger text-white"
-                                >
-                                  <i className="bi bi-trash"></i> Delete
-                                </button>
-                              </div>
-                              <div className="d-flex justify-content-between align-items-center">
-                                {task.taskStatus === 'Not Started' && (
-                                  <span className="badge bg-warning text-dark">Not Started</span>
-                                )}
-                                {task.taskStatus === 'In Progress' && (
-                                  <span className="badge bg-info text-dark">In Progress</span>
-                                )}
-                                {task.taskStatus === 'Completed' && (
-                                  <span className="badge bg-success">Completed</span>
-                                )}
-                                <button
-                                  className="btn btn-sm position-relative"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#taskMessage"
-                                  onClick={() => handleOpenMessages(task)}
-                                >
-                                  <i className="bi bi-chat-left-dots"></i>
-                                  {notifications[task._id] > 0 && (
-                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                      {notifications[task._id]}
-                                    </span>
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
+                      )}
+                    </div>
+                  </>
                 )}
+                <div />
 
                 {/* Pagination controls */}
                 <div className="row mt-3">
@@ -1270,7 +1275,8 @@ const Tasks = () => {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-primary"
+                        className="btn close text-white"
+                        style={{ backgroundColor: "#0a9400" }}
                         data-bs-dismiss="modal"
                         onClick={handleSubmit}
                       >
@@ -1544,7 +1550,8 @@ const Tasks = () => {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-primary"
+                        className="btn close text-white"
+                        style={{ backgroundColor: "#0a9400" }}
                         onClick={taskHandleSubmit}
                       >
                         Update

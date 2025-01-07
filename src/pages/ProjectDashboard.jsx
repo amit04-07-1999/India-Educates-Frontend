@@ -367,8 +367,8 @@ const ProjectDashboard = () => {
   };
 
   const projectsChartData = createChartData('Projects', totalProjects, 'rgba(255, 99, 132, 0.6)');
-  const clientsChartData = createChartData('Clients', totalClients, 'rgba(54, 162, 235, 0.6)');
-  const employeesChartData = createChartData('Employees', totalEmployees, 'rgba(75, 192, 192, 0.6)');
+  const clientsChartData = createChartData('Associates', totalClients, 'rgba(54, 162, 235, 0.6)');
+  const employeesChartData = createChartData('Agents', totalEmployees, 'rgba(75, 192, 192, 0.6)');
 
   const chartData = {
     labels: ['Projects', 'Clients', 'Employees'],
@@ -1477,18 +1477,18 @@ const ProjectDashboard = () => {
               <div className="text-center">
                 <div style={{ height: isMobile ? "6rem" : "9rem" }}>
                   <img
-                    src="Images/pizeonflylogo.png"
+                    src="Images/IndiaEducatesLogo.png"
                     className="img-fluid"
                     alt="No Data"
                     style={{
                       height: isMobile ? "3rem" : "5rem",
-                      maxHeight: "100%",
-                      width: "auto"
+                      height: "80%",
+                      width: "50%"
                     }}
                   />
-                  <p className="fs-6" style={{ color: "#4989fd", fontSize: isMobile ? "0.8rem" : "1rem" }}>
+                  {/* <p className="fs-6" style={{ color: "#4989fd", fontSize: isMobile ? "0.8rem" : "1rem" }}>
                     An agency like no other. <span style={{ color: "#0c117b" }}>Results to match.</span>
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="row justify-content-center mt-4">
@@ -1507,7 +1507,7 @@ const ProjectDashboard = () => {
                     <Link to="/clients">
                       <div className="card shadow-lg" style={darkModeStyles.card}>
                         <div className="card-body">
-                          <h5 className="card-title text-center">Clients</h5>
+                          <h5 className="card-title text-center">Associates</h5>
                           <h2 className="text-center mb-4" style={{ color: 'rgba(54, 162, 235, 1)' }}>{totalClients}</h2>
                           <Bar data={clientsChartData} options={chartOptions} />
                         </div>
@@ -1518,7 +1518,7 @@ const ProjectDashboard = () => {
                     <Link to="/members">
                       <div className="card shadow-lg" style={darkModeStyles.card}>
                         <div className="card-body">
-                          <h5 className="card-title text-center">Employees</h5>
+                          <h5 className="card-title text-center">Agents</h5>
                           <h2 className="text-center mb-4" style={{ color: 'rgba(75, 192, 192, 1)' }}>{totalEmployees}</h2>
                           <Bar data={employeesChartData} options={chartOptions} />
                         </div>

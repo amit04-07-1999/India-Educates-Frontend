@@ -313,7 +313,7 @@ const Client = () => {
                                     <div className="col-md-12">
                                         <div className="card border-0 mb-2 no-bg">
                                             <div className="card-header py-3 px-0 d-flex align-items-center  justify-content-between border-bottom">
-                                                <h3 className=" fw-bold flex-fill mb-0">Clients</h3>
+                                                <h3 className=" fw-bold flex-fill mb-0">Associates</h3>
                                                 <div className="col-auto d-flex">
                                                     <button
                                                         type="button"
@@ -322,38 +322,15 @@ const Client = () => {
                                                         data-bs-target="#createproject"
                                                     >
                                                         <i className="icofont-plus-circle me-2 fs-6" />
-                                                        Add Client
+                                                        Add Associate
                                                     </button>
 
                                                 </div>
                                             </div>
 
-                                            <div className="d-flex justify-content-between mt-2">
-                                                <div className="">
-                                                    <div className="input-group">
-                                                        <input
-                                                            type="search"
-                                                            className="form-control"
-                                                            aria-label="search"
-                                                            aria-describedby="addon-wrapping"
-                                                            value={searchQuery}
-                                                            onChange={(e) => {
-                                                                setSearchQuery(e.target.value);
-                                                                handleSearchSubmit(e.target.value);
-                                                            }}
-                                                            placeholder="Enter Client Name"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="input-group-text"
-                                                            id="addon-wrapping"
-                                                            onClick={handleSearchSubmit}
-                                                        >
-                                                            <i className="fa fa-search" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div className="d-flex">
+                                            <div className="d-flex justify-content-between mt-3 border-bottom">
+
+                                                <div className="d-flex mb-3">
                                                     {viewMode === 'grid' ? (
                                                         <button
                                                             className="btn btn-outline-primary"
@@ -372,6 +349,30 @@ const Client = () => {
                                                         </button>
                                                     )}
                                                 </div>
+                                                <div className="mb-3">
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="search"
+                                                            className="form-control"
+                                                            aria-label="search"
+                                                            aria-describedby="addon-wrapping"
+                                                            value={searchQuery}
+                                                            onChange={(e) => {
+                                                                setSearchQuery(e.target.value);
+                                                                handleSearchSubmit(e.target.value);
+                                                            }}
+                                                            placeholder="Enter Associate Name"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="input-group-text"
+                                                            id="addon-wrapping"
+                                                            onClick={handleSearchSubmit}
+                                                        >
+                                                            <i className="fa fa-search" />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -379,6 +380,10 @@ const Client = () => {
                                 {/* Row End */}
                                 {loading ? (
                                     <div className="custom-loader "></div>
+                                ) : clients.length === 0 ? (
+                                    <div className="text-center mt-4">
+                                        <h1 className="text-muted">No Associates available. Please add a associate.</h1>
+                                    </div>
                                 ) : (
                                     viewMode === 'grid' ? (
                                         // Existing grid view
@@ -602,7 +607,7 @@ const Client = () => {
                                     <div className="modal-header">
                                         <h5 className="modal-title  fw-bold" id="createprojectlLabel">
                                             {" "}
-                                            Add Client
+                                            Add Associate
                                         </h5>
                                         <button
                                             type="button"
@@ -614,7 +619,7 @@ const Client = () => {
                                     <div className="modal-body">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput877" className="form-label">
-                                                Client Name <span className="text-danger">*</span>
+                                                Associate Name <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -864,7 +869,8 @@ const Client = () => {
                                         >
                                             Done
                                         </button>
-                                        <button type="button" className="btn btn-primary" onClick={handleSubmit}>
+                                        <button type="button" className="btn close text-white"
+                                            style={{ backgroundColor: "#0a9400" }} onClick={handleSubmit}>
                                             Create
                                         </button>
                                     </div>
@@ -882,12 +888,12 @@ const Client = () => {
                             <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
                                 <div className="modal-content">
                                     <div className="modal-header">
-                                        <h5 className="modal-title fw-bold" id="createprojectlLabel">Edit Client</h5>
+                                        <h5 className="modal-title fw-bold" id="createprojectlLabel">Edit Associate</h5>
                                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                                     </div>
                                     <div className="modal-body">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput877" className="form-label">Client Name</label>
+                                            <label htmlFor="exampleFormControlInput877" className="form-label">Associate Name</label>
                                             <input
                                                 type="text"
                                                 className="form-control"
@@ -1111,7 +1117,8 @@ const Client = () => {
                                     </div>
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-                                        <button type="button" className="btn btn-primary" onClick={updateSubmit}>Update</button>
+                                        <button type="button" className="btn close text-white"
+                                            style={{ backgroundColor: "#0a9400" }} onClick={updateSubmit}>Update</button>
                                     </div>
                                 </div>
                             </div>
