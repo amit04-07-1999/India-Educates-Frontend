@@ -38,7 +38,13 @@ const Chat = () => {
   const fetchGroups = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/groups`);
-      setGroups(response.data);
+      const userGroups = response.data.filter(group => 
+        group.members.some(member => 
+          member.userId === currentUser._id && 
+          !member.isRemoved
+        )
+      );
+      setGroups(userGroups);
     } catch (error) {
       console.error('Error fetching groups:', error);
       toast.error('Error loading groups');
@@ -86,9 +92,18 @@ const Chat = () => {
       socket.current.emit('join_chat', currentUser._id);
 
       socket.current.on('receive_message', (message) => {
+        console.log('Received message:', message);
         setMessages(prev => {
           if (!prev.some(m => m._id === message._id)) {
-            return [...prev, message];
+            if (selectedUser?.userType === 'Group' && message.receiverId === selectedUser._id) {
+              return [...prev, message];
+            }
+            else if (selectedUser && (
+              (message.senderId === selectedUser._id && message.receiverId === currentUser._id) ||
+              (message.senderId === currentUser._id && message.receiverId === selectedUser._id)
+            )) {
+              return [...prev, message];
+            }
           }
           return prev;
         });
@@ -116,7 +131,62 @@ const Chat = () => {
       });
 
       socket.current.on('receive_group_message', (message) => {
-        setMessages(prev => [...prev, message]);
+        console.log('Received group message:', message);
+        setMessages(prev => {
+          if (!prev.some(m => m._id === message._id)) {
+            if (selectedUser?.userType === 'Group' && message.receiverId === selectedUser._id) {
+              console.log('Adding new group message to state');
+              return [...prev, message];
+            }
+          }
+          return prev;
+        });
+      });
+
+      socket.current.on('group_message_sent', (message) => {
+        console.log('Group message sent confirmation:', message);
+        setMessages(prev => {
+          if (!prev.some(m => m._id === message._id)) {
+            return [...prev, message];
+          }
+          return prev;
+        });
+      });
+
+      socket.current.on('group_updated', (updatedGroup) => {
+        setGroups(prevGroups => 
+            prevGroups.map(group => 
+                group._id === updatedGroup._id ? updatedGroup : group
+            )
+        );
+      });
+
+      socket.current.on('member_removed_from_group', (data) => {
+        if (currentUser._id === data.memberId) {
+          setGroups(prevGroups => prevGroups.filter(group => group._id !== data.groupId));
+          
+          if (selectedUser && selectedUser._id === data.groupId) {
+            setSelectedUser(null);
+            setMessages([]);
+          }
+        } else {
+          setGroups(prevGroups => 
+              prevGroups.map(group => {
+                  if (group._id === data.groupId) {
+                      return {
+                          ...group,
+                          members: group.members.map(member => {
+                              if (member.userId === data.memberId) {
+                                  return { ...member, isRemoved: true };
+                              }
+                              return member;
+                          })
+                      };
+                  }
+                  return group;
+              })
+          );
+        }
       });
 
       fetchUsers();
@@ -140,6 +210,7 @@ const Chat = () => {
       fetchGroupMessages(user._id);
     } else {
       fetchMessages(user._id);
+      fetchChatSettings(user._id);
     }
   };
 
@@ -161,11 +232,15 @@ const Chat = () => {
     try {
       const messageData = {
         senderId: currentUser._id,
-        senderType: mapRoleToType(currentUser.role),
+        senderType: 'AdminUser',
+        senderName: currentUser.username,
+        senderImage: currentUser.profileImage,
         receiverId: selectedUser._id,
         receiverType: selectedUser.userType,
         message: newMessage
       };
+
+      console.log('Admin sending message:', messageData);
 
       setNewMessage('');
 
@@ -173,6 +248,31 @@ const Chat = () => {
         `${import.meta.env.VITE_BASE_URL}api/createChat`,
         messageData
       );
+
+      if (selectedUser.userType === 'Group') {
+        const groupMessageData = {
+          ...response.data,
+          groupId: selectedUser._id,
+          members: selectedUser.members,
+          senderDetails: {
+            name: currentUser.username,
+            email: currentUser.email,
+            image: currentUser.profileImage,
+            type: 'AdminUser'
+          }
+        };
+        
+        console.log('Emitting group message:', groupMessageData);
+        socket.current.emit('group_message', groupMessageData);
+      } else {
+        socket.current.emit('private_message', {
+          receiverId: selectedUser._id,
+          message: response.data
+        });
+      }
+
+      // setMessages(prev => [...prev, response.data]);
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Error sending message');
@@ -330,6 +430,76 @@ const Chat = () => {
 
   const allUsers = [...employees, ...clients].filter(Boolean);
 
+  useEffect(() => {
+    if (selectedUser?.userType === 'Group') {
+      const interval = setInterval(() => {
+        fetchGroupMessages(selectedUser._id);
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on('receive_group_message', (message) => {
+        console.log('Received group message:', message);
+        setMessages(prev => {
+          if (!prev.some(m => m._id === message._id)) {
+            if (selectedUser?.userType === 'Group' && message.receiverId === selectedUser._id) {
+              console.log('Adding new group message to state');
+              return [...prev, message];
+            }
+          }
+          return prev;
+        });
+      });
+
+      socket.current.on('group_message_sent', (message) => {
+        console.log('Group message sent confirmation:', message);
+        setMessages(prev => {
+          if (!prev.some(m => m._id === message._id)) {
+            return [...prev, message];
+          }
+          return prev;
+        });
+      });
+
+      return () => {
+        socket.current.off('receive_group_message');
+        socket.current.off('group_message_sent');
+        socket.current.off('member_removed_from_group');
+      };
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (selectedUser && selectedUser.userType === 'Employee') {
+      const interval = setInterval(() => {
+        fetchMessages(selectedUser._id);
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }
+  }, [selectedUser]);
+
+  const fetchChatSettings = async (otherUserId) => {
+    try {
+      // Only fetch if we have valid IDs
+      if (!currentUser?._id || !otherUserId) {
+        console.log('Missing user IDs for chat settings');
+        return;
+      }
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}api/getChatSettings/${currentUser._id}/${otherUserId}`
+      );
+      // Handle the settings...
+    } catch (error) {
+      console.error('Error fetching chat settings:', error);
+    }
+  };
+
   return (
     <>
       <div id="mytask-layout">
@@ -368,6 +538,7 @@ const Chat = () => {
               onMessageDelete={handleMessageDelete}
               fetchMessages={fetchMessages}
               setSelectedUser={setSelectedUser}
+              fetchChatSettings={fetchChatSettings}
             />
             <FilePreview
               show={showFilePreview}

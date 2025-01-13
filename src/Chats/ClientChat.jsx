@@ -37,14 +37,26 @@ const ClientChat = () => {
                     currentUser.role === 'employee' ? 'Employee' : 'Client'
             });
 
+            // Add this new listener for group updates
+            socket.current.on('group_updated', (updatedGroup) => {
+                setGroups(prevGroups => 
+                    prevGroups.map(group => 
+                        group._id === updatedGroup._id ? updatedGroup : group
+                    )
+                );
+            });
+
             // Listen for received messages
             socket.current.on('receive_message', (message) => {
                 setMessages(prev => {
                     if (!prev.some(m => m._id === message._id)) {
-                        if (message.receiverId === currentClient._id) {
-                            toast.info('New message received!');
+                        if (selectedUser?.userType === 'Group' && message.receiverId === selectedUser._id) {
+                            return [...prev, message];
                         }
-                        return [...prev, message];
+                        else if (selectedUser && 
+                            (message.senderId === selectedUser._id || message.receiverId === selectedUser._id)) {
+                            return [...prev, message];
+                        }
                     }
                     return prev;
                 });
@@ -74,16 +86,93 @@ const ClientChat = () => {
                 ));
             });
 
+            socket.current.on('receive_group_message', (message) => {
+                console.log('Client/Employee received group message:', message); // Debug log
+                setMessages(prev => {
+                    if (!prev.some(m => m._id === message._id)) {
+                        if (selectedUser?.userType === 'Group' && message.receiverId === selectedUser._id) {
+                            return [...prev, message];
+                        }
+                    }
+                    return prev;
+                });
+            });
+
+            socket.current.on('group_message_sent', (message) => {
+                console.log('Client/Employee group message sent confirmation:', message); // Debug log
+                setMessages(prev => {
+                    if (!prev.some(m => m._id === message._id)) {
+                        return [...prev, message];
+                    }
+                    return prev;
+                });
+            });
+
             fetchUsers();
             fetchGroups();
+
+            // Add listener for member removal
+            socket.current.on('member_removed_from_group', (data) => {
+                if (currentClient._id === data.memberId) {
+                    // Remove the group from the local state if current client is removed
+                    setGroups(prevGroups => prevGroups.filter(group => group._id !== data.groupId));
+                    
+                    // If the removed group is currently selected, clear the selection
+                    if (selectedUser && selectedUser._id === data.groupId) {
+                        setSelectedUser(null);
+                        setMessages([]);
+                    }
+                } else {
+                    // Update the group's member list in local state
+                    setGroups(prevGroups => 
+                        prevGroups.map(group => {
+                            if (group._id === data.groupId) {
+                                return {
+                                    ...group,
+                                    members: group.members.map(member => {
+                                        if (member.userId === data.memberId) {
+                                            return { ...member, isRemoved: true };
+                                        }
+                                        return member;
+                                    })
+                                };
+                            }
+                            return group;
+                        })
+                    );
+                }
+            });
 
             return () => {
                 if (socket.current) {
                     socket.current.disconnect();
+                    socket.current.off('receive_group_message');
+                    socket.current.off('group_message_sent');
+                    socket.current.off('member_removed_from_group');
                 }
             };
         }
-    }, []);
+    }, [selectedUser]);
+
+    useEffect(() => {
+        if (selectedUser?.userType === 'Group') {
+            const interval = setInterval(() => {
+                fetchGroupMessages(selectedUser._id);
+            }, 3000);
+
+            return () => clearInterval(interval);
+        }
+    }, [selectedUser]);
+
+    useEffect(() => {
+        if (selectedUser && selectedUser.userType === 'AdminUser') {
+            const interval = setInterval(() => {
+                fetchMessages(selectedUser._id);
+            }, 3000); // Poll every 3 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [selectedUser]);
 
     const fetchUsers = async () => {
         try {
@@ -126,14 +215,20 @@ const ClientChat = () => {
                 message: newMessage
             };
 
-            setNewMessage(''); // Clear message input immediately
+            setNewMessage('');
 
-            await axios.post(
+            const response = await axios.post(
                 `${import.meta.env.VITE_BASE_URL}api/createChat`,
                 messageData
             );
 
-            // Socket emit is handled by backend
+            if (selectedUser.userType === 'Group') {
+                socket.current.emit('group_message', {
+                    ...response.data,
+                    groupId: selectedUser._id,
+                    members: selectedUser.members
+                });
+            }
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Error sending message');
@@ -290,7 +385,7 @@ const ClientChat = () => {
                 key={user._id}
                 className={`list-group-item ${selectedUser?._id === user._id ? 'active' : ''}`}
                 style={{ backgroundColor: selectedUser?._id === user._id ? '#80808069' : '' }}
-                onClick={() => onUserSelect(user, isAdmin ? 'Admin' : 'Employee')}
+                onClick={() => onUserSelect(user, isAdmin ? 'AdminUser' : 'Employee')}
             >
                 <div className="d-flex align-items-center">
                     <img
@@ -319,8 +414,16 @@ const ClientChat = () => {
     const fetchGroups = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/groups`);
-            setGroups(response.data);
+            const userGroups = response.data.filter(group => 
+                group.members.some(member => 
+                    member.userId === currentClient._id && 
+                    member.userType === 'Client' && 
+                    !member.isRemoved
+                )
+            );
+            setGroups(userGroups);
         } catch (error) {
+            console.error('Error fetching groups:', error);
             toast.error('Error loading groups');
         }
     };
@@ -332,6 +435,7 @@ const ClientChat = () => {
             fetchGroupMessages(user._id);
         } else {
             fetchMessages(user._id);
+            fetchChatSettings(user._id);
         }
     };
 
@@ -348,6 +452,23 @@ const ClientChat = () => {
     };
 
     const allUsers = [...admins, ...employees].filter(Boolean);
+
+    const fetchChatSettings = async (otherUserId) => {
+        try {
+            // Only fetch if we have valid IDs
+            if (!currentClient?._id || !otherUserId) {
+                console.log('Missing user IDs for chat settings');
+                return;
+            }
+
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}api/getChatSettings/${currentClient._id}/${otherUserId}`
+            );
+            // Handle the settings...
+        } catch (error) {
+            console.error('Error fetching chat settings:', error);
+        }
+    };
 
     return (
         <div id="mytask-layout">
@@ -387,6 +508,7 @@ const ClientChat = () => {
                         onMessageDelete={handleMessageDelete}
                         fetchMessages={fetchMessages}
                         onClearChat={handleClearChat}
+                        fetchChatSettings={fetchChatSettings}
                     />
                     <FilePreview
                         show={showFilePreview}

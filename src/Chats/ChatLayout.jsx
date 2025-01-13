@@ -28,7 +28,8 @@ const ChatLayout = ({
     onGroupCreate,
     socket,
     groups,
-    setSelectedUser
+    setSelectedUser,
+    fetchChatSettings
 }) => {
     const [showUserModal, setShowUserModal] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -82,28 +83,112 @@ const ChatLayout = ({
 
     // Handle group creation
     const handleCreateGroup = async () => {
-        if (!groupName.trim() || selectedMembers.length === 0) {
-            toast.error('Please enter group name and select members');
-            return;
-        }
-
         try {
+            if (!groupName.trim()) {
+                toast.error('Please enter a group name');
+                return;
+            }
+
+            // Get current user from localStorage
+            const currentUser = JSON.parse(localStorage.getItem('user')) ||
+                JSON.parse(localStorage.getItem('emp_user')) ||
+                JSON.parse(localStorage.getItem('client_user'));
+
+            // Initialize creatorType and creatorName
+            let creatorType = 'Unknown'; // Default value
+            let creatorName = 'Unknown User'; // Default value
+
+            // Check if currentUser has a role
+            if (!currentUser) {
+                console.error('Current user is not defined');
+                return;
+            }
+
+            // Determine creator's user type and name based on role
+            if (currentUser.role) {
+                if (currentUser.role === 'superadmin' || currentUser.role === 'admin') {
+                    creatorType = 'AdminUser';
+                    creatorName = currentUser.username;
+                } else if (currentUser.role === 'employee') {
+                    creatorType = 'Employee';
+                    creatorName = currentUser.employeeName;
+                } else if (currentUser.role === 'client') {
+                    creatorType = 'Client';
+                    creatorName = currentUser.clientName;
+                } else {
+                    console.error('Unknown user role:', currentUser.role);
+                }
+            } else {
+                // Fallback logic if role is not available
+                if (currentUser.employeeName) {
+                    creatorType = 'Employee';
+                    creatorName = currentUser.employeeName;
+                } else if (currentUser.clientName) {
+                    creatorType = 'Client';
+                    creatorName = currentUser.clientName;
+                }
+            }
+
+            // console.log('Current User:', currentUser);
+            // console.log('Creator Type:', creatorType);
+
+            // Proceed with group creation logic
+            if (!groupName.trim()) {
+                toast.error('Please enter a group name');
+                return;
+            }
+
+            // Create creator member object with full details
+            const creatorMember = {
+                userId: currentUser._id,
+                type: creatorType,
+                name: creatorName
+            };
+
+            // Convert selected members to the correct format
+            const formattedSelectedMembers = selectedMembers.map(member => ({
+                userId: member.value,
+                type: member.type,
+                name: member.label
+            }));
+
+            // Combine creator with selected members
+            const allMembers = [creatorMember, ...formattedSelectedMembers];
+
+            // Remove duplicates while preserving all member information
+            const uniqueMembers = allMembers.filter((member, index, self) =>
+                index === self.findIndex((m) => m.userId === member.userId)
+            );
+
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}api/createGroup`, {
                 name: groupName,
-                members: selectedMembers.map(member => ({
-                    userId: member.value,
-                    userType: member.type
-                }))
+                members: uniqueMembers,
+                createdBy: {
+                    userId: currentUser._id,
+                    type: creatorType,
+                    name: creatorName
+                }
             });
 
-            toast.success('Group created successfully');
-            setShowCreateGroupModal(false);
-            setGroupName('');
-            setSelectedMembers([]);
-            // Refresh groups list if needed
-            if (typeof onGroupCreate === 'function') {
-                onGroupCreate();
+            // Only proceed if the response is successful
+            if (response.data) {
+                setShowCreateGroupModal(false);
+                setGroupName('');
+                setSelectedMembers([]);
+
+
+                // Emit socket event for group creation
+                if (socket.current) {
+                    socket.current.emit('group_created', response.data);
+                }
+
+                // Fetch updated groups list
+                if (typeof fetchGroups === 'function') {
+                    fetchGroups();
+                }
+                toast.success('Group created successfully');
             }
+
             // Reload the page after 5 seconds
             setTimeout(() => {
                 window.location.reload();
@@ -111,7 +196,7 @@ const ChatLayout = ({
 
         } catch (error) {
             console.error('Error creating group:', error);
-            toast.error('Error creating group');
+            toast.error(error.response?.data?.error || 'Error creating group');
         }
     };
 
@@ -430,26 +515,228 @@ const ChatLayout = ({
 
     const handleRemoveSelectedMembers = async () => {
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}api/removeGroupMembers`, {
-                groupId: selectedUser._id,
-                memberIds: selectedMembers
-            });
-            // Update the selected user with the new group data
-            setSelectedUser(response.data);
+
+            // Fetch the current group details to verify members
+            const groupResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}api/groupDetails/${selectedUser._id}`);
+            const currentMembers = groupResponse.data.members;
+
+
+            await Promise.all(selectedMembers.map(async (memberId) => {
+                // Initialize memberName
+                let memberName = 'Unknown Member';
+
+                // Check if the member exists in the current members
+                const memberExists = currentMembers.some(m => m.userId.toString() === memberId);
+                if (!memberExists) {
+                    // Find the member object to get the name for the error message
+                    const memberToRemove = currentMembers.find(m => m.userId.toString() === memberId);
+                    if (memberToRemove) {
+                        memberName = memberToRemove.name; // Set memberName if found
+                    }
+                    throw new Error(`Member not found in group: ${memberName}`);
+                } else {
+                    // If the member exists, find their name for the system message
+                    const memberToRemove = currentMembers.find(m => m.userId.toString() === memberId);
+                    if (memberToRemove) {
+                        memberName = memberToRemove.name; // Set memberName if found
+                    }
+                }
+
+                // Call your API to remove the member
+                await axios.post(`${import.meta.env.VITE_BASE_URL}api/removeGroupMember`, {
+                    groupId: selectedUser._id,
+                    memberId: memberId
+                });
+
+                // Create a system message for each removed member
+                const systemMessage = {
+                    isSystemMessage: true,
+                    message: `${memberName} was removed`,
+                    senderId: null, // or the ID of the group creator
+                    senderType: 'System', // or the type of the group creator
+                    receiverId: selectedUser._id,
+                    receiverType: 'Group'
+                };
+
+                // Emit the system message to the group
+                socket.current.emit('receive_group_message', systemMessage);
+            }));
+
+            // Clear the selected members after removal
             setSelectedMembers([]);
             setShowDeleteMembersModal(false);
             toast.success('Members removed successfully');
-
             // Reload the page after 5 seconds
             setTimeout(() => {
                 window.location.reload();
             }, 5000);
         } catch (error) {
             console.error('Error removing members:', error);
-            toast.error('Error removing members');
+            toast.error(error.message || 'Error removing members');
         }
     };
 
+    const isGroupCreator = () => {
+        const currentUser = JSON.parse(localStorage.getItem('user')) ||
+            JSON.parse(localStorage.getItem('emp_user')) ||
+            JSON.parse(localStorage.getItem('client_user'));
+
+        return selectedUser?.createdBy?.userId === currentUser._id;
+    };
+
+    useEffect(() => {
+        if (selectedUser && selectedUser.userType !== 'Group') {
+            fetchChatSettings(selectedUser._id);
+        }
+    }, [selectedUser]);
+
+    const renderMessage = (message) => {
+        if (message.isSystemMessage) {
+            return (
+                <div className="system-message text-center my-2">
+                    <span className="px-2 rounded-1" style={{ backgroundColor: '#453b3d69', color: 'white', fontSize: '0.8rem' }}>
+                        {message.message}
+                    </span>
+                </div>
+            );
+        }
+
+        return (
+            <div className={`chat-message d-flex ${message.isCurrentUser ? 'justify-content-end' : 'justify-content-start'} mb-3`}>
+                {!message.isCurrentUser && selectedUser?.userType === 'Group' && (
+                    <div className="sender-info me-2">
+                        <img
+                            src={`${import.meta.env.VITE_BASE_URL}${message.senderDetails?.image?.replace('uploads/', '')}`}
+                            className="avatar rounded-circle"
+                            style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                            // alt="{msg.senderDetails?.name}"
+                            alt="photo"
+                        />
+                    </div>
+                )}
+                <div className={`message-bubble px-2 rounded-1 ${message.isCurrentUser ? 'text-white' : 'bg-white'}`}
+                    style={{
+                        maxWidth: '75%',
+                        position: 'relative',
+                        backgroundColor: message.isCurrentUser ? '#075E54' : '#ffffff',
+                        borderRadius: '7.5px'
+                    }}>
+                    {!message.isCurrentUser && selectedUser?.userType === 'Group' && (
+                        <div className="sender-name fw-bold" style={{
+                            fontSize: '0.8rem',
+                            color: '#128c7e',
+                            fontWeight: '500',
+                            marginBottom: '2px'
+                        }}>
+                            {message.senderDetails?.name}
+                        </div>
+                    )}
+                    <div className="d-flex justify-content-between align-items-start">
+                        <div className="message-content pe-2">
+                            {message.isDeleted ? (
+                                <em className="text-muted" style={{ fontSize: '0.9em' }}>
+                                    {message.isCurrentUser ? 'You deleted this message' : 'This message was deleted'}
+                                </em>
+                            ) : editingMessageId === message._id ? (
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleEditSubmit(message._id, editMessage);
+                                }}>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={editMessage}
+                                            onChange={(e) => setEditMessage(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <button type="submit" className="btn btn-sm btn-success">
+                                            <i className="bi bi-check"></i>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-secondary"
+                                            onClick={() => {
+                                                setEditingMessageId(null);
+                                                setEditMessage('');
+                                            }}
+                                        >
+                                            <i className="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <>
+                                    {message.message}
+                                    {message.isEdited && <small className="text-muted ms-2">(edited)</small>}
+                                </>
+                            )}
+                        </div>
+                        {!message.isDeleted && message.isCurrentUser && <MessageActions message={message} />}
+                    </div>
+
+                    {!message.isDeleted && (
+                        <>
+                            {/* Images */}
+                            {message.imageUrls && message.imageUrls.map((url, i) => (
+                                <img
+                                    key={i}
+                                    src={`${import.meta.env.VITE_BASE_URL}${url?.replace('uploads/', '') || ''}`}
+                                    alt="Shared image"
+                                    className="img-fluid rounded mb-1 py-2"
+                                    style={{ maxHeight: '200px', cursor: 'pointer' }}
+                                    onClick={() => {
+                                        setSelectedImage(`${import.meta.env.VITE_BASE_URL}${url?.replace('uploads/', '') || ''}`);
+                                    }}
+                                />
+                            ))}
+
+                            {/* Video */}
+                            {message.videoUrl && (
+                                <video
+                                    controls
+                                    className="img-fluid rounded mb-1 py-2"
+                                    style={{ maxHeight: '200px' }}
+                                >
+                                    <source src={`${import.meta.env.VITE_BASE_URL}${message.videoUrl?.replace('uploads/', '') || ''}`} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+
+                            {/* Audio */}
+                            {message.audioUrl && (
+                                <audio controls className="w-100 mb-1">
+                                    <source src={`${import.meta.env.VITE_BASE_URL}${message.audioUrl?.replace('uploads/', '') || ''}`} type="audio/mpeg" />
+                                    Your browser does not support the audio element.
+                                </audio>
+                            )}
+
+                            {/* Voice Recording */}
+                            {message.recordingUrl && (
+                                <audio controls className="mb-1 py-2">
+                                    <source src={`${import.meta.env.VITE_BASE_URL}${message.recordingUrl?.replace('uploads/', '') || ''}`} type="audio/webm" style={{ backgroundColor: 'black' }} />
+                                    Your browser does not support the audio element.
+                                </audio>
+                            )}
+                        </>
+                    )}
+
+                    {/* Timestamp */}
+                    <div className="message-footer">
+                        <small
+                            className={`d-block text-end ${message.isCurrentUser ? 'text-white-50' : 'text-muted'}`}
+                            style={{
+                                fontSize: '0.6rem',
+                                marginTop: '1px'
+                            }}
+                        >
+                            {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="container-fluid mt-2" style={{}}>
@@ -467,10 +754,66 @@ const ChatLayout = ({
                                         <div onClick={() => setShowUserModal(true)} style={{ cursor: 'pointer' }}>
                                             {selectedUser && (
                                                 selectedUser.userType === 'Group' ? (
-                                                    // Group Avatar
-                                                    <div className="avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                                        style={{ width: '40px', height: '40px' }}>
-                                                        {selectedUser.name?.[0]?.toUpperCase()}
+                                                    // Group Avatar Grid
+                                                    <div className="avatar rounded-circle d-flex align-items-center justify-content-center"
+                                                        style={{
+                                                            backgroundColor: '#128C7E',
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            position: 'relative',
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                        <div className="group-avatar-grid" style={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns: 'repeat(2, 1fr)',
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            gap: '1px'
+                                                        }}>
+                                                            {selectedUser.members?.slice(0, 4).map((member, idx) => {
+                                                                let imagePath;
+                                                                if (member.userType === 'Employee') {
+                                                                    imagePath = member.employeeImage?.replace('uploads/', '');
+                                                                } else if (member.userType === 'AdminUser') {
+                                                                    imagePath = member.profileImage?.replace('uploads/', '');
+                                                                } else if (member.userType === 'Client') {
+                                                                    imagePath = member.image?.replace('uploads/', '');
+                                                                }
+
+                                                                return (
+                                                                    <div key={idx} style={{
+                                                                        width: '100%',
+                                                                        height: '100%',
+                                                                        backgroundColor: '#f0f0f0'
+                                                                    }}>
+                                                                        {imagePath ? (
+                                                                            <img
+                                                                                src={`${import.meta.env.VITE_BASE_URL}${imagePath}`}
+                                                                                alt=""
+                                                                                style={{
+                                                                                    width: '100%',
+                                                                                    height: '100%',
+                                                                                    objectFit: 'cover'
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <div style={{
+                                                                                width: '100%',
+                                                                                height: '100%',
+                                                                                backgroundColor: '#128C7E',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                color: 'white',
+                                                                                fontSize: '10px'
+                                                                            }}>
+                                                                                {member.name?.[0]?.toUpperCase()}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
                                                 ) : selectedUser.userType === 'AdminUser' ? (
                                                     // Admin Avatar
@@ -508,13 +851,20 @@ const ChatLayout = ({
                                                     'Unknown User'}
                                             </h6>
                                             <small className="text-white-50">
-                                                {selectedUser?.userType === 'Group' ?
-                                                    `${selectedUser.members?.length || 0} members` :
-                                                    selectedUser?.userType} {userStatuses[selectedUser?._id]?.isOnline
+                                                {selectedUser?.userType === 'Group' ? (
+                                                    <span>
+                                                        {selectedUser.members?.map(member =>
+                                                            member.name || member.employeeName || member.clientName || member.username
+                                                        ).slice(0, 3).join(', ')}
+                                                        {selectedUser.members?.length > 3 ? `, +${selectedUser.members.length - 3} others` : ''}
+                                                    </span>
+                                                ) : (
+                                                    `${selectedUser?.userType} ${userStatuses[selectedUser?._id]?.isOnline
                                                         ? 'online'
                                                         : userStatuses[selectedUser?._id]?.lastSeen
                                                             ? formatLastSeen(userStatuses[selectedUser?._id].lastSeen)
-                                                            : ''}
+                                                            : ''}`
+                                                )}
                                             </small>
                                         </div>
                                     </div>
@@ -524,6 +874,16 @@ const ChatLayout = ({
                                             <i className="bi bi-three-dots-vertical"></i>
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
+                                            {selectedUser?.userType === 'Group' && (
+                                                <>
+                                                    <Dropdown.Item onClick={() => setShowAddMembersModal(true)}>
+                                                        <i className="bi bi-person-plus me-2"></i>Add Members
+                                                    </Dropdown.Item>
+                                                    <Dropdown.Item onClick={() => setShowUserModal(true)}>
+                                                        <i className="bi bi-people me-2"></i>Group Info
+                                                    </Dropdown.Item>
+                                                </>
+                                            )}
                                             <Dropdown.Item onClick={() => setShowClearChatModal(true)}>
                                                 <i className="bi bi-trash me-2"></i>Clear Chat
                                             </Dropdown.Item>
@@ -551,122 +911,7 @@ const ChatLayout = ({
                                     scrollbarWidth: 'none',
                                     '&::-webkit-scrollbar': { display: 'none' }
                                 }}>
-                                {messages.map((msg, index) => (
-                                    <div key={index}
-                                        className={`chat-message d-flex ${msg.isCurrentUser ? 'justify-content-end' : 'justify-content-start'} mb-3`}>
-                                        <div className={`message-bubble px-2 rounded-1 ${msg.isCurrentUser ? 'text-white' : 'bg-white'}`}
-                                            style={{
-                                                maxWidth: '75%',
-                                                maxHeight: '75%',
-                                                position: 'relative',
-                                                backgroundColor: msg.isCurrentUser ? '#075E54' : '#ffffff',
-                                                borderRadius: '7.5px'
-                                            }}>
-                                            <div className="d-flex justify-content-between align-items-start">
-                                                <div className="message-content pe-2">
-                                                    {msg.isDeleted ? (
-                                                        <em className="text-muted" style={{ fontSize: '0.9em' }}>
-                                                            {msg.isCurrentUser ? 'You deleted this message' : 'This message was deleted'}
-                                                        </em>
-                                                    ) : editingMessageId === msg._id ? (
-                                                        <form onSubmit={(e) => {
-                                                            e.preventDefault();
-                                                            handleEditSubmit(msg._id, editMessage);
-                                                        }}>
-                                                            <div className="input-group">
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control form-control-sm"
-                                                                    value={editMessage}
-                                                                    onChange={(e) => setEditMessage(e.target.value)}
-                                                                    autoFocus
-                                                                />
-                                                                <button type="submit" className="btn btn-sm btn-success">
-                                                                    <i className="bi bi-check"></i>
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="btn btn-sm btn-secondary"
-                                                                    onClick={() => {
-                                                                        setEditingMessageId(null);
-                                                                        setEditMessage('');
-                                                                    }}
-                                                                >
-                                                                    <i className="bi bi-x"></i>
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    ) : (
-                                                        <>
-                                                            {msg.message}
-                                                            {msg.isEdited && <small className="text-muted ms-2">(edited)</small>}
-                                                        </>
-                                                    )}
-                                                </div>
-                                                {!msg.isDeleted && msg.isCurrentUser && <MessageActions message={msg} />}
-                                            </div>
-
-                                            {!msg.isDeleted && (
-                                                <>
-                                                    {/* Images */}
-                                                    {msg.imageUrls && msg.imageUrls.map((url, i) => (
-                                                        <img
-                                                            key={i}
-                                                            src={`${import.meta.env.VITE_BASE_URL}${url?.replace('uploads/', '') || ''}`}
-                                                            alt="Shared image"
-                                                            className="img-fluid rounded mb-1 py-2"
-                                                            style={{ maxHeight: '200px', cursor: 'pointer' }}
-                                                            onClick={() => {
-                                                                setSelectedImage(`${import.meta.env.VITE_BASE_URL}${url?.replace('uploads/', '') || ''}`);
-                                                            }}
-                                                        />
-                                                    ))}
-
-                                                    {/* Video */}
-                                                    {msg.videoUrl && (
-                                                        <video
-                                                            controls
-                                                            className="img-fluid rounded mb-1 py-2"
-                                                            style={{ maxHeight: '200px' }}
-                                                        >
-                                                            <source src={`${import.meta.env.VITE_BASE_URL}${msg.videoUrl?.replace('uploads/', '') || ''}`} type="video/mp4" />
-                                                            Your browser does not support the video tag.
-                                                        </video>
-                                                    )}
-
-                                                    {/* Audio */}
-                                                    {msg.audioUrl && (
-                                                        <audio controls className="w-100 mb-1">
-                                                            <source src={`${import.meta.env.VITE_BASE_URL}${msg.audioUrl?.replace('uploads/', '') || ''}`} type="audio/mpeg" />
-                                                            Your browser does not support the audio element.
-                                                        </audio>
-                                                    )}
-
-                                                    {/* Voice Recording */}
-                                                    {msg.recordingUrl && (
-                                                        <audio controls className="mb-1 py-2">
-                                                            <source src={`${import.meta.env.VITE_BASE_URL}${msg.recordingUrl?.replace('uploads/', '') || ''}`} type="audio/webm" style={{ backgroundColor: 'black' }} />
-                                                            Your browser does not support the audio element.
-                                                        </audio>
-                                                    )}
-                                                </>
-                                            )}
-
-                                            {/* Timestamp */}
-                                            <div className="message-footer">
-                                                <small
-                                                    className={`d-block text-end ${msg.isCurrentUser ? 'text-white-50' : 'text-muted'}`}
-                                                    style={{
-                                                        fontSize: '0.6rem',
-                                                        marginTop: '1px'
-                                                    }}
-                                                >
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                {messages.map((msg, index) => renderMessage(msg))}
                                 <div ref={messagesEndRef} />
                             </div>
 
@@ -842,16 +1087,98 @@ const ChatLayout = ({
                                                         <li
                                                             key={group._id}
                                                             className={`list-group-item ${selectedUser?._id === group._id ? 'active' : ''}`}
-                                                            style={{ backgroundColor: selectedUser?._id === group._id ? '#80808069' : '' }}
+                                                            style={{
+                                                                backgroundColor: selectedUser?._id === group._id ? '#80808069' : '',
+                                                                padding: '10px 15px'
+                                                            }}
                                                             onClick={() => onUserSelect(group, 'Group')}
                                                         >
                                                             <div className="d-flex align-items-center">
-                                                                <div className="avatar rounded-circle" style={{ backgroundColor: '#128C7E', color: 'white', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    {group.name[0].toUpperCase()}
+                                                                <div className="avatar rounded-circle d-flex align-items-center justify-content-center"
+                                                                    style={{
+                                                                        backgroundColor: '#128C7E',
+                                                                        width: '45px',
+                                                                        height: '45px',
+                                                                        position: 'relative',
+                                                                        overflow: 'hidden'
+                                                                    }}>
+                                                                    {/* Group members mini avatars */}
+                                                                    <div className="group-avatar-grid" style={{
+                                                                        display: 'grid',
+                                                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                                                        width: '100%',
+                                                                        height: '100%',
+                                                                        gap: '1px'
+                                                                    }}>
+                                                                        {group.members.slice(0, 4).map((member, idx) => {
+                                                                            let imagePath;
+                                                                            if (member.userType === 'Employee') {
+                                                                                imagePath = member.employeeImage?.replace('uploads/', '');
+                                                                            } else if (member.userType === 'AdminUser') {
+                                                                                imagePath = member.profileImage?.replace('uploads/', '');
+                                                                            } else if (member.userType === 'Client') {
+                                                                                imagePath = member.image?.replace('uploads/', '');
+                                                                            }
+
+                                                                            return (
+                                                                                <div key={idx} style={{
+                                                                                    width: '100%',
+                                                                                    height: '100%',
+                                                                                    backgroundColor: '#f0f0f0'
+                                                                                }}>
+                                                                                    {imagePath ? (
+                                                                                        <img
+                                                                                            src={`${import.meta.env.VITE_BASE_URL}${imagePath}`}
+                                                                                            alt=""
+                                                                                            style={{
+                                                                                                width: '100%',
+                                                                                                height: '100%',
+                                                                                                objectFit: 'cover'
+                                                                                            }}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div style={{
+                                                                                            width: '100%',
+                                                                                            height: '100%',
+                                                                                            backgroundColor: '#128C7E',
+                                                                                            display: 'flex',
+                                                                                            alignItems: 'center',
+                                                                                            justifyContent: 'center',
+                                                                                            color: 'white',
+                                                                                            fontSize: '10px'
+                                                                                        }}>
+                                                                                            {member.name?.[0]?.toUpperCase()}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="flex-fill ms-3">
-                                                                    <h6 className="mb-0">{group.name}</h6>
-                                                                    <small>{group.members.length} members</small>
+                                                                    <div className="d-flex justify-content-between align-items-center">
+                                                                        <h6 className="mb-0">{group.name}</h6>
+                                                                        {group.lastMessage && (
+                                                                            <small className="text-muted">
+                                                                                {new Date(group.lastMessage.timestamp).toLocaleTimeString([], {
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                })}
+                                                                            </small>
+                                                                        )}
+                                                                    </div>
+                                                                    <small className="text-muted d-block">
+                                                                        {group.lastMessage ? (
+                                                                            <span>
+                                                                                <strong>{group.lastMessage.sender?.name} </strong>
+                                                                                {group.lastMessage.message?.length > 30
+                                                                                    ? group.lastMessage.message.substring(0, 30) + '...'
+                                                                                    : group.lastMessage.message}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span>{group.members.length} members</span>
+                                                                        )}
+                                                                    </small>
                                                                 </div>
                                                             </div>
                                                         </li>
@@ -877,23 +1204,87 @@ const ChatLayout = ({
                 </Modal.Header>
                 <Modal.Body>
                     <div className="text-center mb-4">
-                        <img
-                            src={`${import.meta.env.VITE_BASE_URL}${selectedUser?.userType === 'Employee'
-                                ? selectedUser?.employeeImage?.replace('uploads/', '')
-                                : selectedUser?.userType === 'AdminUser'
-                                    ? selectedUser?.profileImage?.replace('uploads/', '')
-                                    : selectedUser?.clientImage?.replace('uploads/', '')
-                                }`}
-                            className="rounded-circle"
-                            alt="Profile"
-                            style={{ width: '100px', height: '100px', objectFit: 'contain', cursor: 'pointer' }}
-                            onClick={() => handleProfileImageClick(`${import.meta.env.VITE_BASE_URL}${selectedUser?.userType === 'Employee'
-                                ? selectedUser?.employeeImage?.replace('uploads/', '')
-                                : selectedUser?.userType === 'AdminUser'
-                                    ? selectedUser?.profileImage?.replace('uploads/', '')
-                                    : selectedUser?.clientImage?.replace('uploads/', '')
-                                }`)}
-                        />
+                        {selectedUser?.userType === 'Group' ? (
+                            <div className="avatar rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                style={{
+                                    backgroundColor: '#128C7E',
+                                    width: '100px',
+                                    height: '100px',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    cursor: 'pointer'
+                                }}>
+                                <div className="group-avatar-grid" style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(2, 1fr)',
+                                    width: '100%',
+                                    height: '100%',
+                                    gap: '1px'
+                                }}>
+                                    {selectedUser.members?.slice(0, 4).map((member, idx) => {
+                                        let imagePath;
+                                        if (member.userType === 'Employee') {
+                                            imagePath = member.employeeImage?.replace('uploads/', '');
+                                        } else if (member.userType === 'AdminUser') {
+                                            imagePath = member.profileImage?.replace('uploads/', '');
+                                        } else if (member.userType === 'Client') {
+                                            imagePath = member.image?.replace('uploads/', '');
+                                        }
+
+                                        return (
+                                            <div key={idx} style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                backgroundColor: '#f0f0f0'
+                                            }}>
+                                                {imagePath ? (
+                                                    <img
+                                                        src={`${import.meta.env.VITE_BASE_URL}${imagePath}`}
+                                                        alt=""
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        backgroundColor: '#128C7E',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        color: 'white',
+                                                        fontSize: '20px'
+                                                    }}>
+                                                        {member.name?.[0]?.toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <img
+                                src={`${import.meta.env.VITE_BASE_URL}${selectedUser?.userType === 'Employee'
+                                    ? selectedUser?.employeeImage?.replace('uploads/', '')
+                                    : selectedUser?.userType === 'AdminUser'
+                                        ? selectedUser?.profileImage?.replace('uploads/', '')
+                                        : selectedUser?.clientImage?.replace('uploads/', '')
+                                    }`}
+                                className="rounded-circle"
+                                alt="Profile"
+                                style={{ width: '100px', height: '100px', objectFit: 'contain', cursor: 'pointer' }}
+                                onClick={() => handleProfileImageClick(`${import.meta.env.VITE_BASE_URL}${selectedUser?.userType === 'Employee'
+                                    ? selectedUser?.employeeImage?.replace('uploads/', '')
+                                    : selectedUser?.userType === 'AdminUser'
+                                        ? selectedUser?.profileImage?.replace('uploads/', '')
+                                        : selectedUser?.clientImage?.replace('uploads/', '')
+                                    }`)}
+                            />
+                        )}
                     </div>
                     {/* Group Details */}
                     <div className="user-details">
@@ -910,25 +1301,29 @@ const ChatLayout = ({
                                         <strong>Total Members:</strong> {selectedUser?.members?.length || 0}
                                     </div>
                                     <div className="info-item mb-2">
-                                        <div className="d-flex justify-content-between align-items-center"> <strong className="">Members List</strong>
-                                        <div>
-                                        {selectedMembers.length > 0 && (
-                                                <button
-                                                    className="btn btn-sm btn-danger text-white"
-                                                    onClick={() => setShowDeleteMembersModal(true)}
-                                                >
-                                                    Delete Selected
-                                                </button>
-                                            )}
-                                            <button
-                                                className="btn btn-sm ms-2 text-white"
-                                                style={{ backgroundColor: '#128c7e', border: 'none' }}
-                                                onClick={() => setShowAddMembersModal(true)}
-                                            >
-                                                    + Add Member
-                                                </button>
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <strong className="">Members List</strong>
+                                            <div>
+                                                {isGroupCreator() && selectedMembers.length > 0 && (
+                                                    <button
+                                                        className="btn btn-sm btn-danger text-white"
+                                                        onClick={() => setShowDeleteMembersModal(true)}
+                                                    >
+                                                        Delete Selected
+                                                    </button>
+                                                )}
+                                                {isGroupCreator() && (
+                                                    <button
+                                                        className="btn btn-sm ms-2 text-white"
+                                                        style={{ backgroundColor: '#128c7e', border: 'none' }}
+                                                        onClick={() => setShowAddMembersModal(true)}
+                                                    >
+                                                        + Add Member
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
+                                        {/* Members List */}
                                         {selectedUser?.members
                                             ?.slice(0, showAllMembers ? undefined : 5)
                                             .map(member => {
@@ -942,19 +1337,20 @@ const ChatLayout = ({
                                                 }
                                                 return (
                                                     <div key={member.userId} className="d-flex align-items-center mb-1 py-1 rounded-3 border-bottom">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="me-2"
-                                                            checked={selectedMembers.includes(member.userId)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) {
-                                                                    setSelectedMembers([...selectedMembers, member.userId]);
-                                                                } else {
-                                                                    setSelectedMembers(selectedMembers.filter(id => id !== member.userId));
-                                                                }
-                                                            }}
-                                                        />
-                                                        {/* <i className="bi bi-dot me-1 fs-4 text-success" /> */}
+                                                        {isGroupCreator() && (
+                                                            <input
+                                                                type="checkbox"
+                                                                className="me-2"
+                                                                checked={selectedMembers.includes(member.userId)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedMembers([...selectedMembers, member.userId]);
+                                                                    } else {
+                                                                        setSelectedMembers(selectedMembers.filter(id => id !== member.userId));
+                                                                    }
+                                                                }}
+                                                            />
+                                                        )}
                                                         <img
                                                             src={`${import.meta.env.VITE_BASE_URL}${imagePath}`}
                                                             className="avatar rounded-circle me-2"
@@ -962,42 +1358,20 @@ const ChatLayout = ({
                                                             style={{ width: '30px', height: '30px', objectFit: 'contain' }}
                                                         />
                                                         <div className=''>
-                                                            <span
-                                                                className="fw-semibold me-1"
-                                                                style={{ cursor: 'pointer' }}
-                                                                onClick={() => {
-                                                                    // Find the user in the users array
-                                                                    const userToChat = users.find(u => u._id === member.userId);
-                                                                    if (userToChat) {
-                                                                        // Switch to appropriate tab based on user type
-                                                                        if (member.userType === 'Employee') {
-                                                                            onTabChange('employees');
-                                                                        } else if (member.userType === 'Client') {
-                                                                            onTabChange('clients');
-                                                                        } else if (member.userType === 'AdminUser') {
-                                                                            onTabChange('admins');
-                                                                        }
-
-                                                                        // Small delay to ensure tab change is complete
-                                                                        setTimeout(() => {
-                                                                            onUserSelect(userToChat, member.userType);
-                                                                            setShowUserModal(false); // Close the modal
-                                                                        }, 100);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {member.name}
-                                                            </span>
+                                                            <span className="fw-semibold me-1">{member.name}</span>
                                                             <span className="text-muted">({member.userType})</span>
                                                         </div>
-                                                        <i
-                                                            className="bi bi-trash text-danger text-end ms-auto"
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => handleRemoveMember(member.userId)}
-                                                        />                                                </div>
+                                                        {isGroupCreator() && (
+                                                            <i
+                                                                className="bi bi-trash text-danger text-end ms-auto"
+                                                                style={{ cursor: 'pointer' }}
+                                                                onClick={() => handleRemoveMember(member.userId)}
+                                                            />
+                                                        )}
+                                                    </div>
                                                 );
                                             })}
-                                        
+
                                         {/* Show All button */}
                                         {selectedUser?.members?.length > 5 && (
                                             <button
@@ -1009,10 +1383,10 @@ const ChatLayout = ({
                                         )}
                                     </div>
                                     <div className="info-item mb-2">
-                                        <strong>Created At:</strong> {new Date(selectedUser?.createdAt).toLocaleDateString()}
+                                        <strong>Created At:</strong> {selectedUser?.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'N/A'}
                                     </div>
                                     <div className="info-item mb-2">
-                                        <strong>Last Message:</strong> {selectedUser?.lastMessage || 'No messages yet'}
+                                        <strong>Last Message:</strong> {typeof selectedUser?.lastMessage === 'string' ? selectedUser.lastMessage : 'No messages yet'}
                                     </div>
                                 </>
                             )}
@@ -1226,7 +1600,7 @@ const ChatLayout = ({
             </Modal>
 
             {/* Add Members Modal */}
-            <Modal show={showAddMembersModal} onHide={() => setShowAddMembersModal(false)} style={{ backgroundColor: '#080808a1'}}>
+            <Modal show={showAddMembersModal} onHide={() => setShowAddMembersModal(false)} style={{ backgroundColor: '#080808a1' }}>
                 <Modal.Header closeButton style={{ backgroundColor: '#075E54', color: 'white' }}>
                     <Modal.Title>Add Members to Group</Modal.Title>
                 </Modal.Header>
@@ -1360,7 +1734,7 @@ const ChatLayout = ({
             </Modal>
 
             {/* Add Delete Members Confirmation Modal */}
-            <Modal show={showDeleteMembersModal} onHide={() => setShowDeleteMembersModal(false)} centered style={{ backgroundColor: '#080808a1'}}>
+            <Modal show={showDeleteMembersModal} onHide={() => setShowDeleteMembersModal(false)} centered style={{ backgroundColor: '#080808a1' }}>
                 <Modal.Header closeButton style={{ backgroundColor: '#075E54', color: 'white' }}>
                     <Modal.Title>Delete Selected Members</Modal.Title>
                 </Modal.Header>
