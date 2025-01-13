@@ -80,10 +80,10 @@ const CreateMeeting = () => {
 
     // Ensure date and startTime are set before submitting
     if (selectedDate) {
-        meetingData.date = selectedDate;
+      meetingData.date = selectedDate;
     }
     if (selectedTime) {
-        meetingData.startTime = selectedTime;
+      meetingData.startTime = selectedTime;
     }
 
     // Set loading to true before API call
@@ -135,7 +135,7 @@ const CreateMeeting = () => {
                     {step === 1 ? "Select a Date & Time" : (
 
                       <div className="">
-                          {/* <span className="cursor-pointer" onClick={() => setStep(1)}><i className="bi bi-arrow-left fs-5" /></span> */}
+                        {/* <span className="cursor-pointer" onClick={() => setStep(1)}><i className="bi bi-arrow-left fs-5" /></span> */}
                         <div className="d-flex justify-content-between">
                           {/* <span className="" > Enter Details</span> */}
                           <span className="cursor-pointer" onClick={() => setStep(1)}><i className="bi bi-arrow-left fs-5 me-2" />Enter Details</span>
@@ -361,8 +361,8 @@ const CreateMeeting = () => {
                         </label>
                       </div>
 
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         className="btn btn-primary w-25 btn-lg fs-6"
                         disabled={isLoading}
                       >
@@ -385,101 +385,131 @@ const CreateMeeting = () => {
       </div>
       <style>
         {`
-          .react-calendar {
-            width: 100%;
-            min-height: 600px;
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 20px;
-            background: #fff;
-            font-family: inherit;
-          }
+       .react-calendar {
+      width: 100%;
+      max-width: 100%;
+      min-height: 500px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      background: #fff;
+      font-family: inherit;
+    }
 
-          /* कैलेंडर हेडर स्टाइलिंग */
-          .react-calendar__navigation {
-            margin-bottom: 20px;
-            height: 60px;
-          }
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 768px) {
+      .react-calendar {
+        min-height: 400px;
+        padding: 10px;
+      }
 
-          .react-calendar__navigation button {
-            min-width: 50px;
-            background: none;
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            padding: 15px;
-            border-radius: 8px;
-          }
+      .react-calendar__tile {
+        font-size: 14px;
+        height: 60px;
+        width: 60px;
+      }
 
-          .react-calendar__navigation button:hover {
-            background-color: #f0f0f0;
-          }
+      .react-calendar__month-view__weekdays {
+        font-size: 14px;
+        padding: 8px 0;
+      }
+    }
 
-          /* वीकडे हेडर्स */
-          .react-calendar__month-view__weekdays {
-            font-weight: 600;
-            font-size: 16px;
-            color: #666;
-            text-transform: uppercase;
-            padding: 12px 0;
-            display: grid !important;
-            grid-template-columns: repeat(7, 1fr);
-          }
+    @media (max-width: 576px) {
+      .react-calendar {
+        min-height: 350px;
+        padding: 5px;
+      }
 
-          .react-calendar__month-view__weekdays__weekday {
-            text-align: center;
-            padding: 8px 0;
-          }
+      .react-calendar__tile {
+        font-size: 12px;
+        height: 50px;
+        width: 50px;
+      }
 
-          /* अब्ब्रेवीएशन टैग के स्टाइल को रीसेट करें */
-          .react-calendar__month-view__weekdays__weekday abbr {
-            text-decoration: none;
-            cursor: default;
-          }
+      .react-calendar__month-view__weekdays {
+        font-size: 12px;
+        padding: 6px 0;
+      }
+    }
 
-          /* डेज़ ग्रिड को मेंटेन करें */
-          .react-calendar__month-view__days {
-            display: grid !important;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-            padding: 12px;
-          }
+    /* Calendar header styling */
+    .react-calendar__navigation {
+      margin-bottom: 15px;
+      height: 50px;
+    }
 
-          /* डेट टाइल्स */
-          .react-calendar__tile {
-            aspect-ratio: 1/1;
-            padding: 0;
-            border-radius: 50%;
-            font-weight: 500;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: auto;
-            width: 70px;
-          }
+    .react-calendar__navigation button {
+      min-width: 40px;
+      background: none;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      padding: 10px;
+      border-radius: 8px;
+    }
 
-          .react-calendar__tile--active {
-            background: #0d6efd !important;
-            color: white !important;
-            border-radius: 50%;
-          }
+    .react-calendar__navigation button:hover {
+      background-color: #f0f0f0;
+    }
 
-          .react-calendar__tile--now {
-            background: #e6f3ff;
-            color: #0d6efd;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 1.2rem
-          }
+    /* Weekday headers */
+    .react-calendar__month-view__weekdays {
+      font-weight: 600;
+      font-size: 16px;
+      color: #666;
+      text-transform: uppercase;
+      padding: 12px 0;
+      display: grid !important;
+      grid-template-columns: repeat(7, 1fr);
+    }
 
-          .react-calendar__tile:hover {
-            background-color: #f0f8ff !important;
-            border-radius: 50%;
-          }
+    .react-calendar__month-view__weekdays__weekday {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* Days grid */
+    .react-calendar__month-view__days {
+      display: grid !important;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+
+    /* Date tiles */
+    .react-calendar__tile {
+      aspect-ratio: 1/1;
+      padding: 0;
+      border-radius: 50%;
+      font-weight: 500;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+    }
+
+    .react-calendar__tile--active {
+      background: #0d6efd !important;
+      color: white !important;
+      border-radius: 50%;
+    }
+
+    .react-calendar__tile--now {
+      background: #e6f3ff;
+      color: #0d6efd;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .react-calendar__tile:hover {
+      background-color: #f0f8ff !important;
+      border-radius: 50%;
+    }
 
           /* टाइम स्लॉट्स स्टाइलिंग */
           .time-slots {

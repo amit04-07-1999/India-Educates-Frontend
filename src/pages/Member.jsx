@@ -808,10 +808,10 @@ const Member = () => {
 
                 {/* Row End */}
                 {loading ? (
-                  <div className="custom-loader "></div>
-                ) : Member.length === 0 ? (
+                  <div className="custom-loader"></div>
+                ) : employees.length === 0 ? (
                   <div className="text-center mt-4">
-                    <h1 className="text-muted">No agents available. Please add a agent.</h1>
+                    <h1 className="text-muted">No agents available. Please add an agent.</h1>
                   </div>
                 ) : (viewMode === 'grid' ? (
                   <div className="row g-3 row-cols-1 row-cols-sm-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2 row-cols-xxl-2 row-deck py-1 pb-4">
@@ -1840,7 +1840,7 @@ const Member = () => {
                     <button
                       type="button"
                       className="btn close text-white"
-                      style={{backgroundColor:"#0a9400"}}
+                      style={{ backgroundColor: "#0a9400" }}
                       onClick={updateSubmit}
                     >
                       Update
@@ -2357,7 +2357,7 @@ const Member = () => {
                     <button
                       type="button"
                       className="btn close text-white"
-                      style={{backgroundColor:"#0a9400"}}
+                      style={{ backgroundColor: "#0a9400" }}
                       onClick={handleSubmit}
                     >
                       Create
