@@ -17,7 +17,7 @@ const Tasks = () => {
   const [filteredProjectName, setFilteredProjectName] = useState(null);
   const [filteredEmployeeName, setFilteredEmployeeName] = useState(null);
 
-  const [viewMode, setViewMode] = useState('list'); // Default is list view
+  const [viewMode, setViewMode] = useState('grid'); // Default is list view
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -256,13 +256,48 @@ const Tasks = () => {
     try {
       const taskToUpdate = tasks.find((task) => task._id === taskId);
       const formDataToSend = new FormData();
-      delete taskToUpdate.taskAssignPerson;
-      for (const key in taskToUpdate) {
-        formDataToSend.append(key, taskToUpdate[key]);
+
+      // Helper function to safely parse dates
+      const parseDate = (dateString) => {
+        if (!dateString) return null;
+
+        // Try parsing different date formats
+        const date = new Date(dateString);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          // Try parsing UK format (DD/MM/YYYY)
+          const [day, month, yearTime] = dateString.split('/');
+          const [year, time] = (yearTime || '').split(',');
+          if (day && month && year) {
+            return new Date(`${year.trim()}-${month.trim()}-${day.trim()}${time || ''}`);
+          }
+          return null;
+        }
+
+        return date;
+      };
+
+      // Create a copy of the task and format the dates
+      const formattedTask = {
+        ...taskToUpdate,
+        taskDate: parseDate(taskToUpdate.taskDate)?.toISOString() || new Date().toISOString(),
+        taskEndDate: parseDate(taskToUpdate.taskEndDate)?.toISOString() || new Date().toISOString()
+      };
+
+      // Remove taskAssignPerson before sending
+      delete formattedTask.taskAssignPerson;
+
+      // Append formatted data to FormData
+      for (const key in formattedTask) {
+        formDataToSend.append(key, formattedTask[key]);
       }
+
+      // Append selected employees
       selectedEmployees.forEach((obj) => {
         formDataToSend.append("taskAssignPerson", obj.value);
       });
+
       const response = await axios.put(
         `${import.meta.env.VITE_BASE_URL}api/tasks/${taskId}`,
         formDataToSend,
@@ -288,6 +323,12 @@ const Tasks = () => {
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Error updating task. Please check the date formats.", {
+        style: {
+          backgroundColor: "#dc3545",
+          color: "white",
+        },
+      });
     }
   };
 
@@ -587,7 +628,21 @@ const Tasks = () => {
   }, [messages, selectedTaskId]); // Add selectedTaskId as dependency
 
 
+  // Add these state declarations at the top of your Tasks component
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImageTitle, setSelectedImageTitle] = useState('');
+  const [selectedTaskImages, setSelectedTaskImages] = useState([]);
+  const [selectedTaskName, setSelectedTaskName] = useState('');
 
+  // Add this function to handle opening the task images modal
+  const handleOpenTaskImages = (task) => {
+    setSelectedTaskImages(task.taskImages);
+    setSelectedTaskName(task.taskTitle);
+    const modal = new bootstrap.Modal(document.getElementById('taskImagesModal'));
+    modal.show();
+  };
+
+  // Add these modals just before the closing div of your return statement
 
 
   return (
@@ -669,7 +724,7 @@ const Tasks = () => {
                     </div>
                   </div>
                 </div>{" "}
-                <div className="row g-3 border-bottom">
+                <div className="row g-3 border-bottom mb-3">
                   <div className="col-12 col-md-4 mb-3">
                     <div className="d-flex">
                       {viewMode === 'row' ? (
@@ -781,12 +836,11 @@ const Tasks = () => {
                                       {task.projectName}
                                       <p>{task.taskDate}</p>
                                       <Link
-                                        to="/images"
-                                        state={{
-                                          images: task.taskImages,
-                                          projectName: task.projectName,
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          handleOpenTaskImages(task);
                                         }}
-                                        style={{ marginLeft: "33px" }}
+                                        style={{ marginLeft: "33px", cursor: 'pointer' }}
                                       >
                                         <i className="bi-paperclip fs-6" />
                                       </Link>
@@ -845,12 +899,14 @@ const Tasks = () => {
                                         <button
                                           onClick={() => taskHandleSubmit(task._id)}
                                           className="bi bi-check2 bg-primary text-white border-0 rounded"
+                                          title="Update Task"
                                         />
                                         <button
                                           data-bs-toggle="modal"
                                           data-bs-target="#dremovetask"
                                           onClick={() => setDeletableId(task._id)}
                                           className="bi bi-trash bg-danger text-white border-0 rounded"
+                                          title="Delete Task"
                                         />
                                       </div>
                                     </td>
@@ -905,15 +961,14 @@ const Tasks = () => {
                                       <span className="fw-bold fs-6">{index + 1}. </span>
                                       <h5 className="fw-bold mb-0">{task.projectName}</h5>
 
-                                      <Link
-                                        to="/images"
-                                        state={{
-                                          images: task.taskImages,
-                                          projectName: task.projectName,
-                                        }}
-                                      >
-                                        <i className="bi-paperclip fs-6" />
-                                      </Link>
+                                      {task.taskImages && task.taskImages.length > 0 && (
+                                        <button
+                                          className="btn btn-link"
+                                          onClick={() => handleOpenTaskImages(task)}
+                                        >
+                                          <i className="bi-paperclip fs-6" />
+                                        </button>
+                                      )}
                                     </div>
                                     <input
                                       className="form-control"
@@ -931,14 +986,14 @@ const Tasks = () => {
                                     />
                                     <textarea
                                       className="form-control mb-2"
-                                      rows="3"
+                                      rows="5"
                                       name="description"
                                       value={task.description}
                                       onChange={(e) => taskHandleChange(e, task._id)}
-                                      style={{ resize: 'none' }}
+                                      style={{ resize: 'none',  backgroundColor: 'transparent' }}
                                     />
-                                    <p className="mb-1">Assigned to: {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}</p>
-                                    <p className="mb-1">By: {task.assignedBy}</p>
+                                    <p className="mb-1 fw-semibold text-primary">Assigned to: {task.taskAssignPerson && task.taskAssignPerson.employeeName ? task.taskAssignPerson.employeeName : 'Unassigned'}</p>
+                                    <p className="mb-1 fw-semibold" style={{color:"green"}}>By: {task.assignedBy}</p>
                                     <input
                                       type="date"
                                       className="form-control mb-2"
@@ -957,22 +1012,7 @@ const Tasks = () => {
                                       <option value="Medium">Medium</option>
                                       <option value="Lowest">Lowest</option>
                                     </select>
-                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                      <button
-                                        onClick={() => taskHandleSubmit(task._id)}
-                                        className="btn btn-sm btn-primary"
-                                      >
-                                        <i className="bi bi-check2"></i> Update
-                                      </button>
-                                      <button
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#dremovetask"
-                                        onClick={() => setDeletableId(task._id)}
-                                        className="btn btn-sm btn-danger text-white"
-                                      >
-                                        <i className="bi bi-trash"></i> Delete
-                                      </button>
-                                    </div>
+
                                     <div className="d-flex justify-content-between align-items-center">
                                       {task.taskStatus === 'Not Started' && (
                                         <span className="badge bg-warning text-dark">Not Started</span>
@@ -995,6 +1035,22 @@ const Tasks = () => {
                                             {notifications[task._id]}
                                           </span>
                                         )}
+                                      </button>
+                                    </div>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                      <button
+                                        onClick={() => taskHandleSubmit(task._id)}
+                                        className="btn btn-sm btn-primary"
+                                      >
+                                        <i className="bi bi-check2"></i> Update
+                                      </button>
+                                      <button
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#dremovetask"
+                                        onClick={() => setDeletableId(task._id)}
+                                        className="btn btn-sm btn-danger text-white"
+                                      >
+                                        <i className="bi bi-trash"></i> Delete
                                       </button>
                                     </div>
                                   </div>
@@ -1640,6 +1696,101 @@ const Tasks = () => {
                         </div>
                         <button type="submit" className="btn btn-dark">Submit</button>
                       </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Preview Modal */}
+              <div className="modal fade" id="imagePreviewModal" tabIndex={-1} aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-sm">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">{selectedImageTitle}</h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      />
+                    </div>
+                    <div className="modal-body">
+                      <div className="">
+                        {selectedImages.map((image, index) => (
+                          <div key={index} className="mb-3">
+                            <img
+                              src={`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`}
+                              alt={`Preview ${index + 1}`}
+                              className="img-fluid rounded"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => window.open(`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`, '_blank')}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Task Images Modal */}
+              <div className="modal fade" id="taskImagesModal" tabIndex={-1} aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-lg">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">{selectedTaskName} - Images</h5>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      />
+                    </div>
+                    <div className="modal-body">
+                      <div className="row">
+                        {selectedTaskImages && selectedTaskImages.map((image, index) => {
+                          const fileExtension = image.split('.').pop().toLowerCase();
+                          const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension);
+                          const isPdf = fileExtension === 'pdf';
+
+                          return (
+                            <div key={index} className="col-md-4 mb-3">
+                              {isImage ? (
+                                <img
+                                  src={`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`}
+                                  alt={`Task Image ${index + 1}`}
+                                  className="img-fluid rounded"
+                                  style={{ cursor: 'pointer', height: '200px', width: '100%', objectFit: 'cover' }}
+                                  onClick={() => window.open(`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`, '_blank')}
+                                />
+                              ) : isPdf ? (
+                                <div className="d-flex flex-column align-items-center">
+                                  <i className="bi bi-file-pdf fs-1"></i>
+                                  <a
+                                    href={`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-primary mt-2"
+                                  >
+                                    View PDF
+                                  </a>
+                                </div>
+                              ) : (
+                                <div className="d-flex flex-column align-items-center">
+                                  <i className="bi bi-file-earmark fs-1"></i>
+                                  <a
+                                    href={`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`}
+                                    download
+                                    className="btn btn-sm btn-primary mt-2"
+                                  >
+                                    Download File
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>

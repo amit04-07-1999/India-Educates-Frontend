@@ -100,7 +100,12 @@ const Project = () => {
       // console.log(response.data);
 
       // Assuming the response contains the new project data
-      const newProject = response.data;
+      const newProject = {
+        ...response.data,
+        taskStats: response.data.taskStats || { completed: 0, inProgress: 0, notStarted: 0 },
+      };
+      setProjects((prevProjects) => [newProject, ...prevProjects]);
+
 
       // Update the projects state
       setProjects((prevProjects) => [newProject, ...prevProjects]);
@@ -532,7 +537,7 @@ const Project = () => {
     const handleNewMessage = (message) => {
       console.log('New message received:', message);
       setMessages((prevMessages) => [...prevMessages, message]);
-      
+
       if (!isChatModalOpen || selectProject._id !== message.projectId) {
         setNotifications(prev => {
           const newNotifications = {
@@ -641,14 +646,14 @@ const Project = () => {
   const handleOpenMessages = (project) => {
     setSelectProject(project);
     fetchProjectMessages(project._id);
-    
+
     // Clear notifications for this specific project only
     setNotifications(prev => {
       const newNotifications = { ...prev, [project._id]: 0 };
       localStorage.setItem('projectNotifications', JSON.stringify(newNotifications));
       return newNotifications;
     });
-    
+
     setIsChatModalOpen(true);
 
     setTimeout(() => {
@@ -670,10 +675,10 @@ const Project = () => {
   }, []);
 
   const ProjectProgressBar = ({ project }) => {
-    const total = project.totalTasks;
-    const completed = project.taskStats.completed;
-    const inProgress = project.taskStats.inProgress;
-    const notStarted = project.taskStats.notStarted;
+    const total = project.totalTasks || 0;
+    const completed = project.taskStats.completed || 0;
+    const inProgress = project.taskStats.inProgress || 0;
+    const notStarted = project.taskStats.notStarted || 0;
 
     // Calculate percentages
     const completedPercent = total ? ((completed / total) * 100).toFixed(1) : 0;
@@ -1267,7 +1272,7 @@ const Project = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="row">
+                        <div className="row w-100">
                           {filteredProjects.map((project, index) => {
                             const getFormattedDate = (date, includeTime = false) => {
                               const newDate = new Date(date);
@@ -1705,7 +1710,7 @@ const Project = () => {
                     <button
                       type="button"
                       className="btn close text-white"
-                      style={{backgroundColor:"#0a9400"}}
+                      style={{ backgroundColor: "#0a9400" }}
                       data-dismiss="modal"
                       onClick={handleSubmit}
                     >
@@ -1944,7 +1949,7 @@ const Project = () => {
                     <button
                       type="button"
                       className="btn close text-white"
-                      style={{backgroundColor:"#0a9400"}}
+                      style={{ backgroundColor: "#0a9400" }}
                       onClick={projectHandleSubmit}
                     >
                       Update

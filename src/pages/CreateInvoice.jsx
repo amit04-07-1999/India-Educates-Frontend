@@ -89,7 +89,7 @@ const CreateInvoice = () => {
         }
       );
 
-      console.log('Invoice created:', response.data);
+      // console.log('Invoice created:', response.data);
       window.print();
 
       // Reset form with current dates
@@ -394,6 +394,9 @@ const CreateInvoice = () => {
     const fetchLogos = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/invoice-logos`);
+        // console.log('API Response:', response);
+        // console.log('Base URL:', import.meta.env.VITE_BASE_URL);
+        // console.log('Fetched logos:', response.data);
         setStoredLogos(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error('Error fetching logos:', error);
@@ -406,11 +409,21 @@ const CreateInvoice = () => {
   // Add function to handle logo selection from dropdown
   const handleStoredLogoSelect = (logoPath) => {
     if (logoPath) {
-      setLogo(`${import.meta.env.VITE_BASE_URL}${logoPath}`);
-      setFormData(prev => ({
-        ...prev,
-        logo: logoPath // Store just the path for existing logos
-      }));
+      try {
+        // Make sure the path starts with 'uploads/'
+        const fullLogoUrl = logoPath.startsWith('uploads/') 
+          ? `${import.meta.env.VITE_BASE_URL}${logoPath}`
+          : `${import.meta.env.VITE_BASE_URL}uploads/${logoPath}`;
+        
+        // console.log('Attempting to load logo from:', fullLogoUrl); // Debug log
+        setLogo(fullLogoUrl);
+        setFormData(prev => ({
+          ...prev,
+          logo: logoPath
+        }));
+      } catch (error) {
+        console.error('Error setting logo:', error);
+      }
     }
   };
 
@@ -419,7 +432,8 @@ const CreateInvoice = () => {
     const defaultLogoNames = {
       'uploads/a2zlogo.png': 'A2Z Logo',
       'uploads/ficlogo.png': 'FIC Logo',
-      'uploads/pizeonflylogo.png': 'Pizeonfly Logo'
+      'uploads/pizeonflylogo.png': 'Pizeonfly Logo',
+      'uploads/IndiaEducatesLogo.png': 'India Educates Logo'
     };
 
     // If it's a default logo, return its friendly name
@@ -533,15 +547,21 @@ const CreateInvoice = () => {
                       {/* Add logo dropdown */}
                       <select
                         className="form-select me-2"
-                        onChange={(e) => handleStoredLogoSelect(e.target.value)}
+                        onChange={(e) => {
+                          // console.log('Selected value:', e.target.value); // Debug log
+                          handleStoredLogoSelect(e.target.value);
+                        }}
                         style={{ maxWidth: '200px' }}
                       >
                         <option value="">Select Existing Logo</option>
-                        {Array.isArray(storedLogos) && storedLogos.map((logoPath, index) => (
-                          <option key={index} value={logoPath}>
-                            {getLogoDisplayName(logoPath)}
-                          </option>
-                        ))}
+                        {Array.isArray(storedLogos) && storedLogos.map((logoPath, index) => {
+                          // console.log('Logo path:', logoPath); // Debug log
+                          return (
+                            <option key={index} value={logoPath}>
+                              {getLogoDisplayName(logoPath)}
+                            </option>
+                          );
+                        })}
                       </select>
 
                       {/* Existing file input */}
@@ -557,8 +577,20 @@ const CreateInvoice = () => {
                     {logo && (
                       <img
                         style={{ width: "10rem", objectFit: "contain" }}
-                        src={logo.replace(/\\/g, '/').replace('uploads/', '')}
-                        alt="logo"
+                        src={logo}
+                        alt="Company Logo"
+                        onError={(e) => {
+                          console.error('Failed to load image from:', logo);
+                          // Remove 'uploads/' and try again if it exists in the path
+                          if (logo.includes('uploads/')) {
+                            const retryUrl = `${import.meta.env.VITE_BASE_URL}${logo.split('uploads/')[1]}`;
+                            // console.log('Retrying with:', retryUrl);
+                            e.target.src = retryUrl;
+                          } else {
+                            // Set a default logo or hide the image
+                            e.target.style.display = 'none';
+                          }
+                        }}
                       />
                     )}
                   </div>
@@ -567,9 +599,9 @@ const CreateInvoice = () => {
 
                 <div className="d-flex  justify-content-between">
                   <div style={{ width: "49%" }}>
-                    <div className="p-3 rounded" style={{ backgroundColor: "lavender", height: "16.3rem" }}>
-                      <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "lavender" }}>Billed By</h2>
-                      <textarea className="fw-semibold" style={{ backgroundColor: "lavender", border: "none" }} rows="9" onChange={handleBilledByChange} defaultValue={"First India Credit \n\n88,Sant Nagar,Near India Post Office, \nEast of Kailash, New Delhi, Delhi \nIndia - 110065 \n\nGSTIN: 06AATFG8894M1Z8 \nPAN: AATFG8894M \nEmail:afzal9000i@gmail.com"} />
+                    <div className="p-3 rounded" style={{ backgroundColor: "#F3BCA7", height: "16.3rem" }}>
+                      <h2 className="h5 mb-2" style={{ backgroundColor: "#F3BCA7", color:'#0a9400' }}>Billed By</h2>
+                      <textarea className="fw-semibold" style={{ backgroundColor: "#F3BCA7", border: "none" }} rows="9" onChange={handleBilledByChange} defaultValue={"First India Credit \n\n88,Sant Nagar,Near India Post Office, \nEast of Kailash, New Delhi, Delhi \nIndia - 110065 \n\nGSTIN: 06AATFG8894M1Z8 \nPAN: AATFG8894M \nEmail:afzal9000i@gmail.com"} />
                     </div>
                   </div>
 
@@ -595,8 +627,8 @@ const CreateInvoice = () => {
                         </option>
                       ))}
                     </select>
-                    <div className="p-3 rounded" style={{ backgroundColor: "lavender", height: "16.3rem" }}>
-                      <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "lavender" }}>Billed To</h2>
+                    <div className="p-3 rounded" style={{ backgroundColor: "#F3BCA7", height: "16.3rem" }}>
+                      <h2 className="h5 mb-2" style={{ backgroundColor: "#F3BCA7", color:'#0a9400'}}>Billed To</h2>
 
 
 
@@ -604,7 +636,7 @@ const CreateInvoice = () => {
                       <textarea
                         className="fw-semibold"
                         style={{
-                          backgroundColor: "lavender",
+                          backgroundColor: "#F3BCA7",
                           border: "none",
                           width: "100%",
                           height: "75%"
@@ -664,14 +696,14 @@ const CreateInvoice = () => {
                       {selectedState === 'HR' ?
                         <tbody >
                           <tr >
-                            <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Item</th>
-                            <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Description</th>
-                            <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">Rate</th>
-                            <th style={{ width: 70, background: "#650bfd", color: "white" }} className="border-secondary">Quantity</th>
-                            <th style={{ width: 60, background: "#650bfd", color: "white" }} className="border-secondary">GST %</th>
-                            {/* <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">IGST</th> */}
-                            <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">CGST</th>
-                            <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">SGST</th>
+                            <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Item</th>
+                            <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Description</th>
+                            <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">Rate</th>
+                            <th style={{ width: 70, background: "#fe6730", color: "white" }} className="border-secondary">Quantity</th>
+                            <th style={{ width: 60, background: "#fe6730", color: "white" }} className="border-secondary">GST %</th>
+                            {/* <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">IGST</th> */}
+                            <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">CGST</th>
+                            <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">SGST</th>
                           </tr>
                           {rows.map((row, index) => (
                             <tr key={index} className="item-row ">
@@ -725,20 +757,20 @@ const CreateInvoice = () => {
                           </tr>
                           <tr>
                             <td colSpan={4} className="blank border-secondary">Total (INR)</td>
-                            <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}>₹ {formatNumber(total.grandTotal)}</td>
+                            <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}>₹ {formatNumber(total.grandTotal)}</td>
                           </tr>
                         </tbody>
                         :
                         <tbody >
                           <tr >
-                            <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Item</th>
-                            <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Description</th>
-                            <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">Rate</th>
-                            <th style={{ width: 70, background: "#650bfd", color: "white" }} className="border-secondary">Quantity</th>
-                            <th style={{ width: 60, background: "#650bfd", color: "white" }} className="border-secondary">GST %</th>
-                            <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">IGST</th>
-                            {/* <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">CGST</th>
-                                <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">SGST</th> */}
+                            <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Item</th>
+                            <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Description</th>
+                            <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">Rate</th>
+                            <th style={{ width: 70, background: "#fe6730", color: "white" }} className="border-secondary">Quantity</th>
+                            <th style={{ width: 60, background: "#fe6730", color: "white" }} className="border-secondary">GST %</th>
+                            <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">IGST</th>
+                            {/* <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">CGST</th>
+                                <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">SGST</th> */}
                           </tr>
                           {rows.map((row, index) => (
                             <tr key={index} className="item-row ">
@@ -796,8 +828,8 @@ const CreateInvoice = () => {
                           </tr>
                           <tr>
                             <td colSpan={3} className="blank border-secondary"> </td>
-                            <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}>Total (INR)</td>
-                            <td className="total-value border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}><div id="grand-total" style={{ background: "#650bfd", color: "white", width: "max-content" }}>₹ {formatNumber(total.grandTotal)}</div></td>
+                            <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}>Total (INR)</td>
+                            <td className="total-value border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}><div id="grand-total" style={{ background: "#fe6730", color: "white", width: "max-content" }}>₹ {formatNumber(total.grandTotal)}</div></td>
                           </tr>
                         </tbody>
                       }
@@ -806,15 +838,15 @@ const CreateInvoice = () => {
                     <div style={{ height: "90px" }}></div>
                   }
                   <div style={{ width: "45%", marginTop: "-60px" }}>
-                    <div className="p-2 rounded" style={{ backgroundColor: "lavender", border: "none" }}>
-                      <h2 className="h5 text-primary" style={{ backgroundColor: "lavender", border: "none" }}>Bank Details</h2>
-                      <table className="items " style={{ backgroundColor: "lavender", border: "none", marginTop: "-1px" }}>
+                    <div className="p-2 rounded" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
+                      <h2 className="h5" style={{ backgroundColor: "#F3BCA7", border: "none",color:'#0a9400' }}>Bank Details</h2>
+                      <table className="items " style={{ backgroundColor: "#F3BCA7", border: "none", marginTop: "-1px" }}>
                         <tbody>
                           <tr>
-                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Name</td>
-                            <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}>
+                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>Account Name</td>
+                            <td className="p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
                               <textarea
-                                style={{ backgroundColor: "lavender", border: "none" }}
+                                style={{ backgroundColor: "#F3BCA7", border: "none" }}
                                 rows="1"
                                 defaultValue={"First India Credit"}
                                 onChange={(e) => handleBankDetailsChange(e, 'accountName')}
@@ -822,10 +854,10 @@ const CreateInvoice = () => {
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Number</td>
-                            <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}>
+                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>Account Number</td>
+                            <td className="p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
                               <textarea
-                                style={{ backgroundColor: "lavender", border: "none" }}
+                                style={{ backgroundColor: "#F3BCA7", border: "none" }}
                                 rows="1"
                                 defaultValue={"002105501589"}
                                 onChange={(e) => handleBankDetailsChange(e, 'accountNumber')}
@@ -833,10 +865,10 @@ const CreateInvoice = () => {
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>IFSC</td>
-                            <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}>
+                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>IFSC</td>
+                            <td className="p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
                               <textarea
-                                style={{ backgroundColor: "lavender", border: "none" }}
+                                style={{ backgroundColor: "#F3BCA7", border: "none" }}
                                 rows="1"
                                 defaultValue={"ICIC0000021"}
                                 onChange={(e) => handleBankDetailsChange(e, 'ifsc')}
@@ -844,10 +876,10 @@ const CreateInvoice = () => {
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Type</td>
-                            <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}>
+                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>Account Type</td>
+                            <td className="p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
                               <textarea
-                                style={{ backgroundColor: "lavender", border: "none" }}
+                                style={{ backgroundColor: "#F3BCA7", border: "none" }}
                                 rows="1"
                                 defaultValue={"Current"}
                                 onChange={(e) => handleBankDetailsChange(e, 'accountType')}
@@ -855,10 +887,10 @@ const CreateInvoice = () => {
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Bank</td>
-                            <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}>
+                            <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>Bank</td>
+                            <td className="p-0" style={{ backgroundColor: "#F3BCA7", border: "none" }}>
                               <textarea
-                                style={{ backgroundColor: "lavender", border: "none" }}
+                                style={{ backgroundColor: "#F3BCA7", border: "none" }}
                                 rows="1"
                                 defaultValue={"KOTAK MAHINDRA BANK"}
                                 onChange={(e) => handleBankDetailsChange(e, 'bankName')}

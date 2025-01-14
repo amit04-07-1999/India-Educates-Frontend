@@ -300,12 +300,12 @@ const UpdateInvoice = () => {
 
           <div className="d-flex justify-content-between">
             <div style={{ width: "49%" }}>
-              <div className="p-3 rounded" style={{ backgroundColor: "lavender" }}>
-                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "lavender" }}>Billed By</h2>
+              <div className="p-3 rounded" style={{ backgroundColor: "#f3bca7" }}>
+                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "#f3bca7" }}>Billed By</h2>
                 <textarea
                   className="fw-semibold"
                   name="billedBy"
-                  style={{ backgroundColor: "lavender", border: "none" }}
+                  style={{ backgroundColor: "#f3bca7", border: "none" }}
                   rows="9"
                   value={updatedInvoice.billedBy}
                   onChange={handleChange}
@@ -313,12 +313,12 @@ const UpdateInvoice = () => {
               </div>
             </div>
             <div style={{ width: "49%" }}>
-              <div className="p-3 rounded" style={{ backgroundColor: "lavender" }}>
-                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "lavender" }}>Billed To</h2>
+              <div className="p-3 rounded" style={{ backgroundColor: "#f3bca7" }}>
+                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "#f3bca7" }}>Billed To</h2>
                 <textarea
                   className="fw-semibold"
                   name="clientDetail"
-                  style={{ backgroundColor: "lavender", border: "none" }}
+                  style={{ backgroundColor: "#f3bca7", border: "none" }}
                   rows="9"
                   value={updatedInvoice.clientDetail}
                   onChange={handleChange}
@@ -561,29 +561,29 @@ const UpdateInvoice = () => {
 
             </table>
             <div style={{ width: "45%", marginTop: "-60px" }}>
-              <div className="p-2 rounded" style={{ backgroundColor: "lavender", border: "none" }}>
-                <h2 className="h5 text-primary" style={{ backgroundColor: "lavender", border: "none" }}>Bank Details</h2>
-                <table className="items" style={{ backgroundColor: "lavender", border: "none", marginTop: "-1px" }}>
+              <div className="p-2 rounded" style={{ backgroundColor: "#f3bca7", border: "none" }}>
+                <h2 className="h5 text-primary" style={{ backgroundColor: "#f3bca7", border: "none" }}>Bank Details</h2>
+                <table className="items" style={{ backgroundColor: "#f3bca7", border: "none", marginTop: "-1px" }}>
                   <tbody>
                     <tr>
-                      <td colSpan={2} className="fw-bold  p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Name</td>
-                      <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}><textarea style={{ backgroundColor: "lavender", border: "none" }} rows="1" name="bankDetails.accountName" value={updatedInvoice.bankDetails.accountName} onChange={(e) => handleBankDetailsChange(e, 'accountName')} /></td>
+                      <td colSpan={2} className="fw-bold  p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}>Account Name</td>
+                      <td className="p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}><textarea style={{ backgroundColor: "#f3bca7", border: "none" }} rows="1" name="bankDetails.accountName" value={updatedInvoice.bankDetails.accountName} onChange={(e) => handleBankDetailsChange(e, 'accountName')} /></td>
                     </tr>
                     <tr>
-                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Number </td>
-                      <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}><textarea style={{ backgroundColor: "lavender", border: "none" }} rows="1" name="bankDetails.accountNumber" value={updatedInvoice.bankDetails.accountNumber} onChange={(e) => handleBankDetailsChange(e, 'accountNumber')} /></td>
+                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}>Account Number </td>
+                      <td className="p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}><textarea style={{ backgroundColor: "#f3bca7", border: "none" }} rows="1" name="bankDetails.accountNumber" value={updatedInvoice.bankDetails.accountNumber} onChange={(e) => handleBankDetailsChange(e, 'accountNumber')} /></td>
                     </tr>
                     <tr>
-                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>IFSC</td>
-                      <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}><textarea style={{ backgroundColor: "lavender", border: "none" }} rows="1" name="bankDetails.ifsc" value={updatedInvoice.bankDetails.ifsc} onChange={(e) => handleBankDetailsChange(e, 'ifsc')} /></td>
+                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}>IFSC</td>
+                      <td className="p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}><textarea style={{ backgroundColor: "#f3bca7", border: "none" }} rows="1" name="bankDetails.ifsc" value={updatedInvoice.bankDetails.ifsc} onChange={(e) => handleBankDetailsChange(e, 'ifsc')} /></td>
                     </tr>
                     <tr>
-                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Account Type</td>
-                      <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}><textarea style={{ backgroundColor: "lavender", border: "none" }} rows="1" name="bankDetails.accountType" value={updatedInvoice.bankDetails.accountType} onChange={(e) => handleBankDetailsChange(e, 'accountType')} /></td>
+                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}>Account Type</td>
+                      <td className="p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}><textarea style={{ backgroundColor: "#f3bca7", border: "none" }} rows="1" name="bankDetails.accountType" value={updatedInvoice.bankDetails.accountType} onChange={(e) => handleBankDetailsChange(e, 'accountType')} /></td>
                     </tr>
                     <tr>
-                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "lavender", border: "none" }}>Bank</td>
-                      <td className="p-0" style={{ backgroundColor: "lavender", border: "none" }}><textarea style={{ backgroundColor: "lavender", border: "none" }} rows="1" name="bankDetails.bankName" value={updatedInvoice.bankDetails.bankName} onChange={(e) => handleBankDetailsChange(e, 'bankName')} defaultValue={"ICICI bank"} /></td>
+                      <td colSpan={2} className="fw-bold p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}>Bank</td>
+                      <td className="p-0" style={{ backgroundColor: "#f3bca7", border: "none" }}><textarea style={{ backgroundColor: "#f3bca7", border: "none" }} rows="1" name="bankDetails.bankName" value={updatedInvoice.bankDetails.bankName} onChange={(e) => handleBankDetailsChange(e, 'bankName')} defaultValue={"ICICI bank"} /></td>
                     </tr>
                   </tbody>
                 </table>

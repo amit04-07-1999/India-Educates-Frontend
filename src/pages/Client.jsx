@@ -625,7 +625,7 @@ const Client = () => {
                                                 type="text"
                                                 className="form-control"
                                                 id="exampleFormControlInput877"
-                                                placeholder="Client Name"
+                                                placeholder="Associate Name"
                                                 name="clientName" value={formData.clientName} onChange={handleChange}
                                             />
                                         </div>
