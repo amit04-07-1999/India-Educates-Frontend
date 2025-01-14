@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FloatingMenu from '../Chats/FloatingMenu'
 import { Link, useNavigate } from "react-router-dom";
+import { formatTime12Hour } from '../utils/timeUtils';
+import CountdownTimer from '../components/CountdownTimer';
 
 const AllMeetings = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -204,7 +206,18 @@ const AllMeetings = () => {
                           <td className="text-center">{index + 1}</td>
                           <td className="text-center">{meeting.title}</td>
                           <td className="text-center">{new Date(meeting.date).toLocaleDateString()}</td>
-                          <td className="text-center">{meeting.startTime}</td>
+                          <td className="text-center">{formatTime12Hour(meeting.startTime)}
+                          {/* <div className="text-center">
+                            {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
+                              <span className="badge bg-secondary">Meeting {meeting.status}</span>
+                            ) : (
+                              <CountdownTimer 
+                                meetingDate={meeting.date} 
+                                meetingTime={meeting.startTime} 
+                              />
+                            )}
+                          </div> */}
+                          </td>
                           <td className="text-center">{meeting.duration} minutes</td>
                           <td className="text-center">{meeting.guestName}</td>
                           <td className="text-center">{meeting.guestEmail}</td>
@@ -262,7 +275,8 @@ const AllMeetings = () => {
                       <div
                         className="card mt-4 task-card"
                         style={{
-                          height: '300px' // Adjusted height for meeting cards
+                          height: 'auto',
+                          minHeight: '300px'
                         }}
                       >
                         <div className="card-body d-flex flex-column">
@@ -279,8 +293,20 @@ const AllMeetings = () => {
                                 Date: {new Date(meeting.date).toLocaleDateString()}
                               </span>
                               <span className="text-muted fw-bold">
-                                Time: {meeting.startTime}
+                                Time: {formatTime12Hour(meeting.startTime)}
                               </span>
+                            </div>
+
+                            <div className="mt-3">
+                              <strong>Time Left:</strong>
+                              {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
+                                <span className="badge bg-secondary ms-2">Meeting {meeting.status}</span>
+                              ) : (
+                                <CountdownTimer 
+                                  meetingDate={meeting.date} 
+                                  meetingTime={meeting.startTime} 
+                                />
+                              )}
                             </div>
 
                             <div className="mt-3">

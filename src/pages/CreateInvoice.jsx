@@ -904,7 +904,7 @@ const CreateInvoice = () => {
 
                   <div style={{ clear: "both" }} />
                   <div className="footer-note mt-4">
-                    <h6 className="text-primary mb-1 bg-light">Terms and Conditions</h6>
+                    <h6 className="mb-1" style={{color: "#0a9400", border: "none" }}>Terms and Conditions</h6>
                     <textarea
                       className=""
                       rows="4"

@@ -8,6 +8,7 @@ import FloatingMenu from '../Chats/FloatingMenu'
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { formatTime12Hour } from '../utils/timeUtils';
 
 const CreateMeeting = () => {
   // Get admin user ID from localStorage
@@ -34,8 +35,8 @@ const CreateMeeting = () => {
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [timeSlots] = useState([
-    "9:30am", "10:00am", "10:30am", "11:00am", "11:30am",
-    "12:00pm", "12:30pm", "1:00pm"
+    "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+    "12:00 PM", "12:30 PM", "1:00 PM"
   ]);
   const [selectedTime, setSelectedTime] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +64,11 @@ const CreateMeeting = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleTimeChange = (e) => {
+    const time24 = e.target.value;
+    setSelectedTime(formatTime12Hour(time24));
   };
 
   const handleSubmit = async (e) => {
@@ -140,7 +146,7 @@ const CreateMeeting = () => {
                           {/* <span className="" > Enter Details</span> */}
                           <span className="cursor-pointer" onClick={() => setStep(1)}><i className="bi bi-arrow-left fs-5 me-2" />Enter Details</span>
                           <span>
-                            {selectedDate && `${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${selectedTime}`}
+                            {selectedDate && `${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${formatTime12Hour(selectedTime)}`}
                           </span>
                         </div>
                       </div>
@@ -185,7 +191,7 @@ const CreateMeeting = () => {
                             </h4>
                             <div className="d-flex align-items-center justify-content-center">
                               <div className="text-nowrap text-center me-2">Select Time - </div>
-                              <input type="time" className="form-control form-control-sm w-auto" value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} />
+                              <input type="time" className="form-control form-control-sm w-auto" value={selectedTime} onChange={handleTimeChange} />
                             </div>
                           </div>
 

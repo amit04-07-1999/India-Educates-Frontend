@@ -4,6 +4,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useTheme } from '../context/ThemeContext';
+import { formatTime12Hour } from '../utils/timeUtils';
+import CountdownTimer from './CountdownTimer';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -292,34 +294,55 @@ const Header = () => {
               {/* Notification display */}
               {notifications.length > 0 ? (
                 <div className="notification">
-                  <marquee behavior="scroll" direction="left">
-                    <p>
-                      You have {notifications.length} meeting(s) scheduled: | {" "}
-                      <strong>Today:</strong> 
-                      {notifications.filter(meeting => {
+                  <p>
+                    {(() => {
+                      const todayMeetings = notifications.filter(meeting => {
                         const meetingDate = new Date(meeting.date);
                         return meetingDate.toDateString() === new Date().toDateString();
-                      }).map((meeting, index) => (
-                        <span key={meeting._id}>
-                          <strong>{index + 1}. {meeting.title}</strong> at {meeting.startTime}
-                          {index < notifications.length - 1 ? ' , ' : ''}
-                        </span>
-                      ))}
-                      | {" "}
-                      <strong>Tomorrow:</strong>
-                      {notifications.filter(meeting => {
+                      });
+                      
+                      return todayMeetings.length > 0 ? (
+                        <>
+                          <strong style={{color: "#0a9400"}}>Today :</strong> {" "}
+                          {todayMeetings.map((meeting, index) => (
+                            <span key={meeting._id}>
+                              <strong>{meeting.title}</strong> at <strong>{formatTime12Hour(meeting.startTime)}</strong>
+                              <CountdownTimer 
+                                meetingDate={meeting.date} 
+                                meetingTime={meeting.startTime}
+                              />
+                              {index < todayMeetings.length - 1 ? ' , ' : ''}
+                            </span>
+                          ))}
+                          {" "}
+                        </>
+                      ) : null;
+                    })()}
+                    {(() => {
+                      const tomorrowMeetings = notifications.filter(meeting => {
                         const meetingDate = new Date(meeting.date);
                         const tomorrow = new Date();
                         tomorrow.setDate(tomorrow.getDate() + 1);
                         return meetingDate.toDateString() === tomorrow.toDateString();
-                      }).map((meeting, index) => (
-                        <span key={meeting._id}>
-                          <strong>{index + 1}. {meeting.title}</strong> at {meeting.startTime}
-                          {index < notifications.length - 1 ? ' , ' : ''}
-                        </span>
-                      ))}
-                    </p>
-                  </marquee>
+                      });
+                      
+                      return tomorrowMeetings.length > 0 ? (
+                        <div className="mt-2">
+                          <strong className="text-danger">Tomorrow :</strong> {" "}
+                          {tomorrowMeetings.map((meeting, index) => (
+                            <span key={meeting._id}>
+                              <strong>{meeting.title}</strong> at <strong>{formatTime12Hour(meeting.startTime)}</strong>
+                              <CountdownTimer 
+                                meetingDate={meeting.date} 
+                                meetingTime={meeting.startTime}
+                              />
+                              {index < tomorrowMeetings.length - 1 ? ' , ' : ''}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null;
+                    })()}
+                  </p>
                 </div>
               ) : (
                 <div className="notification">
@@ -473,6 +496,33 @@ const Header = () => {
           .dropdown-menu-right {
             right: 0 !important;
             left: auto !important;
+          }
+        }
+
+        .notification .badge {
+          margin-left: 8px;
+          font-size: 0.85em;
+          padding: 4px 8px;
+          border-radius: 12px;
+          background-color: #f8f9fa;
+          color: #212529;
+          border: 1px solid #dee2e6;
+        }
+
+        .notification span {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin: 0 4px;
+        }
+
+        @media (max-width: 768px) {
+          .notification p {
+            font-size: 0.9em;
+          }
+          
+          .notification .badge {
+            font-size: 0.8em;
           }
         }
       `}</style>

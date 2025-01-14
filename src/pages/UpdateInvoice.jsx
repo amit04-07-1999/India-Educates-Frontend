@@ -301,7 +301,7 @@ const UpdateInvoice = () => {
           <div className="d-flex justify-content-between">
             <div style={{ width: "49%" }}>
               <div className="p-3 rounded" style={{ backgroundColor: "#f3bca7" }}>
-                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "#f3bca7" }}>Billed By</h2>
+                <h2 className="h5  mb-2" style={{ backgroundColor: "#f3bca7", color: "#0a9400" }}>Billed By</h2>
                 <textarea
                   className="fw-semibold"
                   name="billedBy"
@@ -314,7 +314,7 @@ const UpdateInvoice = () => {
             </div>
             <div style={{ width: "49%" }}>
               <div className="p-3 rounded" style={{ backgroundColor: "#f3bca7" }}>
-                <h2 className="h5 text-primary mb-2" style={{ backgroundColor: "#f3bca7" }}>Billed To</h2>
+                <h2 className="h5  mb-2" style={{ backgroundColor: "#f3bca7", color: "#0a9400" }}>Billed To</h2>
                 <textarea
                   className="fw-semibold"
                   name="clientDetail"
@@ -370,14 +370,14 @@ const UpdateInvoice = () => {
                 <>
                   <tbody>
                     <tr>
-                      <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Item</th>
-                      <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Description</th>
-                      <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">Rate</th>
-                      <th style={{ width: 70, background: "#650bfd", color: "white" }} className="border-secondary">Quantity</th>
-                      <th style={{ width: 60, background: "#650bfd", color: "white" }} className="border-secondary">GST %</th>
-                      <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">CGST</th>
-                      <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">SGST</th>
-                      {/* <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">IGST</th> */}
+                      <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Item</th>
+                      <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Description</th>
+                      <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">Rate</th>
+                      <th style={{ width: 70, background: "#fe6730", color: "white" }} className="border-secondary">Quantity</th>
+                      <th style={{ width: 60, background: "#fe6730", color: "white" }} className="border-secondary">GST %</th>
+                      <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">CGST</th>
+                      <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">SGST</th>
+                      {/* <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">IGST</th> */}
                     </tr>
 
                     {updatedInvoice.table.map((item, index) => (
@@ -456,22 +456,22 @@ const UpdateInvoice = () => {
                     </tr>
                     <tr>
                       <td colSpan={4} className="blank border-secondary"></td>
-                      <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}>Total (INR)</td>
-                      <td className="total-value border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}><div id="grand-total" style={{ background: "#650bfd", color: "white", width: "max-content" }}>₹{updatedInvoice.total}</div></td>
+                      <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}>Total (INR)</td>
+                      <td className="total-value border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}><div id="grand-total" style={{ background: "#fe6730", color: "white", width: "max-content" }}>₹{updatedInvoice.total}</div></td>
                     </tr>
                   </tbody>
                 </>
               ) : (
                 <tbody>
                   <tr>
-                    <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Item</th>
-                    <th style={{ background: "#650bfd", color: "white" }} className="border-secondary">Description</th>
-                    <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">Rate</th>
-                    <th style={{ width: 70, background: "#650bfd", color: "white" }} className="border-secondary">Quantity</th>
-                    <th style={{ width: 60, background: "#650bfd", color: "white" }} className="border-secondary">GST %</th>
-                    {/* <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">CGST</th>
-                    <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">SGST</th> */}
-                    <th style={{ width: 100, background: "#650bfd", color: "white" }} className="border-secondary">IGST</th>
+                    <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Item</th>
+                    <th style={{ background: "#fe6730", color: "white" }} className="border-secondary">Description</th>
+                    <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">Rate</th>
+                    <th style={{ width: 70, background: "#fe6730", color: "white" }} className="border-secondary">Quantity</th>
+                    <th style={{ width: 60, background: "#fe6730", color: "white" }} className="border-secondary">GST %</th>
+                    {/* <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">CGST</th>
+                    <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">SGST</th> */}
+                    <th style={{ width: 100, background: "#fe6730", color: "white" }} className="border-secondary">IGST</th>
                   </tr>
 
                   {updatedInvoice.table.map((item, index) => (
@@ -549,10 +549,10 @@ const UpdateInvoice = () => {
                   </tr>
                   <tr>
                     <td colSpan={3} className="blank border-secondary"></td>
-                    <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#650bfd", color: "white" }}>Total (INR)</td>
+                    <td colSpan={2} className="total-line border-secondary fs-6 fw-bold" style={{ background: "#fe6730", color: "white" }}>Total (INR)</td>
                     <td className="total-value border-secondary fs-6 fw-bold"
-                      style={{ background: "#650bfd", color: "white" }}>
-                      <div id="grand-total" style={{ background: "#650bfd", color: "white", width: "max-content" }}>₹{updatedInvoice.total}</div>
+                      style={{ background: "#fe6730", color: "white" }}>
+                      <div id="grand-total" style={{ background: "#fe6730", color: "white", width: "max-content" }}>₹{updatedInvoice.total}</div>
                     </td>
                   </tr>
                 </tbody>
@@ -562,7 +562,7 @@ const UpdateInvoice = () => {
             </table>
             <div style={{ width: "45%", marginTop: "-60px" }}>
               <div className="p-2 rounded" style={{ backgroundColor: "#f3bca7", border: "none" }}>
-                <h2 className="h5 text-primary" style={{ backgroundColor: "#f3bca7", border: "none" }}>Bank Details</h2>
+                <h2 className="h5 " style={{ backgroundColor: "#f3bca7", border: "none", color: "#0a9400" }}>Bank Details</h2>
                 <table className="items" style={{ backgroundColor: "#f3bca7", border: "none", marginTop: "-1px" }}>
                   <tbody>
                     <tr>
@@ -592,8 +592,8 @@ const UpdateInvoice = () => {
 
             <div style={{ clear: "both" }} />
             <div className="footer-note mt-4 ">
-              <h6 className="text-primary mb-1 bg-light">Terms and Conditions</h6>
-              <textarea
+            <h6 className="mb-1" style={{color: "#0a9400", border: "none" }}>Terms and Conditions</h6>
+            <textarea
                 className=""
                 rows="4"
                 name="termsConditions"
