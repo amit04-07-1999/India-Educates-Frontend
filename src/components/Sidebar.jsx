@@ -288,6 +288,28 @@ const Sidebar = () => {
               <a
                 className={`m-link ${textColorClass}`}
                 data-bs-toggle="collapse"
+                data-bs-target="#student-Components"
+                href="#"
+              >
+                <i className={`icofont-users-alt-5 ${textColorClass}`} /> <span>Our Students</span>{" "}
+                <span className={`arrow icofont-dotted-down ms-auto text-end fs-5 ${textColorClass}`} />
+              </a>
+              <ul className="sub-menu collapse" id="student-Components">
+                <li>
+                  <Link className="ms-link" to="/students">
+                    <span>Students</span>
+                  </Link>
+                </li>
+                <li>
+
+                </li>
+              </ul>
+            </li>
+
+            <li className="collapsed">
+              <a
+                className={`m-link ${textColorClass}`}
+                data-bs-toggle="collapse"
                 data-bs-target="#tools-Components"
                 href="#"
               >

@@ -21,6 +21,15 @@ const AllMeetings = () => {
   const [editMeeting, setEditMeeting] = useState(null);
   const navigate = useNavigate();
 
+  const isMeetingPassed = (date, startTime) => {
+    const now = new Date();
+    const [hours, minutes] = startTime.split(':');
+    const meetingDate = new Date(date);
+    meetingDate.setHours(parseInt(hours), parseInt(minutes), 0);
+    
+    return meetingDate < now;
+  };
+
   const getStatusStyle = (status) => {
     switch (status.toLowerCase()) {
       case 'scheduled':
@@ -131,6 +140,28 @@ const AllMeetings = () => {
     fetchMeetings();
   };
 
+  // Add useEffect to periodically check for passed meetings
+  useEffect(() => {
+    const checkPassedMeetings = () => {
+      const updatedMeetings = meetings.map(meeting => {
+        if (isMeetingPassed(meeting.date, meeting.startTime) && 
+            meeting.status !== 'cancelled' && 
+            meeting.status !== 'completed') {
+          return { ...meeting, status: 'cancelled' };
+        }
+        return meeting;
+      });
+
+      if (JSON.stringify(updatedMeetings) !== JSON.stringify(meetings)) {
+        setMeetings(updatedMeetings);
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkPassedMeetings, 60000);
+    return () => clearInterval(interval);
+  }, [meetings]);
+
   return (
     <>
       <div id="mytask-layout">
@@ -202,12 +233,15 @@ const AllMeetings = () => {
                     </thead>
                     <tbody>
                       {currentMeetings.map((meeting, index) => (
-                        <tr key={meeting._id}>
-                          <td className="text-center">{index + 1}</td>
-                          <td className="text-center">{meeting.title}</td>
-                          <td className="text-center">{new Date(meeting.date).toLocaleDateString()}</td>
-                          <td className="text-center">{formatTime12Hour(meeting.startTime)}
-                          {/* <div className="text-center">
+                        <tr 
+                          key={meeting._id} 
+                          className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25' : ''}
+                        >
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{index + 1}</td>
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.title}</td>
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{new Date(meeting.date).toLocaleDateString()}</td>
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{formatTime12Hour(meeting.startTime)}
+                          {/* <div className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>
                             {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
                               <span className="badge bg-secondary">Meeting {meeting.status}</span>
                             ) : (
@@ -218,10 +252,10 @@ const AllMeetings = () => {
                             )}
                           </div> */}
                           </td>
-                          <td className="text-center">{meeting.duration} minutes</td>
-                          <td className="text-center">{meeting.guestName}</td>
-                          <td className="text-center">{meeting.guestEmail}</td>
-                          <td className="text-center">
+                          <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.duration} minutes</td>
+                          <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.guestName}</td>
+                          <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.guestEmail}</td>
+                          <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>
                             <div className="dropdown">
                               <button
                                 className={`btn btn-sm dropdown-toggle ${getStatusStyle(meeting.status)}`}
@@ -242,7 +276,7 @@ const AllMeetings = () => {
                               </ul>
                             </div>
                           </td>
-                          <td className="text-center">
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>
                             <div className="btn-group">
                               <button
                                 type="button"
@@ -272,8 +306,8 @@ const AllMeetings = () => {
                 <div className="row">
                   {currentMeetings.map((meeting, index) => (
                     <div className="col-md-4" key={meeting._id}>
-                      <div
-                        className="card mt-4 task-card"
+                      <div 
+                        className={`card mt-4 task-card ${isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25' : ''}`}
                         style={{
                           height: 'auto',
                           minHeight: '300px'
