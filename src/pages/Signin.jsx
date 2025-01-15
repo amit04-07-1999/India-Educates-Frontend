@@ -121,7 +121,7 @@ const Signin = () => {
                         >
                           <span className="d-flex justify-content-center align-items-center gap-2">
                             <i className="bi bi-person-plus-fill"></i>
-                            Employee Sign In
+                            Agent Sign In
                           </span>
                         </Link>
                         <Link
@@ -130,7 +130,7 @@ const Signin = () => {
                         >
                           <span className="d-flex justify-content-center align-items-center gap-2">
                             <i className="bi bi-person-plus-fill"></i>
-                            Client Sign In
+                            Associate Sign In
                           </span>
                         </Link>
                       </div>

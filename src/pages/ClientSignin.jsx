@@ -104,8 +104,8 @@ const Signin = () => {
                 <div className="w-100 p-3 p-md-5 card border-0 bg-dark text-light" style={{ maxWidth: "32rem" }}>
                   <form onSubmit={handleSubmit} className="row g-1 p-3 p-md-4">
                     <div className="col-12 text-center mb-1 mb-lg-5">
-                      <h1>Client Sign in</h1>
-                      <span>Client Panel</span>
+                      <h1>Associate Sign in</h1>
+                      <span>Associate Panel</span>
                     </div>
                     <div className="col-12 text-center mb-4">
                       <div className="d-flex gap-5">
@@ -124,7 +124,7 @@ const Signin = () => {
                         >
                           <span className="d-flex justify-content-center align-items-center gap-2">
                             <i className="bi bi-person-plus-fill"></i>
-                            Employee Sign In
+                            Agent Sign In
                           </span>
                         </Link>
 

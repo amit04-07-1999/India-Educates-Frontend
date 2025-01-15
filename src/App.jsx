@@ -4,6 +4,8 @@ import EmployeeSinup from './pages/EmployeeSinup'
 import Signin from './pages/Signin'
 import EmployeeSinin from './pages/EmployeeSinin'
 import ClientSignin from './pages/ClientSignin'
+import StudentSinin from './pages/StudentSinin'
+import StudentSinup from './pages/StudentSinup'
 
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
@@ -25,6 +27,7 @@ import UpdateInvoice from './pages/UpdateInvoice'
 import CreateMeeting from './pages/CreateMeeting'
 import AllMeetings from './pages/AllMeetings'
 import Student from './pages/Student'
+import StudentDashboard from './pages/StudentDashboard'
 
 import UrlShortner from './pages/tools/UrlShortner'
 import QrCodeGenerate from './pages/tools/QrCodeGenerate'
@@ -80,6 +83,8 @@ function AppContent() {
           <Route path='/' element={<Signin />}></Route>
           <Route path='/employeesignin' element={<EmployeeSinin />}></Route>
           <Route path='/clientsignin' element={<ClientSignin />}></Route>
+          <Route path='/studentsignin' element={<StudentSinin />}></Route>
+          <Route path='/studentsignup' element={<StudentSinup />}></Route>
 
           <Route path='/project-dashboard' element={<ProjectDashboard />}></Route>
           <Route path='/employee-dashboard' element={<EmployeeDashboard />}></Route>
@@ -100,6 +105,7 @@ function AppContent() {
           <Route path='/create-meeting' element={<CreateMeeting />}></Route>
           <Route path='/all-meetings' element={<AllMeetings />}></Route>
           <Route path='/students' element={<Student />}></Route>
+          <Route path='/student-dashboard' element={<StudentDashboard />}></Route>
 
 
           <Route path='/urlShortner' element={<UrlShortner />}></Route>

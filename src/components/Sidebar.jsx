@@ -291,7 +291,7 @@ const Sidebar = () => {
                 data-bs-target="#student-Components"
                 href="#"
               >
-                <i className={`icofont-users-alt-5 ${textColorClass}`} /> <span>Our Students</span>{" "}
+                <i className={`icofont-graduate-alt ${textColorClass}`} /> <span>Our Students</span>{" "}
                 <span className={`arrow icofont-dotted-down ms-auto text-end fs-5 ${textColorClass}`} />
               </a>
               <ul className="sub-menu collapse" id="student-Components">

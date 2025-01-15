@@ -142,15 +142,16 @@ const Student = () => {
   // Fetch students
   const fetchStudents = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}api/students`);
-      if (response.ok) {
-        const data = await response.json();
-        setStudents(data);
-      }
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/students`);
+      setStudents(response.data);
     } catch (error) {
       console.error('Error fetching students:', error);
     }
   };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
   // Add search handling function
   const handleSearch = useCallback((query) => {

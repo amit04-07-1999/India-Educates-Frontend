@@ -27,11 +27,11 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading when API is hit
+    setIsLoading(true);
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}api/employeelogin`,
+        `${import.meta.env.VITE_BASE_URL}api/studentlogin`,
         formData,
         {
           headers: {
@@ -42,18 +42,14 @@ const Signin = () => {
       const { token, user } = response.data;
 
       if (token) {
-        localStorage.setItem("emp_token", token);
-        localStorage.setItem("emp_user", JSON.stringify(user));
-        localStorage.setItem("emp_user_id", user._id);
+        localStorage.setItem("student_token", token);
+        localStorage.setItem("student_user", JSON.stringify(user));
+        localStorage.setItem("student_user_id", user._id);
         setIsAuthenticated(true);
-        navigate("/employee-dashboard");
+        navigate("/student-dashboard");
       } else {
         setError("Incorrect email or password");
       }
-
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 3000);
 
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -63,13 +59,13 @@ const Signin = () => {
       }
       console.log(error);
     } finally {
-      setIsLoading(false); // End loading after the API call
+      setIsLoading(false);
     }
   };
 
-  // Check authentication status and redirect if already authenticated
+  // This component handles the redirect when authentication state changes
   if (isAuthenticated) {
-    return <Navigate to="/employee-dashboard" />;
+    return <Navigate to="/student-dashboard" />;
   }
 
   return (
@@ -83,21 +79,21 @@ const Signin = () => {
               <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center rounded-lg auth-h100">
                 <div style={{ maxWidth: "25rem" }}>
                   <img
-                    src="../Images/pizeonflylogo.png"
+                    src="../Images/IndiaEducatesLogo.png"
                     className="mb-4"
                     style={{ width: "-webkit-fill-available" }}
                   />
-                  <div className="d-flex justify-content-center ">
+                  {/* <div className="d-flex justify-content-center ">
                     <img
                       src="../Images/crm.jpeg"
                       className="text-center"
                       style={{ height: "30px" }}
                     />
-                  </div>
+                  </div> */}
                   {/* Image block */}
-                  <div>
-                    <img src="../assets/images/login-img.svg" alt="login-img" />
-                  </div>
+                  {/* <div>
+                    <img src="../Images/Indiaeducates.jpg" alt="login-img" />
+                  </div> */}
                 </div>
               </div>
               <div className="col-lg-6 d-flex justify-content-center align-items-center border-0 rounded-lg auth-h100">
@@ -108,31 +104,8 @@ const Signin = () => {
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="row g-1 p-3 p-md-4">
                     <div className="col-12 text-center mb-1 mb-lg-5">
-                      <h1>Agent Sign in</h1>
-                      <span>Agent Panel</span>
-                    </div>
-                    <div className="col-12 text-center mb-4">
-                      <div className="d-flex gap-5">
-                        <Link
-                          className="btn btn-lg btn-outline-secondary btn-block"
-                          to="/"
-                        >
-                          <span className="d-flex justify-content-center align-items-center gap-2">
-                            <i className="bi bi-person-plus-fill"></i>
-                            Admin Sign In
-                          </span>
-                        </Link>
-                        <Link
-                          className="btn btn-lg btn-outline-secondary btn-block"
-                          to="/clientsignin"
-                        >
-                          <span className="d-flex justify-content-center align-items-center gap-2">
-                            <i className="bi bi-person-plus-fill"></i>
-                            Associate Sign In
-                          </span>
-                        </Link>
-                      </div>
-                      <span className="dividers text-muted mt-4">OR</span>
+                      <h1>Student Sign in</h1>
+                      <span>Student Panel</span>
                     </div>
                     <div className="col-12">
                       <div className="mb-2">
@@ -187,14 +160,14 @@ const Signin = () => {
                     </div>
                     {error && <p className="text-danger mt-3 text-center">{error}</p>}
                   </form>
-                  {/* <div className="col-12 text-center mt-4">
+                  <div className="col-12 text-center mt-4">
                     <span className="text-muted">
                       Don't have an account yet?{" "}
-                      <Link to="/employeesignup" className="text-secondary">
+                      <Link to="/studentsignup" className="text-secondary">
                         Sign up here
                       </Link>
                     </span>
-                  </div> */}
+                  </div>
                 </div>
               </div>
             </div>
