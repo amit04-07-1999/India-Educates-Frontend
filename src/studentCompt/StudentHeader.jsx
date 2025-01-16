@@ -48,6 +48,7 @@ const Header = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const dropdownRef = useRef(null);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("student_token");
@@ -249,8 +250,11 @@ const Header = () => {
   };
 
   useEffect(() => {
-    // Check if any required document is missing
-    const checkMissingDocuments = () => {
+    // Check if this is a fresh login or page refresh
+    const isNewSession = sessionStorage.getItem('toastShown') !== 'true';
+    
+    if (isNewSession) {
+      // Check for missing documents
       const user = JSON.parse(localStorage.getItem("student_user"));
       if (user && (!user.aadhaarCard || !user.panCard || !user.resume)) {
         toast.error("Please update your profile with missing documents.", {
@@ -259,18 +263,15 @@ const Header = () => {
             color: "white",
           },
         });
+        
+        // Mark that we've shown the toast in this session
+        sessionStorage.setItem('toastShown', 'true');
       }
-    };
-
-    // Initial check
-    checkMissingDocuments();
-
-    // Set up interval to check every minute
-    // const intervalId = setInterval(checkMissingDocuments, 6000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []);
+    }
+    
+    // No need for interval anymore
+    // Clean up function is also not needed since we're not setting up an interval
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <>
@@ -668,29 +669,30 @@ const Header = () => {
                             />
                           </div>
                         </div>
+                        
                         <div className="row g-3 mb-3">
                           <div className="col">
-                            <label className="form-label">Department</label>
+                            <label className="form-label">Course</label>
                             <input
                               type="text"
                               className="form-control"
                               id="exampleFormControlInput777"
-                              placeholder="Department"
-                              maxLength={14}
-                              name="department"
-                              value={studentData.department}
+                              placeholder="Course"
+                              name="course"
+                              value={studentData.course}
+                              onChange={handleChange}
                             />
                           </div>
                           <div className="col">
-                            <label className="form-label">Designation</label>
+                            <label className="form-label">Batch</label>
                             <input
                               type="text"
                               className="form-control"
                               id="exampleFormControlInput777"
-                              placeholder="Designation"
-                              maxLength={14}
-                              name="designation"
-                              value={studentData.designation}
+                              placeholder="Batch"
+                              name="batch"
+                              value={studentData.batch}
+                              onChange={handleChange}
                             />
                           </div>
                         </div>

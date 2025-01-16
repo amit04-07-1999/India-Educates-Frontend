@@ -28,6 +28,8 @@ import CreateMeeting from './pages/CreateMeeting'
 import AllMeetings from './pages/AllMeetings'
 import Student from './pages/Student'
 import StudentDashboard from './pages/StudentDashboard'
+import StudentForms from './pages/StudentForms'
+import YourForms from './pages/YourForms'
 
 import UrlShortner from './pages/tools/UrlShortner'
 import QrCodeGenerate from './pages/tools/QrCodeGenerate'
@@ -107,7 +109,8 @@ function AppContent() {
           <Route path='/all-meetings' element={<AllMeetings />}></Route>
           <Route path='/students' element={<Student />}></Route>
           <Route path='/student-dashboard' element={<StudentDashboard />}></Route>
-
+          <Route path='/student-forms' element={<StudentForms />}></Route>
+          <Route path='/yours-forms' element={<YourForms />}></Route>
 
           <Route path='/urlShortner' element={<UrlShortner />}></Route>
           <Route path='/qrCodeGenerate' element={<QrCodeGenerate />}></Route>
@@ -147,7 +150,6 @@ function AppContent() {
           <Route path='/client-chat' element={<ClientChat />}></Route>
           <Route path='/chat' element={<Chat />}></Route>
           <Route path="/student-profile" element={<StudentProfile />} />
-
 
 
 

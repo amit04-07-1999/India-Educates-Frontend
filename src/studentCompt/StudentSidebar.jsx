@@ -4,7 +4,7 @@ import CustomColorPicker, { isLightColor } from '../pages/colorpicker/CustomColo
 
 const StudentSidebar = () => {
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [sidebarColor, setSidebarColor] = useState(localStorage.getItem('studentSidebarColor') || '#485563');
+    const [sidebarColor, setSidebarColor] = useState(localStorage.getItem('studentSidebarColor') || '#0a9400');
 
     const handleColorChange = (color) => {
         setSidebarColor(color);
@@ -38,20 +38,25 @@ const StudentSidebar = () => {
                         <li className="collapsed">
                             <a className="m-link" data-bs-toggle="collapse" data-bs-target="#course-Components" href="#">
                                 <i className="icofont-book" />
-                                <span>My Courses</span>
+                                <span>Forms</span>
                                 <span className="arrow icofont-dotted-down ms-auto text-end fs-5" />
                             </a>
                             <ul className="sub-menu collapse" id="course-Components">
                                 <li>
-                                    <Link className="ms-link" to="/student-courses">
-                                        <span>Current Courses</span>
+                                    <Link className="ms-link" to="/student-forms">
+                                        <span>Fill Forms</span>
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link className="ms-link" to="/yours-forms">
+                                        <span>Your's Forms</span>
+                                    </Link>
+                                </li>
+                                {/* <li>
                                     <Link className="ms-link" to="/student-assignments">
                                         <span>Assignments</span>
                                     </Link>
-                                </li>
+                                </li> */}
                             </ul>
                         </li>
 

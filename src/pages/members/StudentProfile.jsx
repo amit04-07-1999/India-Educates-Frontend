@@ -154,6 +154,18 @@ const StudentProfile = () => {
                                                             <i className="bi bi-calendar-date me-2"></i>
                                                             {studentData?.joiningDate && new Date(studentData.joiningDate).toLocaleDateString()}
                                                         </p>
+                                                        {studentData?.course && (
+                                                            <p className="text-muted mb-1 small text-nowrap text-start">
+                                                                <i className="bi bi-book-fill me-2"></i>
+                                                                {studentData.course}
+                                                            </p>
+                                                        )}
+                                                        {studentData?.batch && (
+                                                            <p className="text-muted mb-1 small text-nowrap text-start">
+                                                                <i className="bi bi-people-fill me-2"></i>
+                                                                {studentData.batch}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
