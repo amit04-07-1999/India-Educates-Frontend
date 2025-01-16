@@ -85,19 +85,19 @@ const Signin = () => {
               <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center rounded-lg auth-h100">
                 <div style={{ maxWidth: "25rem" }}>
                   <img
-                    src="../Images/pizeonflylogo.png"
+                    src="../Images/IndiaEducatesLogo.png"
                     className="mb-4"
                     style={{ width: "-webkit-fill-available" }}
                     alt="Logo"
                   />
-                  <div className="d-flex justify-content-center ">
+                  {/* <div className="d-flex justify-content-center ">
                     <img
                       src="../Images/crm.jpeg"
                       className="text-center"
                       style={{ height: "30px" }}
                       alt="CRM"
                     />
-                  </div>
+                  </div> */}
                   <div>
                     <img src="../assets/images/login-img.svg" alt="Login" />
                   </div>

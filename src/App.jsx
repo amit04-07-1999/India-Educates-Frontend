@@ -70,6 +70,7 @@ import { useTheme } from './context/ThemeContext'
 import Chat from './Chats/Chat';
 import EmployeeChat from './Chats/EmployeeChat';
 import ClientChat from './Chats/ClientChat';
+import StudentProfile from './pages/members/StudentProfile';
 
 function AppContent() {
   const { isDarkMode } = useTheme();
@@ -145,6 +146,7 @@ function AppContent() {
           <Route path='/employee-chat' element={<EmployeeChat />}></Route>
           <Route path='/client-chat' element={<ClientChat />}></Route>
           <Route path='/chat' element={<Chat />}></Route>
+          <Route path="/student-profile" element={<StudentProfile />} />
 
 
 

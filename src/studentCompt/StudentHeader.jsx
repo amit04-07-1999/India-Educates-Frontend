@@ -8,30 +8,23 @@ import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [employeeName, setEmployeeName] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState("");
-  const [aadhaarCard, setAadhaarCard] = useState("");
-  const [panCard, setPanCard] = useState("");
-  const [resume, setResume] = useState("");
   const navigation = useNavigate();
 
-  const [employeeData, setEmployeeData] = useState({
-    employeeName: "",
-    employeeCompany: "",
-    employeeImage: null,
-    employeeId: "",
+  const [studentData, setStudentData] = useState({
+    studentName: "",
+    studentImage: null,
+    studentId: "",
     joiningDate: "",
     username: "",
     password: "",
     emailid: "",
     phone: "",
-    department: "",
-    designation: "",
+    course: "",
+    batch: "",
     description: "",
-    aadhaarCard: null,
-    panCard: null,
-    resume: null,
     socialLinks: {
       linkedin: "",
       instagram: "",
@@ -57,20 +50,22 @@ const Header = () => {
   const [pdfUrl, setPdfUrl] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("emp_token");
+    const token = localStorage.getItem("student_token");
     if (!token) {
       navigation("/");
     }
-    const user = JSON.parse(localStorage.getItem("emp_user"));
+    const user = JSON.parse(localStorage.getItem("student_user"));
     if (user) {
-      setEmployeeData({
-        employeeName: user.employeeName || "",
-        employeeId: user.employeeId || "",
+      setStudentData({
+        studentName: user.studentName || "",
+        studentId: user.studentId || "",
         joiningDate: user.joiningDate || "",
         emailid: user.emailid || "",
         password: user.password || "",
         phone: user.phone || "",
         description: user.description || "",
+        course: user.course || "",
+        batch: user.batch || "",
         // Add social links
         socialLinks: {
           linkedin: user.socialLinks?.linkedin || "",
@@ -91,9 +86,9 @@ const Header = () => {
           paymentApp: user.bankDetails?.paymentApp || ""
         }
       });
-      setEmployeeName(user.employeeName);
+      setStudentName(user.studentName);
       setEmail(user.emailid);
-      setImage(user.employeeImage);
+      setImage(user.studentImage);
     }
   }, [navigation]);
 
@@ -121,29 +116,29 @@ const Header = () => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem("emp_token");
-    localStorage.removeItem("emp_user");
-    navigation("/employeesignin");
+    localStorage.removeItem("student_token");
+    localStorage.removeItem("student_user");
+    navigation("/studentsignin");
   };
 
-  //   GET EMPLOYEES
-  const [employees, setEmployees] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/employees`);
-        setEmployees(response.data);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
+  //   GET studentS
+//   const [students, setstudents] = useState([]);
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/students`);
+//         setstudents(response.data);
+//       } catch (error) {
+//         console.error("Error:", error);
+//       }
+//     };
 
-    fetchData();
-  }, []);
+//     fetchData();
+//   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEmployeeData((prevData) => ({
+    setStudentData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -157,47 +152,49 @@ const Header = () => {
     const formData = new FormData();
 
     // Add basic fields
-    formData.append("employeeName", employeeData.employeeName);
-    formData.append("joiningDate", employeeData.joiningDate);
-    formData.append("emailid", employeeData.emailid);
-    formData.append("password", employeeData.password);
-    formData.append("phone", employeeData.phone);
-    formData.append("description", employeeData.description);
+    formData.append("studentName", studentData.studentName);
+    formData.append("joiningDate", studentData.joiningDate);
+    formData.append("emailid", studentData.emailid);
+    formData.append("password", studentData.password);
+    formData.append("phone", studentData.phone);
+    formData.append("description", studentData.description);
+    formData.append("course", studentData.course);
+    formData.append("batch", studentData.batch);
 
     // Add social links
-    Object.entries(employeeData.socialLinks || {}).forEach(([key, value]) => {
+    Object.entries(studentData.socialLinks || {}).forEach(([key, value]) => {
       formData.append(key, value || '');
     });
 
     // Add bank details
-    Object.entries(employeeData.bankDetails || {}).forEach(([key, value]) => {
+    Object.entries(studentData.bankDetails || {}).forEach(([key, value]) => {
       formData.append(key, value || '');
     });
 
     if (selectedFile) {
-      formData.append("employeeImage", selectedFile);
+      formData.append("studentImage", selectedFile);
     }
 
     // Add document files if they exist
-    if (employeeData.aadhaarCard instanceof File) {
-      formData.append("aadhaarCard", employeeData.aadhaarCard);
+    if (studentData.aadhaarCard instanceof File) {
+      formData.append("aadhaarCard", studentData.aadhaarCard);
     }
-    if (employeeData.panCard instanceof File) {
-      formData.append("panCard", employeeData.panCard);
+    if (studentData.panCard instanceof File) {
+      formData.append("panCard", studentData.panCard);
     }
-    if (employeeData.resume instanceof File) {
-      formData.append("resume", employeeData.resume);
+    if (studentData.resume instanceof File) {
+      formData.append("resume", studentData.resume);
     }
-    if (employeeData.qrCode instanceof File) {
-      formData.append("qrCode", employeeData.qrCode);
+    if (studentData.qrCode instanceof File) {
+      formData.append("qrCode", studentData.qrCode);
     }
 
     try {
-      const token = localStorage.getItem("emp_token");
-      const employeeId = JSON.parse(localStorage.getItem("emp_user"))._id;
+      const token = localStorage.getItem("student_token");
+      const studentId = JSON.parse(localStorage.getItem("student_user"))._id;
 
       const response = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}api/employees/${employeeId}`,
+        `${import.meta.env.VITE_BASE_URL}api/students/${studentId}`,
         formData,
         {
           headers: {
@@ -208,11 +205,11 @@ const Header = () => {
       );
 
       if (response.status === 200) {
-        localStorage.setItem("emp_user", JSON.stringify(response.data));
+        localStorage.setItem("student_user", JSON.stringify(response.data));
         toast.success("Profile updated successfully!");
 
         // Close modal
-        const modalElement = document.getElementById("editemp");
+        const modalElement = document.getElementById("editstudent");
         const modal = bootstrap.Modal.getInstance(modalElement);
         modal.hide();
 
@@ -222,7 +219,7 @@ const Header = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error("Error updating employee:", error);
+      console.error("Error updating student:", error);
       toast.error(error.response?.data?.message || "Failed to update profile");
     }
   };
@@ -254,7 +251,7 @@ const Header = () => {
   useEffect(() => {
     // Check if any required document is missing
     const checkMissingDocuments = () => {
-      const user = JSON.parse(localStorage.getItem("emp_user"));
+      const user = JSON.parse(localStorage.getItem("student_user"));
       if (user && (!user.aadhaarCard || !user.panCard || !user.resume)) {
         toast.error("Please update your profile with missing documents.", {
           style: {
@@ -269,7 +266,7 @@ const Header = () => {
     checkMissingDocuments();
 
     // Set up interval to check every minute
-    // const intervalId = setInterval(checkMissingDocuments, 60000);
+    // const intervalId = setInterval(checkMissingDocuments, 6000);
 
     // Clean up interval on component unmount
     return () => clearInterval(intervalId);
@@ -288,9 +285,9 @@ const Header = () => {
               <div className="dropdown user-profile ml-2 ml-sm-3 d-flex align-items-center zindex-popover">
                 <div className="u-info me-2">
                   <p className="mb-0 text-end line-height-sm ">
-                    <span className="font-weight-bold">{employeeName}</span>
+                    <span className="font-weight-bold">{studentName}</span>
                   </p>
-                  <small>Employee Profile</small>
+                  <small>Student Profile</small>
                 </div>
                 <a
                   className="nav-link dropdown-toggle pulse p-0"
@@ -331,7 +328,7 @@ const Header = () => {
                         <div className="flex-fill ms-3">
                           <p className="mb-0">
                             <span className="font-weight-bold">
-                              {employeeName}
+                              {studentName}
                             </span>
                           </p>
                           <p style={{ width: "210px", fontSize: "small" }}>{email}</p>
@@ -398,47 +395,47 @@ const Header = () => {
                       <div>
                         <hr className="dropdown-divider border-dark" />
                       </div>
-                      {/* Add this after the employee info in the dropdown */}
+                      {/* Add this after the student info in the dropdown */}
                       {/* <div className="social-links mt-3">
                         <div className="d-flex flex-wrap gap-2">
-                          {employeeData.socialLinks?.linkedin && (
-                            <a href={employeeData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.linkedin && (
+                            <a href={studentData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-primary">
                               <i className="bi bi-linkedin"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.instagram && (
-                            <a href={employeeData.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.instagram && (
+                            <a href={studentData.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-danger">
                               <i className="bi bi-instagram"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.youtube && (
-                            <a href={employeeData.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.youtube && (
+                            <a href={studentData.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-danger">
                               <i className="bi bi-youtube"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.facebook && (
-                            <a href={employeeData.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.facebook && (
+                            <a href={studentData.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-primary">
                               <i className="bi bi-facebook"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.github && (
-                            <a href={employeeData.socialLinks.github} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.github && (
+                            <a href={studentData.socialLinks.github} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-dark">
                               <i className="bi bi-github"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.website && (
-                            <a href={employeeData.socialLinks.website} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.website && (
+                            <a href={studentData.socialLinks.website} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-info">
                               <i className="bi bi-globe"></i>
                             </a>
                           )}
-                          {employeeData.socialLinks?.other && (
-                            <a href={employeeData.socialLinks.other} target="_blank" rel="noopener noreferrer"
+                          {studentData.socialLinks?.other && (
+                            <a href={studentData.socialLinks.other} target="_blank" rel="noopener noreferrer"
                               className="btn btn-sm btn-outline-secondary">
                               <i className="bi bi-link-45deg"></i>
                             </a>
@@ -452,8 +449,8 @@ const Header = () => {
                         type=""
                         className="list-group-item list-group-item-action border-0"
                         data-bs-toggle="modal"
-                        data-bs-target="#editemp"
-                      // onClick={() => setToEdit(employees._id)}
+                        data-bs-target="#editstudent"
+                      // onClick={() => setToEdit(students._id)}
                       >
                         <i className="icofont-ui-user-group fs-6 me-3" /> Edit
                         Profile
@@ -493,10 +490,10 @@ const Header = () => {
             <div className="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
             </div>
 
-            {/* Edit Employee*/}
+            {/* Edit student*/}
             <div
               className="modal fade"
-              id="editemp"
+              id="editstudent"
               tabIndex={-1}
               aria-hidden="true"
             >
@@ -508,7 +505,7 @@ const Header = () => {
                       id="createprojectlLabel"
                     >
                       {" "}
-                      Edit Employee
+                      Edit student
                     </h5>
                     <button
                       type="button"
@@ -523,15 +520,15 @@ const Header = () => {
                         htmlFor="exampleFormControlInput877"
                         className="form-label"
                       >
-                        Employee Name
+                        Student Name
                       </label>
                       <input
                         type="text"
                         className="form-control"
                         id="exampleFormControlInput877"
                         placeholder="Explain what the Project Name"
-                        name="employeeName"
-                        value={employeeData.employeeName}
+                        name="studentName"
+                        value={studentData.studentName}
                         onChange={handleChange}
                       />
                     </div>
@@ -540,13 +537,13 @@ const Header = () => {
                         htmlFor="formFileMultipleoneone"
                         className="form-label"
                       >
-                        Employee Profile
+                        Student Profile
                       </label>
                       <input
                         className="form-control"
                         type="file"
                         id="formFileMultipleoneone"
-                        name="employeeImage"
+                        name="studentImage"
                         onChange={handleFileChange}
                       />
                     </div>
@@ -558,7 +555,7 @@ const Header = () => {
                         className="form-control"
                         id="aadhaarCardUpload"
                         name="aadhaarCard"
-                        onChange={(e) => setEmployeeData({ ...employeeData, aadhaarCard: e.target.files[0] })}
+                        onChange={(e) => setStudentData({ ...studentData, aadhaarCard: e.target.files[0] })}
                       />
                     </div>
                     <div className="mb-3">
@@ -568,7 +565,7 @@ const Header = () => {
                         className="form-control"
                         id="panCardUpload"
                         name="panCard"
-                        onChange={(e) => setEmployeeData({ ...employeeData, panCard: e.target.files[0] })}
+                        onChange={(e) => setStudentData({ ...studentData, panCard: e.target.files[0] })}
                       />
                     </div>
                     <div className="mb-3">
@@ -578,7 +575,7 @@ const Header = () => {
                         className="form-control"
                         id="resumeUpload"
                         name="resume"
-                        onChange={(e) => setEmployeeData({ ...employeeData, resume: e.target.files[0] })}
+                        onChange={(e) => setStudentData({ ...studentData, resume: e.target.files[0] })}
                       />
                     </div>
                     <div className="deadline-form">
@@ -589,15 +586,15 @@ const Header = () => {
                               htmlFor="exampleFormControlInput1778"
                               className="form-label"
                             >
-                              Employee ID
+                              Student ID
                             </label>
                             <input
                               type="text"
                               className="form-control"
                               id="exampleFormControlInput1778"
                               placeholder="User Name"
-                              name="employeeId"
-                              value={employeeData.employeeId}
+                              name="studentId"
+                              value={studentData.studentId}
                             />
                           </div>
                           <div className="col-sm-6">
@@ -612,7 +609,7 @@ const Header = () => {
                               className="form-control"
                               id="exampleFormControlInput2778"
                               name="joiningDate"
-                              value={employeeData.joiningDate}
+                              value={studentData.joiningDate}
                             />
                           </div>
                         </div>
@@ -630,7 +627,7 @@ const Header = () => {
                               id="exampleFormControlInput477"
                               placeholder="User Name"
                               name="emailid"
-                              value={employeeData.emailid}
+                              value={studentData.emailid}
                               onChange={handleChange}
                             />
                           </div>
@@ -647,7 +644,7 @@ const Header = () => {
                               id="exampleFormControlInput277"
                               placeholder="Password"
                               name="password"
-                              value={employeeData.password}
+                              value={studentData.password}
                               onChange={handleChange} />
                           </div>
                         </div>
@@ -666,7 +663,7 @@ const Header = () => {
                               placeholder="phone"
                               maxLength={14}
                               name="phone"
-                              value={employeeData.phone}
+                              value={studentData.phone}
                               onChange={handleChange}
                             />
                           </div>
@@ -681,7 +678,7 @@ const Header = () => {
                               placeholder="Department"
                               maxLength={14}
                               name="department"
-                              value={employeeData.department}
+                              value={studentData.department}
                             />
                           </div>
                           <div className="col">
@@ -693,7 +690,7 @@ const Header = () => {
                               placeholder="Designation"
                               maxLength={14}
                               name="designation"
-                              value={employeeData.designation}
+                              value={studentData.designation}
                             />
                           </div>
                         </div>
@@ -713,7 +710,7 @@ const Header = () => {
                         placeholder="Add any extra details about the request"
                         defaultValue={""}
                         name="description"
-                        value={employeeData.description}
+                        value={studentData.description}
                         onChange={handleChange}
                       />
                     </div>
@@ -729,11 +726,11 @@ const Header = () => {
                             className="form-control"
                             id="linkedin"
                             name="linkedin"
-                            value={employeeData.socialLinks?.linkedin || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.linkedin || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 linkedin: e.target.value
                               }
                             })}
@@ -750,11 +747,11 @@ const Header = () => {
                             className="form-control"
                             id="instagram"
                             name="instagram"
-                            value={employeeData.socialLinks?.instagram || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.instagram || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 instagram: e.target.value
                               }
                             })}
@@ -771,11 +768,11 @@ const Header = () => {
                             className="form-control"
                             id="youtube"
                             name="youtube"
-                            value={employeeData.socialLinks?.youtube || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.youtube || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 youtube: e.target.value
                               }
                             })}
@@ -792,11 +789,11 @@ const Header = () => {
                             className="form-control"
                             id="facebook"
                             name="facebook"
-                            value={employeeData.socialLinks?.facebook || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.facebook || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 facebook: e.target.value
                               }
                             })}
@@ -813,11 +810,11 @@ const Header = () => {
                             className="form-control"
                             id="github"
                             name="github"
-                            value={employeeData.socialLinks?.github || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.github || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 github: e.target.value
                               }
                             })}
@@ -834,11 +831,11 @@ const Header = () => {
                             className="form-control"
                             id="website"
                             name="website"
-                            value={employeeData.socialLinks?.website || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.website || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 website: e.target.value
                               }
                             })}
@@ -855,11 +852,11 @@ const Header = () => {
                             className="form-control"
                             id="other"
                             name="other"
-                            value={employeeData.socialLinks?.other || ''}
-                            onChange={(e) => setEmployeeData({
-                              ...employeeData,
+                            value={studentData.socialLinks?.other || ''}
+                            onChange={(e) => setStudentData({
+                              ...studentData,
                               socialLinks: {
-                                ...employeeData.socialLinks,
+                                ...studentData.socialLinks,
                                 other: e.target.value
                               }
                             })}
@@ -878,11 +875,11 @@ const Header = () => {
                               className="form-control"
                               id="bankName"
                               name="bankName"
-                              value={employeeData.bankDetails?.bankName || ""}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.bankName || ""}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   bankName: e.target.value
                                 }
                               })}
@@ -897,11 +894,11 @@ const Header = () => {
                               className="form-control"
                               placeholder="Account Holder Name"
                               name="accountHolderName"
-                              value={employeeData.bankDetails?.accountHolderName || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.accountHolderName || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   accountHolderName: e.target.value
                                 }
                               })}
@@ -916,11 +913,11 @@ const Header = () => {
                               className="form-control"
                               placeholder="Account Number"
                               name="accountNumber"
-                              value={employeeData.bankDetails?.accountNumber || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.accountNumber || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   accountNumber: e.target.value
                                 }
                               })}
@@ -935,11 +932,11 @@ const Header = () => {
                               className="form-control"
                               placeholder="IFSC Code"
                               name="ifscCode"
-                              value={employeeData.bankDetails?.ifscCode || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.ifscCode || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   ifscCode: e.target.value
                                 }
                               })}
@@ -952,11 +949,11 @@ const Header = () => {
                             <select
                               className="form-select"
                               name="accountType"
-                              value={employeeData.bankDetails?.accountType || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.accountType || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   accountType: e.target.value
                                 }
                               })}
@@ -976,11 +973,11 @@ const Header = () => {
                               className="form-control"
                               placeholder="UPI ID"
                               name="upiId"
-                              value={employeeData.bankDetails?.upiId || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.upiId || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   upiId: e.target.value
                                 }
                               })}
@@ -994,10 +991,10 @@ const Header = () => {
                               type="file"
                               className="form-control"
                               name="qrCode"
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   qrCode: e.target.value
                                 }
                               })} // Use updateChange for edit form
@@ -1013,11 +1010,11 @@ const Header = () => {
                               className="form-control"
                               placeholder="Payment App (e.g., PayTM, PhonePe)"
                               name="paymentApp"
-                              value={employeeData.bankDetails?.paymentApp || ''}
-                              onChange={(e) => setEmployeeData({
-                                ...employeeData,
+                              value={studentData.bankDetails?.paymentApp || ''}
+                              onChange={(e) => setStudentData({
+                                ...studentData,
                                 bankDetails: {
-                                  ...employeeData.bankDetails,
+                                  ...studentData.bankDetails,
                                   paymentApp: e.target.value
                                 }
                               })}

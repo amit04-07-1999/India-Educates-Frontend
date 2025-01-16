@@ -353,6 +353,11 @@ const Student = () => {
     }
   };
 
+  // Add this function to handle student click
+  const handleStudentClick = (student) => {
+    navigate('/student-profile', { state: { studentId: student._id } });
+  };
+
   return (
     <>
     <div id="mytask-layout">
@@ -665,9 +670,9 @@ const Student = () => {
                                   <div>
                                     <h6
                                       className="mb-0 mt-2 fw-bold d-block fs-6"
-                                      onClick={() => handlestudentClick(student)}
+                                      onClick={() => handleStudentClick(student)}
                                       style={{ cursor: 'pointer' }}
-                                      title="Click to View student Dashboard"
+                                      title="Click to View Student Profile"
                                     >
                                       {student.studentName}
                                     </h6>
@@ -872,10 +877,16 @@ const Student = () => {
                                           )}
                                         />
                                         <div>
-                                          <h6 className="mb-0">{student.studentName}</h6>
-                                          <small>{student.studentId}</small>
-                                        </div>
+                                          <h6  className="mb-0 mt-2 fw-bold d-block fs-6"
+                                          onClick={() => handleStudentClick(student)}
+                                          style={{ cursor: 'pointer' }}
+                                          title="Click to View Student Profile"
+                                        >
+                                          {student.studentName}
+                                        </h6>
+                                        <small>{student.studentId}</small>
                                       </div>
+                                    </div>
                                     </td>
                                     <td>
                                       <div>{student.phone}</div>
