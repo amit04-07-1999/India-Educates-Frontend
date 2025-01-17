@@ -227,15 +227,46 @@ const Student = () => {
     try {
       const formData = new FormData();
       
-      // Append all form fields to FormData
-      Object.keys(studentData).forEach(key => {
-        if (key === 'studentImage' || key === 'resume' || key === 'aadhaarCard' || key === 'qrCode') {
-          if (studentData[key] instanceof File) {
-            formData.append(key, studentData[key]);
-          }
-        } else {
-          formData.append(key, studentData[key]);
-        }
+      // Format the date properly before appending
+      const formattedDate = studentData.joiningDate ? new Date(studentData.joiningDate).toISOString().split('T')[0] : '';
+      
+      // Ensure batch is a string, even if it comes as an array
+      const formattedBatch = typeof studentData.batch === 'string' ? 
+        studentData.batch : 
+        (Array.isArray(studentData.batch) ? studentData.batch.join(', ') : '');
+      
+      // Append basic fields with proper formatting
+      formData.append("studentName", studentData.studentName || '');
+      formData.append("studentId", studentData.studentId || ''); // Add this line
+      formData.append("joiningDate", formattedDate);
+      formData.append("emailid", studentData.emailid || '');
+      formData.append("password", studentData.password || '');
+      formData.append("phone", studentData.phone || '');
+      formData.append("description", studentData.description || '');
+      formData.append("course", studentData.course || '');
+      formData.append("batch", formattedBatch);
+
+      // Handle file fields
+      if (studentData.studentImage instanceof File) {
+        formData.append("studentImage", studentData.studentImage);
+      }
+      if (studentData.resume instanceof File) {
+        formData.append("resume", studentData.resume);
+      }
+      if (studentData.aadhaarCard instanceof File) {
+        formData.append("aadhaarCard", studentData.aadhaarCard);
+      }
+      if (studentData.qrCode instanceof File) {
+        formData.append("qrCode", studentData.qrCode);
+      }
+
+      // Handle social links and bank details
+      Object.entries(studentData.socialLinks || {}).forEach(([key, value]) => {
+        formData.append(key, value || '');
+      });
+
+      Object.entries(studentData.bankDetails || {}).forEach(([key, value]) => {
+        formData.append(key, value || '');
       });
 
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}api/students/${studentData._id}`, {
@@ -247,11 +278,12 @@ const Student = () => {
         toast.success('Student updated successfully');
         fetchStudents(); // Refresh the students list
       } else {
-        toast.error('Failed to update student');
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update student');
       }
     } catch (error) {
       console.error('Error updating student:', error);
-      toast.error('Error updating student');
+      toast.error(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -722,36 +754,6 @@ const Student = () => {
                               <div className="video-setting-icon mt-2 pt-2 border-top">
                                 <p>{student.description}</p>
                               </div>
-                              {/* <div className="mt-2">
-                                <div className="d-flex gap-2 fw-bold">
-                                  Projects :
-                                  <span className="text-primary">
-                                    {studentProjects[student._id] || 0}
-                                  </span>
-                                  <Link
-                                    to="/projects"
-                                    state={{ studentName: student.studentName }}
-                                    className="arrow-link"
-                                    title={`Click to View Projects of ${student.studentName}`}
-                                  >
-                                    <i className="bi bi-arrow-right" />
-                                  </Link>
-                                </div>
-                                <div className="d-flex gap-2 fw-bold">
-                                  Tasks :
-                                  <span className="text-success">
-                                    {studentTasks[student._id] || 0}
-                                  </span>
-                                  <Link
-                                    to="/tasks"
-                                    state={{ studentName: student.studentName }}
-                                    className="arrow-link"
-                                    title={`Click to View Tasks of ${student.studentName}`}
-                                  >
-                                    <i className="bi bi-arrow-right" />
-                                  </Link>
-                                </div>
-                              </div> */}
 
                               {/* bank details */}
                               <button
@@ -877,49 +879,30 @@ const Student = () => {
                                           )}
                                         />
                                         <div>
-                                          <h6  className="mb-0 mt-2 fw-bold d-block fs-6"
-                                          onClick={() => handleStudentClick(student)}
-                                          style={{ cursor: 'pointer' }}
-                                          title="Click to View Student Profile"
-                                        >
-                                          {student.studentName}
-                                        </h6>
-                                        <small>{student.studentId}</small>
+                                          <h6  
+                                            className="mb-0 mt-2 fw-bold d-block fs-6"
+                                            onClick={() => handleStudentClick(student)}
+                                            style={{ cursor: 'pointer' }}
+                                            title="Click to View Student Profile"
+                                          >
+                                            {student.studentName}
+                                          </h6>
+                                          <small>{student.studentId}</small>
+                                        </div>
                                       </div>
-                                    </div>
                                     </td>
                                     <td>
                                       <div>{student.phone}</div>
                                       <small>{student.emailid}</small>
-                                      <div> <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
-                                        {date}/{month}/{year}</div>
+                                      <div>
+                                        <i className="bi bi-calendar-check-fill text-primary fs-6 me-2" />
+                                        {date}/{month}/{year}
+                                      </div>
                                     </td>
                                     <td>
                                       <div>{student.course}</div>
                                       <small>{student.batch}</small>
                                     </td>
-                                    {/* <td>
-                                      <div className="d-flex flex-column gap-1">
-                                        <Link
-                                          to="/projects"
-                                          state={{ studentName: student.studentName }}
-                                          title={`Click to View Projects of ${student.studentName}`}
-                                        >
-                                          <span className="badge bg-primary px-3">
-                                            Projects: {studentProjects[student._id] || 0}
-                                          </span>
-                                        </Link>
-                                        <Link
-                                          to="/tasks"
-                                          state={{ studentName: student.studentName }}
-                                          title={`Click to View Tasks of ${student.studentName}`}
-                                        >
-                                          <span className="badge bg-success px-3">
-                                            Tasks: {studentTasks[student._id] || 0}
-                                          </span>
-                                        </Link>
-                                      </div>
-                                    </td> */}
                                     <td>
                                       <div className="btn-group" role="group">
                                         <button
