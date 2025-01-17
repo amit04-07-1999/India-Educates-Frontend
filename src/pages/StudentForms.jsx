@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StudentHeader from '../studentCompt/StudentHeader';
 import StudentSidebar from '../studentCompt/StudentSidebar';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const StudentForms = () => {
   const [selectedForm, setSelectedForm] = useState(null);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     studentId: '',
     course: '',
@@ -23,6 +24,43 @@ const StudentForms = () => {
   });
 
   const [imagePreview, setImagePreview] = useState(null);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const token = localStorage.getItem('student_token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}api/student/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch student data');
+        }
+
+        const studentData = await response.json();
+        
+        setFormData(prevState => ({
+          ...prevState,
+          fullName: studentData.studentName || '',
+          email: studentData.emailid || '',
+          studentId: studentData.studentId || '',
+          phone: studentData.phone || '',
+          course: studentData.course || ''
+        }));
+      } catch (error) {
+        console.error('Error fetching student data:', error);
+      }
+    };
+
+    fetchStudentData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,10 +81,62 @@ const StudentForms = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your form submission logic here
+    try {
+      const token = localStorage.getItem('student_token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      
+      Object.keys(formData).forEach(key => {
+        if (key !== 'profileImage') {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
+
+      if (formData.profileImage) {
+        formDataToSend.append('profileImage', formData.profileImage);
+      }
+
+      formDataToSend.append('formType', selectedForm);
+
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}api/student/submit-form`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Form submission failed');
+      }
+
+      await response.json();
+      // console.log('Form submitted successfully:', result);
+      toast.success("Form submitted successfully!", {
+        style: {
+          backgroundColor: "#0d6efd",
+          color: "white",
+        },
+      });
+      // Reload the page after 5 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+
+      
+      // alert('Form submitted successfully!');
+      setSelectedForm(null);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(error.message || 'Error submitting form. Please try again.');
+    }
   };
 
   const renderFormFields = () => {
@@ -514,25 +604,15 @@ const StudentForms = () => {
         {/* Personal Information */}
         <h5 className="card-title mb-3">Personal Information</h5>
         <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">First Name</label>
+          <div className="mb-3">
+            <label className="form-label">Full Name</label>
             <input
               type="text"
               className="form-control"
-              name="firstName"
-              value={formData.firstName}
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Last Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
+              readOnly
               required
             />
           </div>
@@ -578,6 +658,7 @@ const StudentForms = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              readOnly
               required
             />
           </div>
@@ -617,6 +698,7 @@ const StudentForms = () => {
               name="studentId"
               value={formData.studentId}
               onChange={handleChange}
+              readOnly
               required
             />
           </div>

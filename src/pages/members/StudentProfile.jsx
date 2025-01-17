@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const StudentProfile = () => {
     const location = useLocation();
     const studentId = location.state?.studentId;
@@ -13,6 +16,143 @@ const StudentProfile = () => {
     const [aadhaarCard, setAadhaarCard] = useState('');
     const [resume, setResume] = useState('');
     const [panCard, setPanCard] = useState('');
+    const [studentForms, setStudentForms] = useState([]);
+
+    const formatDate = (dateString) => {
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+    };
+
+    const getFormTypeName = (formType) => {
+        const formTypes = {
+            form1: 'Admission Form',
+            form2: 'Scholarship Form',
+            form3: 'Leave Application',
+            form4: 'Hostel Application',
+            form5: 'Library Card Request',
+            form6: 'ID Card Request',
+            form7: 'Exam Registration',
+            form8: 'Club Registration',
+            form9: 'Certificate Request'
+        };
+        return formTypes[formType] || formType;
+    };
+
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case 'approved':
+                return 'bg-success';
+            case 'rejected':
+                return 'bg-danger';
+            default:
+                return 'bg-warning';
+        }
+    };
+
+    // Add this function to handle status updates
+    const handleStatusUpdate = async (formId, newStatus) => {
+        try {
+            const response = await axios.patch(
+                `${import.meta.env.VITE_BASE_URL}api/students-forms/${formId}`,
+                { status: newStatus },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (response.data.success) {
+                // Update the local state to reflect the change
+                setStudentForms(prevForms =>
+                    prevForms.map(form =>
+                        form._id === formId ? { ...form, status: newStatus } : form
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Error updating form status:', error);
+        }
+    };
+
+    // Add this function to handle form deletion
+    const handleDeleteForm = async (formId) => {
+        try {
+            const response = await axios.delete(
+                `${import.meta.env.VITE_BASE_URL}api/students-forms/${formId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                // Remove the form from local state
+                setStudentForms(prevForms => prevForms.filter(form => form._id !== formId));
+                // Show success message
+                toast.success("Form deleted successfully!", {
+                    style: {
+                        backgroundColor: "#0d6efd",
+                        color: "white",
+                    },
+                });
+                // Reload the page after 5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
+            } else {
+                alert('Failed to delete form');
+            }
+        } catch (error) {
+            console.error('Error deleting form:', error);
+            alert(error.response?.data?.message || 'Error deleting form');
+        }
+    };
+
+    // Add this new function to handle form updates
+    const handleFormUpdate = async (formId, updatedData) => {
+        try {
+            const response = await axios.put(
+                `${import.meta.env.VITE_BASE_URL}api/students-forms/${formId}`,
+                updatedData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setStudentForms(prevForms =>
+                    prevForms.map(form =>
+                        form._id === formId ? { ...form, ...updatedData } : form
+                    )
+                );
+                toast.success("Form updated successfully!", {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+                // Reload the page after 5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Error updating form:', error);
+            toast.error(error.response?.data?.message || 'Error updating form', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+    };
 
     // Calculate profile completion percentage
     const calculateProfileCompletion = () => {
@@ -92,8 +232,28 @@ const StudentProfile = () => {
             }
         };
 
+        // Add this to fetch student forms
+        const fetchStudentForms = async () => {
+            try {
+                // console.log('Fetching forms for student ID:', studentId); // Debug log
+                const response = await axios.get(
+                    `${import.meta.env.VITE_BASE_URL}api/students-forms/student/${studentId}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
+                // console.log('Forms data:', response.data); // Debug log
+                setStudentForms(response.data.data);
+            } catch (error) {
+                console.error('Error fetching student forms:', error);
+            }
+        };
+
         if (studentId) {
             fetchStudentData();
+            fetchStudentForms();
         }
     }, [studentId]);
 
@@ -142,9 +302,9 @@ const StudentProfile = () => {
                                                     </div>
                                                     <div className="profile-details">
                                                         <h5 className="mb-1 fw-bold text-primary text-start">{studentName}</h5>
-                                                        <p className="text-muted mb-1 small text-nowrap text-start">
+                                                        <p className="text-muted mb-1 small text-nowrap text-start" title={email}>
                                                             <i className="bi bi-envelope-fill me-2"></i>
-                                                            {email}
+                                                            {email.length > 20 ? `${email.substring(0, 15)}...` : email}
                                                         </p>
                                                         <p className="text-muted mb-1 small text-nowrap text-start">
                                                             <i className="bi bi-telephone-fill me-2"></i>
@@ -378,14 +538,102 @@ const StudentProfile = () => {
                                                 role="progressbar"
                                                 style={{
                                                     width: `${calculateProfileCompletion()}%`,
-                                                    backgroundColor: calculateProfileCompletion() < 50 ? '#dc3545' : 
-                                                                   calculateProfileCompletion() < 80 ? '#ffc107' : '#198754'
+                                                    backgroundColor: calculateProfileCompletion() < 50 ? '#dc3545' :
+                                                        calculateProfileCompletion() < 80 ? '#ffc107' : '#198754'
                                                 }}
                                                 aria-valuenow={calculateProfileCompletion()}
                                                 aria-valuemin="0"
                                                 aria-valuemax="100"
                                             ></div>
                                         </div>
+                                    </div>
+
+                                    {/* Add this section in your JSX, after the profile completion section */}
+                                    <div className="student-forms mt-4">
+                                        <h4 className="mb-3">Student Forms</h4>
+                                        {studentForms.length > 0 ? (
+                                            <div className="table-responsive">
+                                                <table className="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>SR.No</th>
+                                                            <th>Form Type</th>
+                                                            <th>Submission Date</th>
+                                                            <th>Status</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {studentForms.map((form, index) => (
+                                                            <tr key={form._id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{getFormTypeName(form.formType)}</td>
+                                                                <td>{formatDate(form.submittedAt)}</td>
+                                                                <td>
+                                                                    <div className="dropdown">
+                                                                        <button
+                                                                            className={`btn btn-sm dropdown-toggle ${getStatusBadgeClass(form.status)}`}
+                                                                            type="button"
+                                                                            data-bs-toggle="dropdown"
+                                                                        >
+                                                                            {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
+                                                                        </button>
+                                                                        <ul className="dropdown-menu">
+                                                                            <li><button
+                                                                                className="dropdown-item"
+                                                                                onClick={() => handleStatusUpdate(form._id, 'pending')}
+                                                                            >Pending</button></li>
+                                                                            <li><button
+                                                                                className="dropdown-item"
+                                                                                onClick={() => handleStatusUpdate(form._id, 'approved')}
+                                                                            >Approve</button></li>
+                                                                            <li><button
+                                                                                className="dropdown-item"
+                                                                                onClick={() => handleStatusUpdate(form._id, 'rejected')}
+                                                                            >Reject</button></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="btn-group">
+                                                                        <button
+                                                                            className="btn  me-2"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target={`#formModal-${form._id}`}
+                                                                        >
+                                                                            <i className="bi bi-eye small"></i>
+                                                                        </button>
+                                                                        <button
+                                                                            className="btn  me-2"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target={`#editFormModal-${form._id}`}
+                                                                        >
+                                                                            <i className="icofont-edit text-success" />
+
+                                                                        </button>
+                                                                        <button
+                                                                            className="btn"
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                const modal = document.getElementById('deleteFormModal');
+                                                                                modal.setAttribute('data-form-id', form._id);
+                                                                                new bootstrap.Modal(modal).show();
+                                                                            }}
+                                                                        >
+                                                                            <i className="icofont-ui-delete text-danger" />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-3">
+                                                <p>No forms submitted yet</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -654,6 +902,813 @@ const StudentProfile = () => {
                     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 }
             `}</style>
+
+            {/* Add this modal markup right before the closing div of your component */}
+            {studentForms.map((form) => (
+                <div
+                    key={form._id}
+                    className="modal fade"
+                    id={`formModal-${form._id}`}
+                    tabIndex="-1"
+                >
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content" style={{ marginLeft: "10rem" }}>
+                            <div className="modal-header">
+                                <h5 className="modal-title">{getFormTypeName(form.formType)} Details</h5>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div className="modal-body">
+                                {/* Profile Image */}
+                                {form.profileImage && (
+                                    <div className="text-center mb-4">
+                                        <img
+                                            src={`${import.meta.env.VITE_BASE_URL}${form.profileImage.replace('uploads\\', '').replace('\\', '/')}`}
+                                            alt="Profile"
+                                            className="rounded-circle"
+                                            style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Personal Information */}
+                                <div className="card mb-3">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">Personal Information</h6>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <p><strong>Full Name:</strong> {form.fullName}</p>
+                                                <p><strong>Date of Birth:</strong> {formatDate(form.dateOfBirth)}</p>
+                                                <p><strong>Gender:</strong> {form.gender}</p>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <p><strong>Blood Group:</strong> {form.bloodGroup}</p>
+                                                <p><strong>Status:</strong> <span className={`badge ${getStatusBadgeClass(form.status)}`}>{form.status}</span></p>
+                                                <p><strong>Submitted:</strong> {formatDate(form.submittedAt)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Contact Information */}
+                                <div className="card mb-3">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">Contact Information</h6>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <p><strong>Email:</strong> {form.email}</p>
+                                                <p><strong>Phone Number:</strong> {form.phoneNumber}</p>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <p><strong>Address:</strong> {form.address}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Academic Information */}
+                                <div className="card mb-3">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">Academic Information</h6>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <p><strong>Student ID:</strong> {form.studentId}</p>
+                                                <p><strong>Course:</strong> {form.course}</p>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <p><strong>Semester:</strong> {form.semester}</p>
+                                                <p><strong>Previous School:</strong> {form.previousSchool}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Emergency Contact */}
+                                <div className="card mb-3">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">Emergency Contact</h6>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <p><strong>Parent/Guardian Name:</strong> {form.parentName}</p>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <p><strong>Parent/Guardian Contact:</strong> {form.parentContact}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Form Specific Fields */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">Form Specific Details</h6>
+                                    </div>
+                                    <div className="card-body">
+                                        {/* Admission Form Fields */}
+                                        {form.formType === 'form1' && (
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <p><strong>Previous GPA:</strong> {form.previousGPA}</p>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <p><strong>Desired Major:</strong> {form.desiredMajor}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Scholarship Form Fields */}
+                                        {form.formType === 'form2' && (
+                                            <div>
+                                                <p><strong>Family Income:</strong> {form.familyIncome}</p>
+                                                <p><strong>Scholarship Type:</strong> {form.scholarshipType}</p>
+                                                <p><strong>Achievements:</strong> {form.achievements}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Leave Application Fields */}
+                                        {form.formType === 'form3' && (
+                                            <div>
+                                                <p><strong>Leave Period:</strong> {formatDate(form.leaveStart)} to {formatDate(form.leaveEnd)}</p>
+                                                <p><strong>Leave Type:</strong> {form.leaveType}</p>
+                                                <p><strong>Reason:</strong> {form.leaveReason}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Hostel Application Fields */}
+                                        {form.formType === 'form4' && (
+                                            <div>
+                                                <p><strong>Room Type:</strong> {form.roomType}</p>
+                                                <p><strong>Duration (months):</strong> {form.duration}</p>
+                                                <p><strong>Meal Plan:</strong> {form.mealPlan}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Library Card Fields */}
+                                        {form.formType === 'form5' && (
+                                            <div>
+                                                <p><strong>Card Type:</strong> {form.cardType}</p>
+                                                <p><strong>Department:</strong> {form.department}</p>
+                                            </div>
+                                        )}
+
+                                        {/* ID Card Fields */}
+                                        {form.formType === 'form6' && (
+                                            <div>
+                                                <p><strong>ID Type:</strong> {form.idType}</p>
+                                                {form.replacementReason && (
+                                                    <p><strong>Replacement Reason:</strong> {form.replacementReason}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Exam Registration Fields */}
+                                        {form.formType === 'form7' && (
+                                            <div>
+                                                <p><strong>Exam Type:</strong> {form.examType}</p>
+                                                <p><strong>Number of Subjects:</strong> {form.subjectCount}</p>
+                                                {form.specialRequirements && (
+                                                    <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Club Registration Fields */}
+                                        {form.formType === 'form8' && (
+                                            <div>
+                                                <p><strong>Club Name:</strong> {form.clubName}</p>
+                                                <p><strong>Position:</strong> {form.position}</p>
+                                                {form.experience && (
+                                                    <p><strong>Previous Experience:</strong> {form.experience}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Certificate Request Fields */}
+                                        {form.formType === 'form9' && (
+                                            <div>
+                                                <p><strong>Certificate Type:</strong> {form.certificateType}</p>
+                                                <p><strong>Number of Copies:</strong> {form.copies}</p>
+                                                <p><strong>Purpose:</strong> {form.purpose}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+
+            {/* Add this edit modal markup for each form */}
+            {studentForms.map((form) => (
+                <div
+                    key={`edit-${form._id}`}
+                    className="modal fade"
+                    id={`editFormModal-${form._id}`}
+                    tabIndex="-1"
+                >
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content" style={{ marginLeft: "10rem" }}>
+                            <div className="modal-header">
+                                <h5 className="modal-title">Edit {getFormTypeName(form.formType)}</h5>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div className="modal-body">
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.target);
+                                    const updatedData = Object.fromEntries(formData.entries());
+                                    handleFormUpdate(form._id, updatedData);
+                                    bootstrap.Modal.getInstance(document.getElementById(`editFormModal-${form._id}`)).hide();
+                                }}>
+                                    {/* Personal Information */}
+                                    <div className="card mb-3">
+                                        <div className="card-header">
+                                            <h6 className="mb-0">Personal Information</h6>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Full Name</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="fullName"
+                                                        defaultValue={form.fullName}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Date of Birth</label>
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        name="dateOfBirth"
+                                                        defaultValue={form.dateOfBirth?.split('T')[0]}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Gender</label>
+                                                    <select
+                                                        className="form-select"
+                                                        name="gender"
+                                                        defaultValue={form.gender}
+                                                        required
+                                                    >
+                                                        <option value="">Select Gender</option>
+                                                        <option value="male">Male</option>
+                                                        <option value="female">Female</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Blood Group</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="bloodGroup"
+                                                        defaultValue={form.bloodGroup}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Contact Information */}
+                                    <div className="card mb-3">
+                                        <div className="card-header">
+                                            <h6 className="mb-0">Contact Information</h6>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Email</label>
+                                                    <input
+                                                        type="email"
+                                                        className="form-control"
+                                                        name="email"
+                                                        defaultValue={form.email}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Phone Number</label>
+                                                    <input
+                                                        type="tel"
+                                                        className="form-control"
+                                                        name="phoneNumber"
+                                                        defaultValue={form.phoneNumber}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-12">
+                                                    <label className="form-label">Address</label>
+                                                    <textarea
+                                                        className="form-control"
+                                                        name="address"
+                                                        defaultValue={form.address}
+                                                        required
+                                                    ></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Academic Information */}
+                                    <div className="card mb-3">
+                                        <div className="card-header">
+                                            <h6 className="mb-0">Academic Information</h6>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Student ID</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="studentId"
+                                                        defaultValue={form.studentId}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Previous School</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="previousSchool"
+                                                        defaultValue={form.previousSchool}
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Course</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="course"
+                                                        defaultValue={form.course}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Semester</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="semester"
+                                                        defaultValue={form.semester}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Emergency Contact */}
+                                    <div className="card mb-3">
+                                        <div className="card-header">
+                                            <h6 className="mb-0">Emergency Contact</h6>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Parent/Guardian Name</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="parentName"
+                                                        defaultValue={form.parentName}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Parent/Guardian Contact</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="parentContact"
+                                                        defaultValue={form.parentContact}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Form Specific Fields */}
+                                    {/* Admission Form Fields */}
+                                    {form.formType === 'form1' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Admission Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Previous GPA</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="form-control"
+                                                            name="previousGPA"
+                                                            defaultValue={form.previousGPA}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Desired Major</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="desiredMajor"
+                                                            defaultValue={form.desiredMajor}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Scholarship Form Fields */}
+                                    {form.formType === 'form2' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Scholarship Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Family Income</label>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            name="familyIncome"
+                                                            defaultValue={form.familyIncome}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Scholarship Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="scholarshipType"
+                                                            defaultValue={form.scholarshipType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Achievements</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="achievements"
+                                                            defaultValue={form.achievements}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Leave Application Fields */}
+                                    {form.formType === 'form3' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Leave Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Leave Start Date</label>
+                                                        <input
+                                                            type="date"
+                                                            className="form-control"
+                                                            name="leaveStart"
+                                                            defaultValue={form.leaveStart?.split('T')[0]}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Leave End Date</label>
+                                                        <input
+                                                            type="date"
+                                                            className="form-control"
+                                                            name="leaveEnd"
+                                                            defaultValue={form.leaveEnd?.split('T')[0]}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Leave Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="leaveType"
+                                                            defaultValue={form.leaveType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Leave Reason</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="leaveReason"
+                                                            defaultValue={form.leaveReason}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Hostel Application Fields */}
+                                    {form.formType === 'form4' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Hostel Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Room Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="roomType"
+                                                            defaultValue={form.roomType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Duration (months)</label>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            name="duration"
+                                                            defaultValue={form.duration}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Meal Plan</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="mealPlan"
+                                                            defaultValue={form.mealPlan}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Library Card Fields */}
+                                    {form.formType === 'form5' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Library Card Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Card Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="cardType"
+                                                            defaultValue={form.cardType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Department</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="department"
+                                                            defaultValue={form.department}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ID Card Fields */}
+                                    {form.formType === 'form6' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">ID Card Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">ID Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="idType"
+                                                            defaultValue={form.idType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Replacement Reason</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="replacementReason"
+                                                            defaultValue={form.replacementReason}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Exam Registration Fields */}
+                                    {form.formType === 'form7' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Exam Registration Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Exam Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="examType"
+                                                            defaultValue={form.examType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Number of Subjects</label>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            name="subjectCount"
+                                                            defaultValue={form.subjectCount}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Special Requirements</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="specialRequirements"
+                                                            defaultValue={form.specialRequirements}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Club Registration Fields */}
+                                    {form.formType === 'form8' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Club Registration Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Club Name</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="clubName"
+                                                            defaultValue={form.clubName}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Position</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="position"
+                                                            defaultValue={form.position}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Experience</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="experience"
+                                                            defaultValue={form.experience}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Certificate Request Fields */}
+                                    {form.formType === 'form9' && (
+                                        <div className="card mb-3">
+                                            <div className="card-header">
+                                                <h6 className="mb-0">Certificate Request Details</h6>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="row g-3">
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Certificate Type</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="certificateType"
+                                                            defaultValue={form.certificateType}
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className="form-label">Number of Copies</label>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            name="copies"
+                                                            defaultValue={form.copies}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label className="form-label">Purpose</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="purpose"
+                                                            defaultValue={form.purpose}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="text-end mt-3">
+                                        <button type="button" className="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+
+            {/* Add this modal markup for form deletion confirmation */}
+            <div
+                className="modal fade"
+                id="deleteFormModal"
+                tabIndex={-1}
+                aria-hidden="true"
+            >
+                <div className="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title fw-bold">
+                                Delete Form Permanently?
+                            </h5>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            />
+                        </div>
+                        <div className="modal-body justify-content-center flex-column d-flex">
+                            <i className="bi bi-trash text-danger display-2 text-center mt-2"></i>
+                            <p className="mt-4 fs-5 text-center">
+                                You can only delete this form Permanently
+                            </p>
+                        </div>
+                        <div className="modal-footer">
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={() => {
+                                    const modal = document.getElementById('deleteFormModal');
+                                    const bsModal = bootstrap.Modal.getInstance(modal);
+                                    bsModal.hide();
+                                    handleDeleteForm(modal.getAttribute('data-form-id'));
+                                }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
