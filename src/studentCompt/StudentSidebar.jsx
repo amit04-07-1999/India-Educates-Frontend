@@ -60,7 +60,7 @@ const StudentSidebar = () => {
                             </ul>
                         </li>
 
-                        <li className="collapsed">
+                        {/* <li className="collapsed">
                             <a className="m-link" data-bs-toggle="collapse" data-bs-target="#tools-Components" href="#">
                                 <i className="icofont-tools-alt-2" />
                                 <span>Tools</span>
@@ -78,7 +78,7 @@ const StudentSidebar = () => {
                                     </Link>
                                 </li>
                             </ul>
-                        </li>
+                        </li> */}
                     </ul>
 
                     <div className="d-flex justify-content-end mb-2">

@@ -45,7 +45,7 @@ const StudentForms = () => {
         }
 
         const studentData = await response.json();
-        
+
         setFormData(prevState => ({
           ...prevState,
           fullName: studentData.studentName || '',
@@ -91,7 +91,7 @@ const StudentForms = () => {
       }
 
       const formDataToSend = new FormData();
-      
+
       Object.keys(formData).forEach(key => {
         if (key !== 'profileImage') {
           formDataToSend.append(key, formData[key]);
@@ -130,7 +130,7 @@ const StudentForms = () => {
         window.location.reload();
       }, 5000);
 
-      
+
       // alert('Form submitted successfully!');
       setSelectedForm(null);
     } catch (error) {
@@ -140,7 +140,7 @@ const StudentForms = () => {
   };
 
   const renderFormFields = () => {
-    switch(selectedForm) {
+    switch (selectedForm) {
       case 'form1':
         return (
           // Admission Form
@@ -456,12 +456,12 @@ const StudentForms = () => {
   const renderFormContent = () => {
     if (!selectedForm) {
       return (
-        <div className="text-center py-5">
-          <h2>Please select a form type</h2>
-          <div className="mt-4 row g-3">
+        <div className="py-5">
+
+          <div className="row g-3">
             <div className="col-md-4">
-              <button 
-                className="btn btn-primary w-100 p-3" 
+              <button
+                className="btn btn-primary w-100 p-3"
                 onClick={() => setSelectedForm('form1')}
               >
                 <i className="bi bi-person-plus-fill mb-2 fs-3"></i>
@@ -469,8 +469,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-success w-100 p-3" 
+              <button
+                className="btn btn-success w-100 p-3"
                 onClick={() => setSelectedForm('form2')}
               >
                 <i className="bi bi-award-fill mb-2 fs-3"></i>
@@ -478,8 +478,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-info w-100 p-3" 
+              <button
+                className="btn btn-info w-100 p-3"
                 onClick={() => setSelectedForm('form3')}
               >
                 <i className="bi bi-calendar-check mb-2 fs-3"></i>
@@ -487,8 +487,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-warning w-100 p-3" 
+              <button
+                className="btn btn-warning w-100 p-3"
                 onClick={() => setSelectedForm('form4')}
               >
                 <i className="bi bi-building mb-2 fs-3"></i>
@@ -496,8 +496,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-danger w-100 p-3" 
+              <button
+                className="btn btn-danger w-100 p-3"
                 onClick={() => setSelectedForm('form5')}
               >
                 <i className="bi bi-book-fill mb-2 fs-3"></i>
@@ -505,8 +505,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-secondary w-100 p-3" 
+              <button
+                className="btn btn-secondary w-100 p-3"
                 onClick={() => setSelectedForm('form6')}
               >
                 <i className="bi bi-card-text mb-2 fs-3"></i>
@@ -514,8 +514,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-dark w-100 p-3" 
+              <button
+                className="btn btn-dark w-100 p-3"
                 onClick={() => setSelectedForm('form7')}
               >
                 <i className="bi bi-mortarboard-fill mb-2 fs-3"></i>
@@ -523,8 +523,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-primary w-100 p-3" 
+              <button
+                className="btn btn-primary w-100 p-3"
                 onClick={() => setSelectedForm('form8')}
               >
                 <i className="bi bi-people-fill mb-2 fs-3"></i>
@@ -532,8 +532,8 @@ const StudentForms = () => {
               </button>
             </div>
             <div className="col-md-4">
-              <button 
-                className="btn btn-success w-100 p-3" 
+              <button
+                className="btn btn-success w-100 p-3"
                 onClick={() => setSelectedForm('form9')}
               >
                 <i className="bi bi-journal-text mb-2 fs-3"></i>
@@ -548,9 +548,9 @@ const StudentForms = () => {
     return (
       <form onSubmit={handleSubmit}>
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3>
-            <button 
-              type="button" 
+          <h2 className="fw-bold">
+            <button
+              type="button"
               className="btn btn-link text-decoration-none p-0 me-2"
               onClick={() => setSelectedForm(null)}
             >
@@ -565,9 +565,9 @@ const StudentForms = () => {
             {selectedForm === 'form7' && 'Exam Registration Form'}
             {selectedForm === 'form8' && 'Club Registration Form'}
             {selectedForm === 'form9' && 'Certificate Request Form'}
-          </h3>
-          <button 
-            type="button" 
+          </h2>
+          <button
+            type="button"
             className="btn btn-secondary"
             onClick={() => setSelectedForm(null)}
           >
@@ -602,7 +602,7 @@ const StudentForms = () => {
 
         {/* Rest of the form fields remain the same */}
         {/* Personal Information */}
-        <h5 className="card-title mb-3">Personal Information</h5>
+        <h5 className="card-title mb-3 fw-bold">Personal Information</h5>
         <div className="row">
           <div className="mb-3">
             <label className="form-label">Full Name</label>
@@ -648,7 +648,7 @@ const StudentForms = () => {
         </div>
 
         {/* Contact Information */}
-        <h5 className="card-title mb-3 mt-4">Contact Information</h5>
+        <h5 className="card-title mb-3 mt-4 fw-bold">Contact Information</h5>
         <div className="row">
           <div className="col-md-6 mb-3">
             <label className="form-label">Email</label>
@@ -688,7 +688,7 @@ const StudentForms = () => {
         </div>
 
         {/* Academic Information */}
-        <h5 className="card-title mb-3 mt-4">Academic Information</h5>
+        <h5 className="card-title mb-3 mt-4 fw-bold">Academic Information</h5>
         <div className="row">
           <div className="col-md-6 mb-3">
             <label className="form-label">Student ID</label>
@@ -755,7 +755,7 @@ const StudentForms = () => {
         </div>
 
         {/* Emergency Contact */}
-        <h5 className="card-title mb-3 mt-4">Emergency Contact</h5>
+        <h5 className="card-title mb-3 mt-4 fw-bold">Emergency Contact</h5>
         <div className="row">
           <div className="col-md-6 mb-3">
             <label className="form-label">Parent/Guardian Name</label>
@@ -805,6 +805,9 @@ const StudentForms = () => {
         </div>
 
         {/* Form Specific Fields */}
+        {selectedForm && (
+          <h5 className="card-title mb-3 mt-4 fw-bold">Form Specific Details</h5>
+        )}
         {renderFormFields()}
 
         <div className="mt-4">
@@ -823,10 +826,11 @@ const StudentForms = () => {
         <div className="body d-flex py-lg-3 py-md-2">
           <div className="container-xxl">
             <div className="col-12">
-              <div className="card">
-                <div className="card-body">
-                  {renderFormContent()}
-                </div>
+              <h2 className="fw-bold">Please select a form type</h2>
+              <div className="">
+
+                {renderFormContent()}
+
               </div>
             </div>
           </div>

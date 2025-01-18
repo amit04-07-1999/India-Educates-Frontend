@@ -28,6 +28,7 @@
     "fabric": "^6.5.0",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "konva": "^9.3.16",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",

@@ -18,6 +18,7 @@ const StudentProfile = () => {
     const [resume, setResume] = useState('');
     const [panCard, setPanCard] = useState('');
     const [studentForms, setStudentForms] = useState([]);
+    const [loadingStatus, setLoadingStatus] = useState(null);
 
     const formatDate = (dateString) => {
         const options = { day: '2-digit', month: 'long', year: 'numeric' };
@@ -50,9 +51,9 @@ const StudentProfile = () => {
         }
     };
 
-    // Update this function to handle status updates
     const handleStatusUpdate = async (formId, newStatus) => {
         try {
+            setLoadingStatus(formId);
             const response = await axios.patch(
                 `${import.meta.env.VITE_BASE_URL}api/students-forms/${formId}`,
                 { status: newStatus },
@@ -63,14 +64,12 @@ const StudentProfile = () => {
                 }
             );
             if (response.data.success) {
-                // Update the local state to reflect the change
                 setStudentForms(prevForms =>
                     prevForms.map(form =>
                         form._id === formId ? { ...form, status: newStatus } : form
                     )
                 );
-                
-                // Show success toast
+
                 toast.success(`Form status updated to ${newStatus}`, {
                     style: {
                         backgroundColor: "#0d6efd",
@@ -83,14 +82,12 @@ const StudentProfile = () => {
                     pauseOnHover: true,
                     draggable: true,
                 });
-                // Reload the page after 5 seconds
                 setTimeout(() => {
                     window.location.reload();
                 }, 5000);
             }
         } catch (error) {
             console.error('Error updating form status:', error);
-            // Show error toast
             toast.error(error.response?.data?.message || 'Error updating form status', {
                 position: "top-right",
                 autoClose: 3000,
@@ -99,10 +96,11 @@ const StudentProfile = () => {
                 pauseOnHover: true,
                 draggable: true,
             });
+        } finally {
+            setLoadingStatus(null);
         }
     };
 
-    // Add this function to handle form deletion
     const handleDeleteForm = async (formId) => {
         try {
             const response = await axios.delete(
@@ -115,16 +113,13 @@ const StudentProfile = () => {
             );
 
             if (response.data.success) {
-                // Remove the form from local state
                 setStudentForms(prevForms => prevForms.filter(form => form._id !== formId));
-                // Show success message
                 toast.success("Form deleted successfully!", {
                     style: {
                         backgroundColor: "#0d6efd",
                         color: "white",
                     },
                 });
-                // Reload the page after 5 seconds
                 setTimeout(() => {
                     window.location.reload();
                 }, 5000);
@@ -137,7 +132,6 @@ const StudentProfile = () => {
         }
     };
 
-    // Add this new function to handle form updates
     const handleFormUpdate = async (formId, updatedData) => {
         try {
             const response = await axios.put(
@@ -164,7 +158,6 @@ const StudentProfile = () => {
                     pauseOnHover: true,
                     draggable: true,
                 });
-                // Reload the page after 5 seconds
                 setTimeout(() => {
                     window.location.reload();
                 }, 5000);
@@ -182,7 +175,6 @@ const StudentProfile = () => {
         }
     };
 
-    // Calculate profile completion percentage
     const calculateProfileCompletion = () => {
         if (!studentData) return 0;
 
@@ -207,13 +199,11 @@ const StudentProfile = () => {
         return Math.round((filledFields / fields.length) * 100);
     };
 
-    // Handle file click for viewing documents
     const handleFileClick = (e, url, type) => {
         e.preventDefault();
         if (type === 'pdf') {
             window.open(url, '_blank');
         } else {
-            // Handle image view
             const image = new Image();
             image.src = url;
             const w = window.open('');
@@ -221,7 +211,6 @@ const StudentProfile = () => {
         }
     };
 
-    // Handle file download
     const handleDownload = async (fileUrl, fileName) => {
         try {
             const response = await axios.get(fileUrl, {
@@ -260,10 +249,8 @@ const StudentProfile = () => {
             }
         };
 
-        // Add this to fetch student forms
         const fetchStudentForms = async () => {
             try {
-                // console.log('Fetching forms for student ID:', studentId); // Debug log
                 const response = await axios.get(
                     `${import.meta.env.VITE_BASE_URL}api/students-forms/student/${studentId}`,
                     {
@@ -272,7 +259,6 @@ const StudentProfile = () => {
                         }
                     }
                 );
-                // console.log('Forms data:', response.data); // Debug log
                 setStudentForms(response.data.data);
             } catch (error) {
                 console.error('Error fetching student forms:', error);
@@ -293,9 +279,8 @@ const StudentProfile = () => {
                 <div className="body d-flex py-lg-3 py-md-2">
                     <div className="container-xxl">
                         <div className="col-12">
-                            <div className="card mb-3">
-                                <div className="card-body text-center p-5">
-                                    {/* Logo Section */}
+                            <div className=" mb-3">
+                                <div className="text-center">
                                     <div style={{ height: "10rem" }}>
                                         <img
                                             src="Images/IndiaEducatesLogo.png"
@@ -309,10 +294,8 @@ const StudentProfile = () => {
                                         />
                                     </div>
 
-                                    {/* Profile Section */}
                                     <div className="profile-section p-3 bg-white rounded-4 shadow-sm mb-4">
                                         <div className="row g-3 align-items-center">
-                                            {/* Profile Image & Details Column */}
                                             <div className="col-md-4">
                                                 <div className="d-flex align-items-center">
                                                     <div className="profile-image-container me-3">
@@ -358,10 +341,8 @@ const StudentProfile = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Documents and Social Links */}
                                             <div className="col-md-8">
                                                 <div className="row">
-                                                    {/* Documents Column */}
                                                     <div className="col-md-6">
                                                         <div className="documents-section p-2 rounded-3">
                                                             <h6 className="mb-2 fw-bold">
@@ -369,7 +350,6 @@ const StudentProfile = () => {
                                                                 Documents
                                                             </h6>
                                                             <div className="row g-2 mt-2">
-                                                                {/* Resume */}
                                                                 <div className="col-12">
                                                                     <div className="document-card p-2 border rounded-3 bg-white">
                                                                         <div className="d-flex align-items-center justify-content-between">
@@ -401,7 +381,6 @@ const StudentProfile = () => {
                                                                     </div>
                                                                 </div>
 
-                                                                {/* Aadhaar Card */}
                                                                 <div className="col-12">
                                                                     <div className="document-card p-2 border rounded-3 bg-white">
                                                                         <div className="d-flex align-items-center justify-content-between">
@@ -433,7 +412,6 @@ const StudentProfile = () => {
                                                                     </div>
                                                                 </div>
 
-                                                                {/* PAN Card */}
                                                                 <div className="col-12">
                                                                     <div className="document-card p-2 border rounded-3 bg-white">
                                                                         <div className="d-flex align-items-center justify-content-between">
@@ -467,7 +445,6 @@ const StudentProfile = () => {
                                                             </div>
                                                         </div>
 
-                                                        {/* Bank Details Button */}
                                                         <button
                                                             className="btn btn-sm btn-outline-primary mt-3 w-100"
                                                             data-bs-toggle="modal"
@@ -478,7 +455,6 @@ const StudentProfile = () => {
                                                         </button>
                                                     </div>
 
-                                                    {/* Social Links Column */}
                                                     <div className="col-md-6">
                                                         <div className="social-links-section p-2">
                                                             <h6 className="mb-2 fw-bold">
@@ -554,7 +530,6 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Profile Completion */}
                                     <div className="profile-completion mt-3 px-3">
                                         <div className="d-flex justify-content-between align-items-center mb-2">
                                             <h6 className="mb-0">Profile Completion</h6>
@@ -576,63 +551,143 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Add this section in your JSX, after the profile completion section */}
                                     <div className="student-forms mt-4">
                                         <h4 className="mb-3">{studentName}'s Forms</h4>
                                         {studentForms.length > 0 ? (
                                             <div className="">
-                                                <table className="table table-hover">
-                                                    <thead>
+                                                <table className="table table-hover align-middle">
+                                                    <thead className="table-light">
                                                         <tr>
-                                                            <th>SR.No</th>
+                                                            <th className="text-center" style={{ width: '60px' }}>Sr.No.</th>
                                                             <th>Form Type</th>
-                                                            <th>Submission Date</th>
-                                                            <th>Status</th>
-                                                            <th>Actions</th>
+                                                            <th className="text-start">Student Details</th>
+                                                            <th className="text-start">Academic Info</th>
+                                                            <th className="text-start">Submission Date</th>
+                                                            <th className="text-center">Status</th>
+                                                            <th className="text-center">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {studentForms.map((form, index) => (
-                                                            <tr key={form._id}>
-                                                                <td>{index + 1}</td>
-                                                                <td>{getFormTypeName(form.formType)}</td>
-                                                                <td>{formatDate(form.submittedAt)}</td>
+                                                            <tr key={form._id} className="align-middle">
+                                                                <td className="text-center fw-bold">{index + 1}.</td>
                                                                 <td>
+                                                                    <div className="d-flex align-items-center">
+
+                                                                        <span className="fw-bold">{getFormTypeName(form.formType)}</span>
+
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="d-flex flex-column text-start">
+                                                                        <span className="fw-bold">{form.fullName}</span>
+                                                                        <small className="text-muted">
+                                                                            <i className="bi bi-envelope-fill me-1"></i>
+                                                                            {form.email}
+                                                                        </small>
+                                                                        {form.phoneNumber && (
+                                                                            <small className="text-muted">
+                                                                                <i className="bi bi-telephone-fill me-1"></i>
+                                                                                {form.phoneNumber}
+                                                                            </small>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="d-flex flex-column text-start">
+                                                                        <small>
+                                                                            <i className="bi bi-card-text me-1"></i>
+                                                                            ID: {form.studentId}
+                                                                        </small>
+                                                                        {form.course && (
+                                                                            <small>
+                                                                                <i className="bi bi-book me-1"></i>
+                                                                                {form.course}
+                                                                            </small>
+                                                                        )}
+                                                                        {form.semester && (
+                                                                            <small>
+                                                                                <i className="bi bi-calendar3 me-1"></i>
+                                                                                Sem: {form.semester}
+                                                                            </small>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="d-flex flex-column text-start">
+                                                                        <small className="fw-bold">
+                                                                            <i className="bi bi-clock-history me-1"></i>
+                                                                            {formatDate(form.submittedAt)}
+                                                                        </small>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="text-center">
                                                                     <div className="dropdown">
                                                                         <button
                                                                             className={`btn btn-sm dropdown-toggle text-white ${getStatusBadgeClass(form.status)}`}
                                                                             type="button"
                                                                             data-bs-toggle="dropdown"
+                                                                            disabled={loadingStatus === form._id}
                                                                         >
-                                                                            {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
+                                                                            {loadingStatus === form._id ? (
+                                                                                <>
+                                                                                    <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                                                    Updating...
+                                                                                </>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <i className={`bi ${form.status === 'approved' ? 'bi-check-circle' :
+                                                                                        form.status === 'rejected' ? 'bi-x-circle' :
+                                                                                            'bi-hourglass-split'} me-1`}></i>
+                                                                                    {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
+                                                                                </>
+                                                                            )}
                                                                         </button>
                                                                         <ul className="dropdown-menu">
-                                                                            <li><button
-                                                                                className="dropdown-item"
-                                                                                onClick={() => handleStatusUpdate(form._id, 'pending')}
-                                                                            >Pending</button></li>
-                                                                            <li><button
-                                                                                className="dropdown-item"
-                                                                                onClick={() => handleStatusUpdate(form._id, 'approved')}
-                                                                            >Approve</button></li>
-                                                                            <li><button
-                                                                                className="dropdown-item"
-                                                                                onClick={() => handleStatusUpdate(form._id, 'rejected')}
-                                                                            >Reject</button></li>
+                                                                            <li>
+                                                                                <button
+                                                                                    className="dropdown-item"
+                                                                                    onClick={() => handleStatusUpdate(form._id, 'pending')}
+                                                                                    disabled={loadingStatus === form._id}
+                                                                                >
+                                                                                    <i className="bi bi-hourglass-split me-2"></i>
+                                                                                    Pending
+                                                                                </button>
+                                                                            </li>
+                                                                            <li>
+                                                                                <button
+                                                                                    className="dropdown-item"
+                                                                                    onClick={() => handleStatusUpdate(form._id, 'approved')}
+                                                                                    disabled={loadingStatus === form._id}
+                                                                                >
+                                                                                    <i className="bi bi-check-circle me-2"></i>
+                                                                                    Approve
+                                                                                </button>
+                                                                            </li>
+                                                                            <li>
+                                                                                <button
+                                                                                    className="dropdown-item"
+                                                                                    onClick={() => handleStatusUpdate(form._id, 'rejected')}
+                                                                                    disabled={loadingStatus === form._id}
+                                                                                >
+                                                                                    <i className="bi bi-x-circle me-2"></i>
+                                                                                    Reject
+                                                                                </button>
+                                                                            </li>
                                                                         </ul>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div className="btn-group">
                                                                         <button
-                                                                            className="btn  me-2"
+                                                                            className="btn btn-sm btn-outline-primary"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target={`#formModal-${form._id}`}
                                                                         >
                                                                             <i className="bi bi-eye small"></i>
                                                                         </button>
                                                                         <button
-                                                                            className="btn  me-2"
+                                                                            className="btn btn-sm btn-outline-success"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target={`#editFormModal-${form._id}`}
                                                                         >
@@ -640,7 +695,7 @@ const StudentProfile = () => {
 
                                                                         </button>
                                                                         <button
-                                                                            className="btn"
+                                                                            className="btn btn-sm btn-outline-danger"
                                                                             onClick={(e) => {
                                                                                 e.preventDefault();
                                                                                 const modal = document.getElementById('deleteFormModal');
@@ -658,8 +713,9 @@ const StudentProfile = () => {
                                                 </table>
                                             </div>
                                         ) : (
-                                            <div className="text-center py-3">
-                                                <p>No forms submitted yet</p>
+                                            <div className="text-center py-5">
+                                                <i className="bi bi-folder-x display-1 text-muted"></i>
+                                                <p className="mt-3 text-muted">No forms submitted yet</p>
                                             </div>
                                         )}
                                     </div>
@@ -670,7 +726,6 @@ const StudentProfile = () => {
                 </div>
             </div>
 
-            {/* Bank Details Modal */}
             <div className="modal fade" id="bankDetailsModal" tabIndex="-1" aria-hidden="true" style={{ zIndex: 9998 }}>
                 <div className="modal-dialog modal-dialog-centered modal-lg">
                     <div className="modal-content" style={{ marginLeft: "100px" }}>
@@ -687,7 +742,6 @@ const StudentProfile = () => {
                         </div>
                         <div className="modal-body">
                             <div className="row g-3">
-                                {/* Bank Name */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-bank fs-4 text-primary me-2"></i>
@@ -709,7 +763,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Account Holder */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-person fs-4 text-success me-2"></i>
@@ -731,7 +784,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Account Number */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-credit-card fs-4 text-info me-2"></i>
@@ -753,7 +805,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* IFSC Code */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-building fs-4 text-warning me-2"></i>
@@ -775,7 +826,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Account Type */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-wallet2 fs-4 text-danger me-2"></i>
@@ -797,7 +847,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* UPI ID */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-phone fs-4 text-success me-2"></i>
@@ -819,7 +868,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Payment App */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-app fs-4 text-primary me-2"></i>
@@ -841,7 +889,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* QR Code */}
                                 <div className="col-md-6">
                                     <div className="bank-info-item p-3 border rounded h-100">
                                         <i className="bi bi-qr-code fs-4 text-dark me-2"></i>
@@ -884,7 +931,6 @@ const StudentProfile = () => {
                 </div>
             </div>
 
-            {/* Styles */}
             <style jsx>{`
                 .profile-section {
                     transition: all 0.3s ease;
@@ -929,9 +975,44 @@ const StudentProfile = () => {
                     transform: translateY(-2px);
                     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 }
+
+                .table-hover tbody tr:hover {
+                    background-color: rgba(0, 123, 255, 0.05) !important;
+                }
+
+                .table-responsive {
+                    border-radius: 0.5rem;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                }
+
+                .table > :not(caption) > * > * {
+                    padding: 1rem 0.75rem;
+                }
+
+                .btn-group .btn {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.875rem;
+                }
+
+                .dropdown-menu {
+                    min-width: 8rem;
+                    padding: 0.5rem 0;
+                }
+
+                .dropdown-item {
+                    padding: 0.5rem 1rem;
+                    font-size: 0.875rem;
+                }
+
+                .dropdown-item:hover {
+                    background-color: rgba(0, 123, 255, 0.1);
+                }
+
+                .bi {
+                    font-size: 0.9rem;
+                }
             `}</style>
 
-            {/* Add this modal markup right before the closing div of your component */}
             {studentForms.map((form) => (
                 <div
                     key={form._id}
@@ -946,7 +1027,6 @@ const StudentProfile = () => {
                                 <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div className="modal-body">
-                                {/* Profile Image */}
                                 {form.profileImage && (
                                     <div className="text-center mb-4">
                                         <img
@@ -958,7 +1038,6 @@ const StudentProfile = () => {
                                     </div>
                                 )}
 
-                                {/* Personal Information */}
                                 <div className="card mb-3">
                                     <div className="card-header">
                                         <h6 className="mb-0">Personal Information</h6>
@@ -979,7 +1058,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Contact Information */}
                                 <div className="card mb-3">
                                     <div className="card-header">
                                         <h6 className="mb-0">Contact Information</h6>
@@ -997,7 +1075,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Academic Information */}
                                 <div className="card mb-3">
                                     <div className="card-header">
                                         <h6 className="mb-0">Academic Information</h6>
@@ -1016,7 +1093,6 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Emergency Contact */}
                                 <div className="card mb-3">
                                     <div className="card-header">
                                         <h6 className="mb-0">Emergency Contact</h6>
@@ -1033,13 +1109,11 @@ const StudentProfile = () => {
                                     </div>
                                 </div>
 
-                                {/* Form Specific Fields */}
                                 <div className="card">
                                     <div className="card-header">
                                         <h6 className="mb-0">Form Specific Details</h6>
                                     </div>
                                     <div className="card-body">
-                                        {/* Admission Form Fields */}
                                         {form.formType === 'form1' && (
                                             <div className="row">
                                                 <div className="col-md-6">
@@ -1051,7 +1125,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Scholarship Form Fields */}
                                         {form.formType === 'form2' && (
                                             <div>
                                                 <p><strong>Family Income:</strong> {form.familyIncome}</p>
@@ -1060,7 +1133,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Leave Application Fields */}
                                         {form.formType === 'form3' && (
                                             <div>
                                                 <p><strong>Leave Period:</strong> {formatDate(form.leaveStart)} to {formatDate(form.leaveEnd)}</p>
@@ -1069,7 +1141,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Hostel Application Fields */}
                                         {form.formType === 'form4' && (
                                             <div>
                                                 <p><strong>Room Type:</strong> {form.roomType}</p>
@@ -1078,7 +1149,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Library Card Fields */}
                                         {form.formType === 'form5' && (
                                             <div>
                                                 <p><strong>Card Type:</strong> {form.cardType}</p>
@@ -1086,7 +1156,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* ID Card Fields */}
                                         {form.formType === 'form6' && (
                                             <div>
                                                 <p><strong>ID Type:</strong> {form.idType}</p>
@@ -1096,7 +1165,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Exam Registration Fields */}
                                         {form.formType === 'form7' && (
                                             <div>
                                                 <p><strong>Exam Type:</strong> {form.examType}</p>
@@ -1107,7 +1175,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Club Registration Fields */}
                                         {form.formType === 'form8' && (
                                             <div>
                                                 <p><strong>Club Name:</strong> {form.clubName}</p>
@@ -1118,7 +1185,6 @@ const StudentProfile = () => {
                                             </div>
                                         )}
 
-                                        {/* Certificate Request Fields */}
                                         {form.formType === 'form9' && (
                                             <div>
                                                 <p><strong>Certificate Type:</strong> {form.certificateType}</p>
@@ -1137,7 +1203,6 @@ const StudentProfile = () => {
                 </div>
             ))}
 
-            {/* Add this edit modal markup for each form */}
             {studentForms.map((form) => (
                 <div
                     key={`edit-${form._id}`}
@@ -1159,7 +1224,6 @@ const StudentProfile = () => {
                                     handleFormUpdate(form._id, updatedData);
                                     bootstrap.Modal.getInstance(document.getElementById(`editFormModal-${form._id}`)).hide();
                                 }}>
-                                    {/* Personal Information */}
                                     <div className="card mb-3">
                                         <div className="card-header">
                                             <h6 className="mb-0">Personal Information</h6>
@@ -1213,7 +1277,6 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Contact Information */}
                                     <div className="card mb-3">
                                         <div className="card-header">
                                             <h6 className="mb-0">Contact Information</h6>
@@ -1253,7 +1316,6 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Academic Information */}
                                     <div className="card mb-3">
                                         <div className="card-header">
                                             <h6 className="mb-0">Academic Information</h6>
@@ -1303,7 +1365,6 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Emergency Contact */}
                                     <div className="card mb-3">
                                         <div className="card-header">
                                             <h6 className="mb-0">Emergency Contact</h6>
@@ -1334,8 +1395,6 @@ const StudentProfile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Form Specific Fields */}
-                                    {/* Admission Form Fields */}
                                     {form.formType === 'form1' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1367,7 +1426,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Scholarship Form Fields */}
                                     {form.formType === 'form2' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1406,7 +1464,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Leave Application Fields */}
                                     {form.formType === 'form3' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1454,7 +1511,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Hostel Application Fields */}
                                     {form.formType === 'form4' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1494,7 +1550,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Library Card Fields */}
                                     {form.formType === 'form5' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1525,7 +1580,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* ID Card Fields */}
                                     {form.formType === 'form6' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1555,7 +1609,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Exam Registration Fields */}
                                     {form.formType === 'form7' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1594,7 +1647,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Club Registration Fields */}
                                     {form.formType === 'form8' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1633,7 +1685,6 @@ const StudentProfile = () => {
                                         </div>
                                     )}
 
-                                    {/* Certificate Request Fields */}
                                     {form.formType === 'form9' && (
                                         <div className="card mb-3">
                                             <div className="card-header">
@@ -1687,7 +1738,6 @@ const StudentProfile = () => {
                 </div>
             ))}
 
-            {/* Add this modal markup for form deletion confirmation */}
             <div
                 className="modal fade"
                 id="deleteFormModal"
