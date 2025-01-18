@@ -71,29 +71,24 @@ const Signin = () => {
   return (
     <div id="mytask-layout">
       {/* main body area */}
-      <div className="main p-2 py-3 p-xl-5 ">
+      <div className="main p-2 py-3 p-xl-5 " style={{
+        backgroundImage: `url('../Images/Indiaeducates.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundColor: '#ffffff63',
+        backgroundBlendMode: 'overlay'
+      }}>
         {/* Body: Body */}
         <div className="body d-flex p-0 p-xl-5">
           <div className="container-xxl">
             <div className="row g-0">
               <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center rounded-lg auth-h100">
-                <div style={{ maxWidth: "25rem" }}>
+                <div style={{ maxWidth: "50rem" }}>
                   <img
                     src="../Images/IndiaEducatesLogo.png"
                     className="mb-4"
                     style={{ width: "-webkit-fill-available" }}
                   />
-                  {/* <div className="d-flex justify-content-center ">
-                    <img
-                      src="../Images/crm.jpeg"
-                      className="text-center"
-                      style={{ height: "30px" }}
-                    />
-                  </div> */}
-                  {/* Image block */}
-                  {/* <div>
-                    <img src="../Images/Indiaeducates.jpg" alt="login-img" />
-                  </div> */}
                 </div>
               </div>
               <div className="col-lg-6 d-flex justify-content-center align-items-center border-0 rounded-lg auth-h100">
@@ -104,7 +99,7 @@ const Signin = () => {
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="row g-1 p-3 p-md-4">
                     <div className="col-12 text-center mb-1 mb-lg-5">
-                      <h1>Student Sign in</h1>
+                      <h1>Student SignIn</h1>
                       <span>Student Panel</span>
                     </div>
                     <div className="col-12">
@@ -151,7 +146,8 @@ const Signin = () => {
                     <div className="col-12 text-center mt-4">
                       <button
                         type="submit"
-                        className="btn btn-lg btn-block btn-light lift text-uppercase"
+                        className="btn btn-lg text-uppercase"
+                        style={{ backgroundColor: '#0A9400', color: 'white' }}
                         disabled={isLoading} // Disable button while loading
                         alt="signin"
                       >
@@ -161,11 +157,12 @@ const Signin = () => {
                     {error && <p className="text-danger mt-3 text-center">{error}</p>}
                   </form>
                   <div className="col-12 text-center mt-4">
-                    <span className="text-muted">
-                      Don't have an account yet?{" "}
-                      <Link to="/studentsignup" className="text-secondary">
-                        Sign up here
+                    <span className="d-flex justify-content-center align-items-center">
+                      <span className="me-2">Don't have an account yet?</span>
+                      <Link to="/studentsignup" className="me-2" style={{ color: '#005bab', textDecoration: 'underline' }}>
+                        SIGN UP 
                       </Link>
+                      here
                     </span>
                   </div>
                 </div>

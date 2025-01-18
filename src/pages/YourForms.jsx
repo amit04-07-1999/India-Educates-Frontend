@@ -577,6 +577,7 @@ const YourForms = () => {
                                         className="btn btn-sm btn-outline-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target={`#formModal-${form._id}`}
+                                        title="View Form"
                                       >
                                         <i className="bi bi-eye me-1"></i>
 
@@ -584,6 +585,7 @@ const YourForms = () => {
                                       <button
                                         className="btn btn-sm btn-outline-success"
                                         onClick={() => downloadFormAsPDF(form)}
+                                        title="Download Form"
                                       >
                                         <i className="bi bi-download me-1"></i>
 
@@ -676,6 +678,7 @@ const YourForms = () => {
                                       className="btn btn-primary"
                                       data-bs-toggle="modal"
                                       data-bs-target={`#formModal-${form._id}`}
+                                      title="View Form"
                                     >
                                       <i className="bi bi-eye me-1"></i>
                                     </button>
@@ -683,6 +686,7 @@ const YourForms = () => {
                                       className="btn"
                                       style={{ backgroundColor: '#0A9400', color: 'white' }}
                                       onClick={() => downloadFormAsPDF(form)}
+                                      title="Download Form"
                                     >
                                       <i className="bi bi-download me-1"></i>
                                     </button>

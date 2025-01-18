@@ -75,29 +75,24 @@ const Signin = () => {
   return (
     <div id="mytask-layout">
       {/* main body area */}
-      <div className="main p-2 py-3 p-xl-5 ">
+      <div className="main p-2 py-3 p-xl-5 " style={{
+        backgroundImage: `url('../Images/Indiaeducates.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundColor: '#ffffff63',
+        backgroundBlendMode: 'overlay'
+      }}>
         {/* Body: Body */}
         <div className="body d-flex p-0 p-xl-5">
           <div className="container-xxl">
             <div className="row g-0">
               <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center rounded-lg auth-h100">
-                <div style={{ maxWidth: "25rem" }}>
+                <div style={{ maxWidth: "50rem" }}>
                   <img
-                    src="../Images/pizeonflylogo.png"
+                    src="../Images/IndiaEducatesLogo.png"
                     className="mb-4"
                     style={{ width: "-webkit-fill-available" }}
                   />
-                  <div className="d-flex justify-content-center ">
-                    <img
-                      src="../Images/crm.jpeg"
-                      className="text-center"
-                      style={{ height: "30px" }}
-                    />
-                  </div>
-                  {/* Image block */}
-                  <div>
-                    <img src="../assets/images/login-img.svg" alt="login-img" />
-                  </div>
                 </div>
               </div>
               <div className="col-lg-6 d-flex justify-content-center align-items-center border-0 rounded-lg auth-h100">
@@ -114,7 +109,20 @@ const Signin = () => {
                     <div className="col-12 text-center mb-4">
                       <div className="d-flex gap-5">
                         <Link
-                          className="btn btn-lg btn-outline-secondary btn-block"
+                          className="btn"
+                          style={{ 
+                            border: '1px solid #005bab', 
+                            color: '#005bab',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#005bab';
+                            e.currentTarget.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#005bab';
+                          }}
                           to="/"
                         >
                           <span className="d-flex justify-content-center align-items-center gap-2">
@@ -123,7 +131,21 @@ const Signin = () => {
                           </span>
                         </Link>
                         <Link
-                          className="btn btn-lg btn-outline-secondary btn-block"
+                          className="btn"
+                          
+                          style={{ 
+                            border: '1px solid #005bab', 
+                            color: '#005bab',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#005bab';
+                            e.currentTarget.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#005bab';
+                          }}
                           to="/clientsignin"
                         >
                           <span className="d-flex justify-content-center align-items-center gap-2">
@@ -178,7 +200,8 @@ const Signin = () => {
                     <div className="col-12 text-center mt-4">
                       <button
                         type="submit"
-                        className="btn btn-lg btn-block btn-light lift text-uppercase"
+                        className="btn btn-lg text-uppercase"
+                        style={{ backgroundColor: '#0A9400', color: 'white' }}
                         disabled={isLoading} // Disable button while loading
                         alt="signin"
                       >

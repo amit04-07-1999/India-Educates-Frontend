@@ -27,7 +27,7 @@ const Signup = () => {
         formDataToSend.append(key, formData[key]);
       }
       formDataToSend.append('studentImage', 'default.jpeg');
-      
+
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}api/students`,
         formDataToSend,
@@ -53,30 +53,23 @@ const Signup = () => {
   return (
     <>
       <div id="mytask-layout">
-        <div className="main p-2 py-3 p-xl-5">
+        <div className="main p-2 py-3 p-xl-5" style={{ 
+          backgroundImage: `url('../Images/Indiaeducates.jpg')`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundColor: '#ffffff63',
+          backgroundBlendMode: 'overlay'
+        }}>
           <div className="body d-flex p-0 p-xl-5">
             <div className="container-xxl">
               <div className="row g-0">
                 <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center rounded-lg auth-h100">
-                  <div style={{ maxWidth: "25rem" }}>
+                  <div style={{ maxWidth: "50rem" }}>
                     <img
-                      src="../Images/techninza-logo.png"
+                      src="../Images/IndiaEducatesLogo.png"
                       className="mb-4"
                       style={{ width: "-webkit-fill-available" }}
                     />
-                    <div className="d-flex justify-content-center ">
-                      <img
-                        src="../Images/crm.jpeg"
-                        className="text-center"
-                        style={{ height: "30px" }}
-                      />
-                    </div>
-                    <div>
-                      <img
-                        src="../assets/images/login-img.svg"
-                        alt="login-img"
-                      />
-                    </div>
                   </div>
                 </div>
                 <div className="col-lg-6 d-flex justify-content-center align-items-center border-0 rounded-lg auth-h100">
@@ -86,23 +79,9 @@ const Signup = () => {
                   >
                     <form className="row g-1 p-3 p-md-4">
                       <div className="col-12 text-center mb-1 mb-lg-5">
-                        <h1>Student Sign up</h1>
+                        <h1>Student SignUp</h1>
                         <span>Create your account as a student</span>
                       </div>
-                      <div className="col-12 text-center">
-                        <Link
-                          className="btn btn-lg btn-outline-secondary btn-block"
-                          style={{ marginTop: "-40px" }}
-                          to="/signup"
-                        >
-                          <span className="d-flex justify-content-center align-items-center gap-2">
-                            <i className="bi bi-person-plus-fill"></i>
-                            Sign up as a Admin
-                          </span>
-                        </Link>
-                        <span className="dividers text-muted mt-2">OR</span>
-                      </div>
-
                       <div className="col-12">
                         <div className="mb-2">
                           <label className="form-label">Full name</label>
@@ -163,18 +142,20 @@ const Signup = () => {
                       <div className="col-12 text-center mt-4">
                         <button
                           type="submit"
-                          className="btn btn-lg btn-block btn-light lift text-uppercase"
+                          className="btn btn-lg text-uppercase"
+                          style={{ backgroundColor: '#0A9400', color: 'white' }}
                           onClick={handleSubmit}
                         >
                           SIGN UP
                         </button>
                       </div>
                       <div className="col-12 text-center mt-4">
-                        <span className="text-muted">
-                          Already have an account?{" "}
-                          <Link to="/studentsignin" title="Sign in" className="text-secondary">
-                            Sign in here
+                        <span className="d-flex justify-content-center align-items-center">
+                          <span className="me-2">Already have an account?</span>
+                          <Link to="/studentsignin" className="me-2" style={{ color: '#005bab', textDecoration: 'underline' }}>
+                            SIGN IN 
                           </Link>
+                          here
                         </span>
                       </div>
                     </form>
