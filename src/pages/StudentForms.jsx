@@ -457,87 +457,96 @@ const StudentForms = () => {
     if (!selectedForm) {
       return (
         <div className="py-5">
-
           <div className="row g-3">
+            <h2 className="fw-bold">Please select a form type</h2>
             <div className="col-md-4">
               <button
-                className="btn btn-primary w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form1')}
+                style={{ backgroundColor: '#bbdefb', color: '#0d47a1', border: 'none' }}
               >
                 <i className="bi bi-person-plus-fill mb-2 fs-3"></i>
-                <div>Admission Form</div>
+                <h5 className="fw-bold">Admission Form</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-success w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form2')}
+                style={{ backgroundColor: '#c8e6c9', color: '#1b5e20', border: 'none' }}
               >
                 <i className="bi bi-award-fill mb-2 fs-3"></i>
-                <div>Scholarship Form</div>
+                <h5 className="fw-bold">Scholarship Form</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-info w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form3')}
+                style={{ backgroundColor: '#b2ebf2', color: '#00838f', border: 'none' }}
               >
                 <i className="bi bi-calendar-check mb-2 fs-3"></i>
-                <div>Leave Application</div>
+                <h5 className="fw-bold">Leave Application</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-warning w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form4')}
+                style={{ backgroundColor: '#ffe0b2', color: '#e65100', border: 'none' }}
               >
                 <i className="bi bi-building mb-2 fs-3"></i>
-                <div>Hostel Application</div>
+                <h5 className="fw-bold">Hostel Application</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-danger w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form5')}
+                style={{ backgroundColor: '#ffcdd2', color: '#b71c1c', border: 'none' }}
               >
                 <i className="bi bi-book-fill mb-2 fs-3"></i>
-                <div>Library Card Request</div>
+                <h5 className="fw-bold">Library Card Request</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-secondary w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form6')}
+                style={{ backgroundColor: '#cfd8dc', color: '#263238', border: 'none' }}
               >
                 <i className="bi bi-card-text mb-2 fs-3"></i>
-                <div>ID Card Request</div>
+                <h5 className="fw-bold">ID Card Request</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-dark w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form7')}
+                style={{ backgroundColor: '#e0e0e0', color: '#212121', border: 'none' }}
               >
                 <i className="bi bi-mortarboard-fill mb-2 fs-3"></i>
-                <div>Exam Registration</div>
+                <h5 className="fw-bold">Exam Registration</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-primary w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form8')}
+                style={{ backgroundColor: '#e1bee7', color: '#4a148c', border: 'none' }}
               >
                 <i className="bi bi-people-fill mb-2 fs-3"></i>
-                <div>Club Registration</div>
+                <h5 className="fw-bold">Club Registration</h5>
               </button>
             </div>
             <div className="col-md-4">
               <button
-                className="btn btn-success w-100 p-3"
+                className="btn w-100 p-3"
                 onClick={() => setSelectedForm('form9')}
+                style={{ backgroundColor: '#c5cae9', color: '#1a237e', border: 'none' }}
               >
                 <i className="bi bi-journal-text mb-2 fs-3"></i>
-                <div>Certificate Request</div>
+                <h5 className="fw-bold">Certificate Request</h5>
               </button>
             </div>
           </div>
@@ -826,7 +835,7 @@ const StudentForms = () => {
         <div className="body d-flex py-lg-3 py-md-2">
           <div className="container-xxl">
             <div className="col-12">
-              <h2 className="fw-bold">Please select a form type</h2>
+
               <div className="">
 
                 {renderFormContent()}
