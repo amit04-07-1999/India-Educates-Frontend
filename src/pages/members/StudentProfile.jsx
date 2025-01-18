@@ -5,6 +5,7 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const StudentProfile = () => {
     const location = useLocation();
@@ -49,7 +50,7 @@ const StudentProfile = () => {
         }
     };
 
-    // Add this function to handle status updates
+    // Update this function to handle status updates
     const handleStatusUpdate = async (formId, newStatus) => {
         try {
             const response = await axios.patch(
@@ -68,9 +69,36 @@ const StudentProfile = () => {
                         form._id === formId ? { ...form, status: newStatus } : form
                     )
                 );
+                
+                // Show success toast
+                toast.success(`Form status updated to ${newStatus}`, {
+                    style: {
+                        backgroundColor: "#0d6efd",
+                        color: "white",
+                    },
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+                // Reload the page after 5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
             }
         } catch (error) {
             console.error('Error updating form status:', error);
+            // Show error toast
+            toast.error(error.response?.data?.message || 'Error updating form status', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
@@ -550,9 +578,9 @@ const StudentProfile = () => {
 
                                     {/* Add this section in your JSX, after the profile completion section */}
                                     <div className="student-forms mt-4">
-                                        <h4 className="mb-3">Student Forms</h4>
+                                        <h4 className="mb-3">{studentName}'s Forms</h4>
                                         {studentForms.length > 0 ? (
-                                            <div className="table-responsive">
+                                            <div className="">
                                                 <table className="table table-hover">
                                                     <thead>
                                                         <tr>
@@ -572,7 +600,7 @@ const StudentProfile = () => {
                                                                 <td>
                                                                     <div className="dropdown">
                                                                         <button
-                                                                            className={`btn btn-sm dropdown-toggle ${getStatusBadgeClass(form.status)}`}
+                                                                            className={`btn btn-sm dropdown-toggle text-white ${getStatusBadgeClass(form.status)}`}
                                                                             type="button"
                                                                             data-bs-toggle="dropdown"
                                                                         >
@@ -1709,6 +1737,7 @@ const StudentProfile = () => {
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

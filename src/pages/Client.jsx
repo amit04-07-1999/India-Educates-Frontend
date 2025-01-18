@@ -106,7 +106,7 @@ const Client = () => {
                 window.location.reload();
             }, 5000);
 
-            console.log('Client created:', response.data);
+            // console.log('Client created:', response.data);
             // Optionally, you can redirect the user to another page or show a success message
         } catch (error) {
             console.error('Error creating client:', error);
@@ -120,7 +120,7 @@ const Client = () => {
             setLoading(true);
             try {
                 const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/clients`);
-                console.log(response.data);
+                // console.log(response.data);
                 setClients(response.data);
             } catch (error) {
                 console.error('Error fetching clients:', error);
@@ -235,7 +235,7 @@ const Client = () => {
             );
 
             if (response.status === 200) {
-                console.log('Client updated successfully');
+                // console.log('Client updated successfully');
             }
 
             //  Close the modal programmatically

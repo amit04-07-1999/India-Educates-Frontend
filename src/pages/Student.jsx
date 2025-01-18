@@ -128,6 +128,14 @@ const Student = () => {
         const data = await response.json();
         // Handle success (e.g., show notification, reset form, etc.)
         fetchStudents(); // Refresh the students list
+        const modal = document.getElementById('createemp');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+        toast.success('Student added successfully');
+        // Reload the page after 5 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
       } else {
         // Handle error
         console.error('Failed to create student');
@@ -275,8 +283,15 @@ const Student = () => {
       });
 
       if (response.ok) {
-        toast.success('Student updated successfully');
         fetchStudents(); // Refresh the students list
+        const modal = document.getElementById('editemp');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+        toast.success('Student updated successfully');
+        // Reload the page after 5 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || 'Failed to update student');
