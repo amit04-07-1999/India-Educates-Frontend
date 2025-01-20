@@ -24,7 +24,7 @@ const StudentSidebar = () => {
         <>
             <div className={`sidebar px-3 py-3 me-0 ${textColorClass}`} style={{ background: sidebarColor }}>
                 <div className="d-flex flex-column h-100">
-                    <div className="mb-0 brand-icon mt-5">
+                    <div className="mb-0 brand-icon mt-4">
                         <img src='../Images/IndiaEducatesLogo1.png' style={{ height: "4.5rem", marginLeft:"-1.2rem" }} alt="Logo" />
                     </div>
                     

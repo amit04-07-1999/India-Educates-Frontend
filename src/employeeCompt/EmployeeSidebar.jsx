@@ -5,7 +5,7 @@ import CustomColorPicker, { isLightColor } from '../pages/colorpicker/CustomColo
 
 const EmployeeSidebar = () => {
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [sidebarColor, setSidebarColor] = useState(localStorage.getItem('sidebarColor') || '#485563');
+    const [sidebarColor, setSidebarColor] = useState(localStorage.getItem('sidebarColor') || '#0a9400');
 
     const handleColorChange = (color) => {
         setSidebarColor(color);
@@ -19,22 +19,14 @@ const EmployeeSidebar = () => {
         <>
             <div className={`sidebar px-3 py-3 me-0 ${textColorClass}`} style={{ background: sidebarColor }}>
                 <div className="d-flex flex-column h-100">
-                    <div className="mb-0 brand-icon mt-5">
-                        {/* <span className="logo-icon">
-                            <img src='../Images/picon.png' style={{ height: "4rem" }} alt="Pizeonfly Logo" />
-                        </span>
-                        <div className=''>
-                            <span className="logo-text fs-3" style={{ color: "#4989fd" }}>pizeon</span>
-                            <span className="logo-text fs-3" style={{ marginLeft: "-0.9rem", color: "#0c117b" }}>fly</span>
-
-                        </div> */}
-                        <img src='../Images/pizeonflylogo.png' style={{ height: "2.7rem" }} alt="Pizeonfly Logo" />
+                    <div className="mb-0 brand-icon mt-4">
+                        <img src='../Images/IndiaEducatesLogo1.png' style={{ height: "4.5rem", marginLeft: "-1.2rem" }} alt="Logo" />
                     </div>
                     {/* Menu: main ul */}
                     <ul className="menu-list flex-grow-1 mt-3">
                         <li>
                             <Link className="ms-link" to="/employee-dashboard">
-                                <i className="icofont-home fs-5" /> <span className='fs-6'>Employee Dashboard</span>
+                                <i className="icofont-home fs-5" /> <span className='fs-6'>Agent Dashboard</span>
                             </Link>
                         </li>
                         {/* <li className="collapsed">
@@ -108,21 +100,6 @@ const EmployeeSidebar = () => {
                                 <li>
                                     <Link className="ms-link" to="/employee-saasManager">
                                         <span>Saas Manager</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link className="ms-link" to="/employee-htmlTemplateGenerator">
-                                        <span>HTML Template Generator</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link className="ms-link" to="/employee-cardValidator">
-                                        <span>Card Validator</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link className="ms-link" to="/employee-cardGenerator">
-                                        <span>Card Generator</span>
                                     </Link>
                                 </li>
 

@@ -68,8 +68,8 @@ const Signup = () => {
                     <img
                       src="../Images/IndiaEducatesLogo.png"
                       className="mb-4"
-                      style={{ width: "-webkit-fill-available" }}
-                    />
+                      style={{ width: "-webkit-fill-available", filter: "drop-shadow(0 0 40px white)" }}
+                      />
                   </div>
                 </div>
                 <div className="col-lg-6 d-flex justify-content-center align-items-center border-0 rounded-lg auth-h100">

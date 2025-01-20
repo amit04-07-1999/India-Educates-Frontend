@@ -91,7 +91,7 @@ const Signin = () => {
                   <img
                     src="../Images/IndiaEducatesLogo.png"
                     className="mb-4"
-                    style={{ width: "-webkit-fill-available" }}
+                    style={{ width: "-webkit-fill-available", filter: "drop-shadow(0 0 40px white)" }}
                   />
                 </div>
               </div>

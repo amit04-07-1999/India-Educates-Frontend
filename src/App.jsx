@@ -47,13 +47,16 @@ import OnlineVoiceRecorder from './pages/tools/Miscellaneous/OnlineVoiceRecorder
 import OnlineWebcamTest from './pages/tools/Miscellaneous/OnlineWebcamTest'
 import MembersDashboard from './pages/members/MembersDashboard'
 
-import EmployeeCardValidator from './pages/employee-tools/CardValidator'
-import EmployeeHtmlTemplateGenerator from './pages/employee-tools/HtmlTemplateGenerator'
-import EmployeeMiscellaneous from './pages/employee-tools/Miscellaneous'
+import EmployeeMiscellaneous from './pages/employee-tools/Miscellaneous/Miscellaneous'
 import EmployeeSaasManager from './pages/employee-tools/SaasManager'
 import EmployeeQrCodeGenerate from './pages/employee-tools/QrCodeGenerate'
 import EmployeeUrlShortner from './pages/employee-tools/UrlShortner'
-import EmployeeCardGenerator from './pages/employee-tools/CardGenerator'
+import EmployeeOnlineScreenrecorder from './pages/employee-tools/Miscellaneous/OnlineScreenrecoder'
+import EmployeeOnlineScreenshot from './pages/employee-tools/Miscellaneous/OnlineScreenshot'
+import EmployeeSpeechToText from './pages/employee-tools/Miscellaneous/SpeechToText'
+import EmployeeTextToSpeech from './pages/employee-tools/Miscellaneous/TextToSpeech'
+import EmployeeOnlineVoiceRecorder from './pages/employee-tools/Miscellaneous/OnlineVoiceRecorder'
+import EmployeeOnlineWebcamTest from './pages/employee-tools/Miscellaneous/OnlineWebcamTest'
 
 import ClientCardValidator from './pages/clients-tools/CardValidator'
 import ClientHtmlTemplateGenerator from './pages/clients-tools/HtmlTemplateGenerator'
@@ -127,13 +130,16 @@ function AppContent() {
           <Route path='/online-voice-recorder' element={<OnlineVoiceRecorder />}></Route>
           <Route path='/online-webcam-test' element={<OnlineWebcamTest />}></Route>
 
-          <Route path='/employee-htmlTemplateGenerator' element={<EmployeeHtmlTemplateGenerator />}></Route>
-          <Route path='/employee-cardValidator' element={<EmployeeCardValidator />}></Route>
           <Route path='/employee-miscellaneous' element={<EmployeeMiscellaneous />}></Route>
+          <Route path='/employee-online-screenrecorder' element={<EmployeeOnlineScreenrecorder />}></Route>
+          <Route path='/employee-online-screenshot' element={<EmployeeOnlineScreenshot />}></Route>
+          <Route path='/employee-speech-to-text' element={<EmployeeSpeechToText />}></Route>
+          <Route path='/employee-text-to-speech' element={<EmployeeTextToSpeech />}></Route>
+          <Route path='/employee-online-voice-recorder' element={<EmployeeOnlineVoiceRecorder />}></Route>
+          <Route path='/employee-online-webcam-test' element={<EmployeeOnlineWebcamTest />}></Route>
           <Route path='/employee-saasManager' element={<EmployeeSaasManager />}></Route>
           <Route path='/employee-qrCodeGenerate' element={<EmployeeQrCodeGenerate />}></Route>
           <Route path='/employee-urlShortner' element={<EmployeeUrlShortner />}></Route>
-          <Route path='/employee-cardGenerator' element={<EmployeeCardGenerator />}></Route>
 
           <Route path='/clients-cardValidator' element={<ClientCardValidator />}></Route>
           <Route path='/clients-htmlTemplateGenerator' element={<ClientHtmlTemplateGenerator />}></Route>

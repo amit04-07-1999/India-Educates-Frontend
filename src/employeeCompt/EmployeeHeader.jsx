@@ -255,24 +255,22 @@ const Header = () => {
     // Check if any required document is missing
     const checkMissingDocuments = () => {
       const user = JSON.parse(localStorage.getItem("emp_user"));
-      if (user && (!user.aadhaarCard || !user.panCard || !user.resume)) {
+      const hasShownToast = sessionStorage.getItem("documentToastShown");
+      
+      if (user && (!user.aadhaarCard || !user.panCard || !user.resume) && !hasShownToast) {
         toast.error("Please update your profile with missing documents.", {
           style: {
             backgroundColor: "#0d6efd",
             color: "white",
           },
         });
+        // Mark that we've shown the toast
+        sessionStorage.setItem("documentToastShown", "true");
       }
     };
 
-    // Initial check
+    // Only check once when component mounts
     checkMissingDocuments();
-
-    // Set up interval to check every minute
-    // const intervalId = setInterval(checkMissingDocuments, 60000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -290,7 +288,7 @@ const Header = () => {
                   <p className="mb-0 text-end line-height-sm ">
                     <span className="font-weight-bold">{employeeName}</span>
                   </p>
-                  <small>Employee Profile</small>
+                  <small>Agent Profile</small>
                 </div>
                 <a
                   className="nav-link dropdown-toggle pulse p-0"
@@ -508,7 +506,7 @@ const Header = () => {
                       id="createprojectlLabel"
                     >
                       {" "}
-                      Edit Employee
+                      Edit Agent
                     </h5>
                     <button
                       type="button"
@@ -523,13 +521,13 @@ const Header = () => {
                         htmlFor="exampleFormControlInput877"
                         className="form-label"
                       >
-                        Employee Name
+                        Agent Name
                       </label>
                       <input
                         type="text"
                         className="form-control"
                         id="exampleFormControlInput877"
-                        placeholder="Explain what the Project Name"
+                        placeholder="Agent Name"
                         name="employeeName"
                         value={employeeData.employeeName}
                         onChange={handleChange}
@@ -540,7 +538,7 @@ const Header = () => {
                         htmlFor="formFileMultipleoneone"
                         className="form-label"
                       >
-                        Employee Profile
+                        Agent Profile
                       </label>
                       <input
                         className="form-control"
@@ -589,13 +587,13 @@ const Header = () => {
                               htmlFor="exampleFormControlInput1778"
                               className="form-label"
                             >
-                              Employee ID
+                              Agent ID
                             </label>
                             <input
                               type="text"
                               className="form-control"
                               id="exampleFormControlInput1778"
-                              placeholder="User Name"
+                              placeholder="Agent ID"
                               name="employeeId"
                               value={employeeData.employeeId}
                             />

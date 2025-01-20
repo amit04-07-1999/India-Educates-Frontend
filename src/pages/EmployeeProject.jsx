@@ -68,6 +68,10 @@ const Project = () => {
   const messageInputRef = useRef(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
+  // Add these state declarations near your other state declarations
+  const [selectedProjectImages, setSelectedProjectImages] = useState([]);
+  const [selectedProjectName, setSelectedProjectName] = useState('');
+
   useEffect(() => {
     const newSocket = io(`${import.meta.env.VITE_BASE_URL}`);
     setSocket(newSocket);
@@ -178,6 +182,14 @@ const Project = () => {
     }, 300);
   };
 
+  // Add this function to handle opening the project images modal
+  const handleOpenProjectImages = (project) => {
+    setSelectedProjectImages(project.projectImage);
+    setSelectedProjectName(project.projectName);
+    const modal = new bootstrap.Modal(document.getElementById('projectImagesModal'));
+    modal.show();
+  };
+
   return (
     <>
       <div id="mytask-layout">
@@ -234,7 +246,7 @@ const Project = () => {
                             <thead>
                               <tr>
                                 <th>Project Name</th>
-                                <th>Client Name</th>
+                                <th>Associates Name</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
                                 <th>Members</th>
@@ -256,16 +268,12 @@ const Project = () => {
                                   <tr key={project.id}>
                                     <td>
                                       <Link to="/employee-tasks">{project.projectName}</Link>
-                                      <Link
-                                        to="/images"
-                                        className="btn btn-outline-secondary"
-                                        state={{
-                                          images: project.projectImage,
-                                          projectName: project.projectName,
-                                        }}
+                                      <button
+                                        className="btn btn-link"
+                                        onClick={() => handleOpenProjectImages(project)}
                                       >
                                         <i className="bi-paperclip fs-6" />
-                                      </Link>
+                                      </button>
                                       <p />
                                       <figcaption className="blockquote-footer">
                                         {project.projectCategory}
@@ -452,6 +460,52 @@ const Project = () => {
                       </div>
                       <button type="submit" className="btn btn-dark">Submit</button>
                     </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Images Modal */}
+            <div className="modal fade" id="projectImagesModal" tabIndex={-1} aria-hidden="true">
+              <div className="modal-dialog modal-dialog-centered modal-lg">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">{selectedProjectName} - Project Images</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    />
+                  </div>
+                  <div className="modal-body">
+                    <div className="row g-3">
+                      {selectedProjectImages.map((image, index) => (
+                        <div key={index} className="col-md-4">
+                          <div className="card">
+                            <img
+                              src={`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`}
+                              alt={`Project Image ${index + 1}`}
+                              className="card-img-top"
+                              style={{
+                                height: '200px',
+                                objectFit: 'cover',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => window.open(`${import.meta.env.VITE_BASE_URL}${image.replace('uploads/', '')}`, '_blank')}
+                            />
+                            <div className="card-body">
+                              <p className="card-text text-center mb-0">Image {index + 1}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                      Close
+                    </button>
                   </div>
                 </div>
               </div>

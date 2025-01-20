@@ -229,8 +229,8 @@ const EmployeeDashboard = () => {
     const startCol = Math.min(selectedCells.start.colIndex, selectedCells.end.colIndex);
     const endCol = Math.max(selectedCells.start.colIndex, selectedCells.end.colIndex);
 
-    return rowIndex >= startRow && rowIndex <= endRow && 
-           colIndex >= startCol && colIndex <= endCol;
+    return rowIndex >= startRow && rowIndex <= endRow &&
+      colIndex >= startCol && colIndex <= endCol;
   };
 
   const handleCopy = (e) => {
@@ -1678,18 +1678,17 @@ const EmployeeDashboard = () => {
               <div className="col-12">
                 <div className="card mb-3">
                   <div className="card-body text-center p-5">
-                    <div style={{ height: "8rem" }}>
+                    <div style={{ height: "10rem" }}>
                       <img
-                        src="Images/pizeonflylogo.png"
+                        src="Images/IndiaEducatesLogo.png"
                         className="img-fluid"
                         alt="No Data"
                         style={{
-                          height: isMobile ? "3rem" : "5rem",
+                          height: isMobile ? "5rem" : "8rem",
                           maxHeight: "100%",
-                          width: "auto"
+                          width: "auto",
                         }}
                       />
-                      <p className="fs-6" style={{ color: "#4989fd" }}>An agency like no other. <span style={{ color: "#0c117b" }}>Results to match.</span></p>
                     </div>
 
                     <div className="profile-section p-3 bg-white rounded-4 shadow-sm mb-4">
