@@ -58,13 +58,17 @@ import EmployeeTextToSpeech from './pages/employee-tools/Miscellaneous/TextToSpe
 import EmployeeOnlineVoiceRecorder from './pages/employee-tools/Miscellaneous/OnlineVoiceRecorder'
 import EmployeeOnlineWebcamTest from './pages/employee-tools/Miscellaneous/OnlineWebcamTest'
 
-import ClientCardValidator from './pages/clients-tools/CardValidator'
-import ClientHtmlTemplateGenerator from './pages/clients-tools/HtmlTemplateGenerator'
-import ClientMiscellaneous from './pages/clients-tools/Miscellaneous'
+
+import ClientMiscellaneous from './pages/clients-tools/Miscellaneous/Miscellaneous'
+import ClientSpeechToText from './pages/clients-tools/Miscellaneous/SpeechToText'
+import ClientTextToSpeech from './pages/clients-tools/Miscellaneous/TextToSpeech'
+import ClientOnlineScreenrecorder from './pages/clients-tools/Miscellaneous/OnlineScreenrecoder'
+import ClientOnlineScreenshot from './pages/clients-tools/Miscellaneous/OnlineScreenshot'
+import ClientOnlineVoiceRecorder from './pages/clients-tools/Miscellaneous/OnlineVoiceRecorder'
+import ClientOnlineWebcamTest from './pages/clients-tools/Miscellaneous/OnlineWebcamTest'
 import ClientSaasManager from './pages/clients-tools/SaasManager'
 import ClientQrCodeGenerate from './pages/clients-tools/QrCodeGenerate'
 import ClientUrlShortner from './pages/clients-tools/UrlShortner'
-import ClientCardGenerator from './pages/clients-tools/CardGenerator'
 
 import Notepad from './pages/Excel'
 // import Test from './pages/test'
@@ -141,13 +145,18 @@ function AppContent() {
           <Route path='/employee-qrCodeGenerate' element={<EmployeeQrCodeGenerate />}></Route>
           <Route path='/employee-urlShortner' element={<EmployeeUrlShortner />}></Route>
 
-          <Route path='/clients-cardValidator' element={<ClientCardValidator />}></Route>
-          <Route path='/clients-htmlTemplateGenerator' element={<ClientHtmlTemplateGenerator />}></Route>
+          
           <Route path='/clients-miscellaneous' element={<ClientMiscellaneous />}></Route>
+          <Route path='/clients-speech-to-text' element={<ClientSpeechToText />}></Route>
+          <Route path='/clients-text-to-speech' element={<ClientTextToSpeech />}></Route>
+          <Route path='/clients-online-screenrecorder' element={<ClientOnlineScreenrecorder />}></Route>
+          <Route path='/clients-online-screenshot' element={<ClientOnlineScreenshot />}></Route>
+          <Route path='/clients-online-voice-recorder' element={<ClientOnlineVoiceRecorder />}></Route>
+          <Route path='/clients-online-webcam-test' element={<ClientOnlineWebcamTest />}></Route>
           <Route path='/clients-saasManager' element={<ClientSaasManager />}></Route>
           <Route path='/clients-qrCodeGenerate' element={<ClientQrCodeGenerate />}></Route>
           <Route path='/clients-urlShortner' element={<ClientUrlShortner />}></Route>
-          <Route path='/clients-cardGenerator' element={<ClientCardGenerator />}></Route>
+         
 
           <Route path='/notepad' element={<Notepad />}></Route>
 

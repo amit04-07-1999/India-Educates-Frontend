@@ -132,18 +132,19 @@ const ClientDashboard = () => {
               <div className="col-12">
                 <div className="card mb-3">
                   <div className="card-body text-center p-5">
-                    <div style={{ height: "8rem" }}>
-                      <img
-                        src="Images/pizeonflylogo.png"
-                        className="img-fluid"
-                        alt="No Data"
-                        style={{
-                          height: isMobile ? "3rem" : "5rem",
-                          maxHeight: "100%",
-                          width: "auto"
-                        }}
-                      />
-                      <p className="fs-6" style={{ color: "#4989fd" }}>An agency like no other. <span style={{ color: "#0c117b" }}>Results to match.</span></p>
+                    <div style={{ height: "10rem" }}>
+                      <Link to="/client-dashboard" target="_blank">
+                        <img
+                          src="Images/IndiaEducatesLogo.png"
+                          className="img-fluid"
+                          alt="No Data"
+                          style={{
+                            height: isMobile ? "5rem" : "8rem",
+                            maxHeight: "100%",
+                            width: "auto",
+                          }}
+                        />
+                      </Link>
                     </div>
                     <div className="mt-4 mb-2">
                       <div className="row justify-content-center">
@@ -167,6 +168,7 @@ const ClientDashboard = () => {
                       <div className="mt-5 mb-4 text-center">
                         <Link
                           to="https://pizeonfly.com/"
+                          target="_blank"
                           className="btn btn-outline-primary btn-lg position-relative"
                           style={{
                             borderRadius: '30px',

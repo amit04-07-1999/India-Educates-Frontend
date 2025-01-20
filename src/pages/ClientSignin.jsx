@@ -170,9 +170,9 @@ const Signin = () => {
                         <div className="form-label">
                           <span className="d-flex justify-content-between align-items-center">
                             Password
-                            <a className="text-secondary" href="auth-password-reset.html">
+                            {/* <a className="text-secondary" href="auth-password-reset.html">
                               Forgot Password?
-                            </a>
+                            </a> */}
                           </span>
                         </div>
                         <div className="input-group">

@@ -181,7 +181,7 @@ const ClientHeader = () => {
                   <p className="mb-0 text-end line-height-sm ">
                     <span className="font-weight-bold">{clientName}</span>
                   </p>
-                  <small>Client Profile</small>
+                  <small>Associate Profile</small>
                 </div>
                 <a
                   className="nav-link dropdown-toggle pulse p-0"
@@ -322,7 +322,7 @@ const ClientHeader = () => {
                     <form onSubmit={handleEditSubmit}>
                       {/* Add form fields for editing profile */}
                       <div className="mb-3">
-                        <label htmlFor="clientName" className="form-label">Name</label>
+                        <label htmlFor="clientName" className="form-label">Associate Name</label>
                         <input
                           type="text"
                           className="form-control"

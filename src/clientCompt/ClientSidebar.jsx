@@ -1,27 +1,31 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import CustomColorPicker, { isLightColor } from '../pages/colorpicker/CustomColorPicker'
 
 const ClientSidebar = () => {
-    return (
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [sidebarColor, setSidebarColor] = useState(localStorage.getItem('clientSidebarColor') || '#0a9400');
 
+    const handleColorChange = (color) => {
+        setSidebarColor(color);
+        localStorage.setItem('clientSidebarColor', color);
+    };
+
+    // Determine text color based on sidebar background color
+    const textColorClass = isLightColor(sidebarColor) ? 'text-dark' : 'text-light';
+
+    return (
         <>
-            <div className="sidebar px-4 py-4 py-md-5 me-0">
+            <div className={`sidebar px-4 py-4 py-md-5 me-0 ${textColorClass}`} style={{ background: sidebarColor }}>
                 <div className="d-flex flex-column h-100">
                     <div className="mb-0 brand-icon">
-                        {/* <span className="logo-icon">
-                            <img src='../Images/picon.png' style={{ height: "4rem" }} alt="Pizeonfly Logo" />
-                        </span>
-                        <div className=''>
-                            <span className="logo-text fs-4" style={{ color: "#00f8ffdb" }}>pizeon</span>
-                            <span className="logo-text fs-4" style={{ marginLeft: "-0.9rem", color: "#004eff" }}>fly</span>
-                        </div> */}
-                        <img src='../Images/pizeonflylogo.png' style={{ height: "2.7rem" }} alt="Pizeonfly Logo" />
+                        <img src='../Images/IndiaEducatesLogo1.png' style={{ height: "4.5rem", marginLeft: "-1.2rem" }} alt="Logo" />
                     </div>
                     {/* Menu: main ul */}
                     <ul className="menu-list flex-grow-1 mt-3">
                         <li>
                             <Link className="ms-link" to="/client-dashboard">
-                                <i className="icofont-home fs-5" /> <span className='fs-6'>Client Dashboard</span>
+                                <i className="icofont-home fs-5" /> <span className='fs-6'>Associate Dashboard</span>
                             </Link>
                         </li>
                         {/* <li className="collapsed">
@@ -97,21 +101,7 @@ const ClientSidebar = () => {
                                         <span>Saas Manager</span>
                                     </Link>
                                 </li>
-                                <li>
-                                    <Link className="ms-link" to="/clients-htmlTemplateGenerator">
-                                        <span>HTML Template Generator</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link className="ms-link" to="/clients-cardValidator">
-                                        <span>Card Validator</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link className="ms-link" to="/clients-cardGenerator">
-                                        <span>Card Generator</span>
-                                    </Link>
-                                </li>
+
                                 <li>
                                     <Link className="ms-link" to="/clients-miscellaneous">
                                         <span>Miscellaneous</span>
@@ -121,18 +111,27 @@ const ClientSidebar = () => {
                         </li>
                     </ul>
                     {/* Menu: menu collepce btn */}
-                    <button
-                        type="button"
-                        className="btn btn-link sidebar-mini-btn text-light"
-                    >
-                        <span className="ms-2">
-                            <i className="icofont-bubble-right" />
-                        </span>
-                    </button>
+                    <div className="d-flex justify-content-end mb-2">
+                        <button
+                            className='border-0 bg-transparent'
+                            onClick={() => setShowColorPicker(!showColorPicker)}
+                            title="Customize Sidebar Color"
+                        >
+                            <i className={`bi bi-palette-fill ${textColorClass}`}></i>
+                        </button>
+                        {showColorPicker && (
+                            <div className='position-absolute' style={{ top: '25rem', right: '67rem' }}>
+                                <CustomColorPicker
+                                    color={sidebarColor}
+                                    onChange={handleColorChange}
+                                    onClose={() => setShowColorPicker(false)}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
-
     )
 }
 
