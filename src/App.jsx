@@ -7,8 +7,8 @@ import ClientSignin from './pages/ClientSignin'
 import StudentSinin from './pages/StudentSinin'
 import StudentSinup from './pages/StudentSinup'
 
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-import { HashRouter, Routes, Route } from 'react-router-dom'
 import ProjectDashboard from './pages/ProjectDashboard'
 import EmployeeDashboard from './pages/EmployeeDashboard'
 import ClientDashboard from './pages/ClientDashboard'
@@ -86,7 +86,7 @@ function AppContent() {
 
   return (
     <div className={`app ${isDarkMode ? 'dark' : 'light'}`}>
-      <HashRouter>
+      <BrowserRouter>
         <Routes>
           <Route path='/signup' element={<Signup />}></Route>
           <Route path='/employeesignup' element={<EmployeeSinup />}></Route>
@@ -172,7 +172,7 @@ function AppContent() {
 
 
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </div>
   );
 }
