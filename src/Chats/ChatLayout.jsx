@@ -619,6 +619,7 @@ const ChatLayout = ({
                         maxWidth: '75%',
                         position: 'relative',
                         backgroundColor: message.isCurrentUser ? '#075E54' : '#ffffff',
+                        filter: 'drop-shadow(0 0 2px #00000040)',
                         borderRadius: '7.5px'
                     }}>
                     {!message.isCurrentUser && selectedUser?.userType === 'Group' && (
@@ -901,12 +902,18 @@ const ChatLayout = ({
                                     height: 'calc(93vh - 140px)',
                                     overflowY: 'auto',
                                     backgroundColor: backgroundColor,
-                                    ...(backgroundImage && {
-                                        backgroundImage: `url("${import.meta.env.VITE_BASE_URL}${backgroundImage?.replace('uploads/', '') || ''}")`,
+                                    ...(backgroundImage ? {
+                                        backgroundImage: `url("${import.meta.env.VITE_BASE_URL}${backgroundImage?.replace('uploads/', '')}")`,
+                                    } : {
+                                        backgroundImage: `url('../Images/chatbg.jpeg')`,
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center',
-                                        backgroundRepeat: 'no-repeat',
+                                        backgroundColor: '#ffffff80',
+                                        backgroundBlendMode: 'overlay',
                                     }),
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
                                     msOverflowStyle: 'none',
                                     scrollbarWidth: 'none',
                                     '&::-webkit-scrollbar': { display: 'none' }

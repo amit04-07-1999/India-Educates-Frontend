@@ -522,8 +522,8 @@ const Chat = () => {
               newMessage={newMessage}
               activeTab={activeTab}
               tabs={[
-                { id: 'employees', label: 'Employees' },
-                { id: 'clients', label: 'Clients' },
+                { id: 'employees', label: 'Agents' },
+                { id: 'clients', label: 'Associates' },
                 { id: 'groups', label: 'Groups' }
               ]}
               onTabChange={setActiveTab}

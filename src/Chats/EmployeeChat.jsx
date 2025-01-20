@@ -496,7 +496,7 @@ const EmployeeChat = () => {
             activeTab={activeTab}
             tabs={[
               { id: 'admins', label: 'Admins' },
-              { id: 'clients', label: 'Clients' },
+              { id: 'clients', label: 'Associates' },
               { id: 'groups', label: 'Groups' }
             ]}
             onTabChange={setActiveTab}
