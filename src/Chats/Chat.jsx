@@ -474,7 +474,7 @@ const Chat = () => {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (selectedUser && selectedUser.userType === 'Employee') {
+    if (selectedUser && (selectedUser.userType === 'Employee' || selectedUser.userType === 'Client')) {
       const interval = setInterval(() => {
         fetchMessages(selectedUser._id);
       }, 3000);
