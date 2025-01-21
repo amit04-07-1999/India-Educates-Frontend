@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentHeader from '../studentCompt/StudentHeader';
 import StudentSidebar from '../studentCompt/StudentSidebar';
-import FloatingMenu from '../Chats/FloatingMenu';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -693,7 +692,6 @@ const StudentDashboard = () => {
           </div>
         </div>
       </div>
-      <FloatingMenu userType="student" isMobile={isMobile} />
     </div>
   );
 };
