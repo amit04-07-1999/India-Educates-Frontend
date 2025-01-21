@@ -103,6 +103,8 @@ const FloatingMenu = ({ userType }) => {
                 return '/employee-chat';
             case 'client':
                 return '/client-chat';
+            case 'student':
+                return '/student-chat';
             default:
                 return '/chat';
         }

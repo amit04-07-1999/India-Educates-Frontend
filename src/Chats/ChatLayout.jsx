@@ -55,6 +55,9 @@ const ChatLayout = ({
     // Add this new state for controlling members display
     const [showAllMembers, setShowAllMembers] = useState(false);
 
+    // Add new state for dropdown
+    const [showGroupsDropdown, setShowGroupsDropdown] = useState(false);
+
     // Modified userOptions mapping with debug logs
     const userOptions = Array.isArray(users) ? users.map(user => {
 
@@ -1050,7 +1053,7 @@ const ChatLayout = ({
                             {/* Tabs - WhatsApp style */}
                             <div className="px-4 py-2" style={{ backgroundColor: '#075E54', height: '50px' }}>
                                 <ul className="nav nav-pills" role="tablist">
-                                    {tabs.map(tab => (
+                                    {tabs.filter(tab => tab.id !== 'groups').map(tab => (
                                         <li key={tab.id} className="nav-item">
                                             <button
                                                 className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
@@ -1064,7 +1067,38 @@ const ChatLayout = ({
                                             </button>
                                         </li>
                                     ))}
-
+                                    <li className="nav-item ms-auto">
+                                        <Dropdown show={showGroupsDropdown} onToggle={(isOpen) => setShowGroupsDropdown(isOpen)}>
+                                            <button 
+                                                className="btn btn-link"
+                                                onClick={() => setShowGroupsDropdown(!showGroupsDropdown)}
+                                                style={{ color: 'white', border: 'none', textDecoration: 'none' }}
+                                            >
+                                                <i className="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <Dropdown.Menu 
+                                                style={{ 
+                                                    right: 'auto',
+                                                    left: '-100px'  // This will shift the dropdown menu to the left
+                                                }}
+                                            >
+                                                <Dropdown.Item 
+                                                    onClick={() => {
+                                                        onTabChange('groups');
+                                                        setShowGroupsDropdown(false);
+                                                    }}
+                                                    active={activeTab === 'groups'}
+                                                    style={{ 
+                                                        backgroundColor: activeTab === 'groups' ? '#128C7E' : 'transparent',
+                                                        color: activeTab === 'groups' ? 'white' : 'black'
+                                                    }}
+                                                >
+                                                    <i className="bi bi-people-fill me-2"></i>
+                                                    Groups
+                                                </Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </li>
                                 </ul>
                             </div>
 
@@ -1679,65 +1713,6 @@ const ChatLayout = ({
                         style={{ maxWidth: '100%', maxHeight: '80vh' }}
                     />
                 </Modal.Body>
-            </Modal>
-
-            {/* Add the new modal for adding members */}
-            <Modal show={showAddMembersModal} onHide={() => setShowAddMembersModal(false)}>
-                <Modal.Header closeButton style={{ backgroundColor: '#075E54', color: 'white' }}>
-                    <Modal.Title>Add Members to Group</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="mb-3">
-                        <label className="form-label">Select Members</label>
-                        <MultiSelect
-                            options={users
-                                .filter(user => {
-                                    // Check if selectedUser and members exist before filtering
-                                    if (!selectedUser || !selectedUser.members) return true;
-
-                                    // Filter out users who are already members of the group
-                                    return !selectedUser.members.some(
-                                        member => member.userId === user._id
-                                    );
-                                })
-                                .map(user => {
-                                    let userType;
-                                    if (user.employeeName) userType = 'Employee';
-                                    else if (user.clientName) userType = 'Client';
-                                    else if (user.username) userType = 'AdminUser';
-
-                                    return {
-                                        label: user.employeeName || user.clientName || user.username,
-                                        value: user._id,
-                                        type: userType
-                                    };
-                                })}
-                            value={newMembers}
-                            onChange={setNewMembers}
-                            labelledBy="Select members"
-                            hasSelectAll={true}
-                            disableSearch={false}
-                            overrideStrings={{
-                                selectSomeItems: "Select members...",
-                                allItemsAreSelected: "All members selected",
-                                selectAll: "Select All",
-                                search: "Search members"
-                            }}
-                        />
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowAddMembersModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleAddMembers}
-                        style={{ backgroundColor: '#075E54', border: 'none' }}
-                    >
-                        Add Members
-                    </Button>
-                </Modal.Footer>
             </Modal>
 
             {/* Add Delete Members Confirmation Modal */}
