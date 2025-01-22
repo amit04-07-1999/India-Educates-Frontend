@@ -20,12 +20,14 @@ const EmployeeChat = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showFilePreview, setShowFilePreview] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     socket.current = io(import.meta.env.VITE_BASE_URL);
 
     if (socket.current) {
       socket.current.emit('join_chat', currentEmployee._id);
+      socket.current.emit('join_notifications', currentEmployee._id);
 
       const currentUser = JSON.parse(localStorage.getItem('user')) ||
         JSON.parse(localStorage.getItem('emp_user')) ||
@@ -142,8 +144,14 @@ const EmployeeChat = () => {
         }
       });
 
+      socket.current.on('new_notification', (notification) => {
+        setNotifications(prev => [...prev, notification]);
+        new Audio('/notification-sound.mp3').play().catch(e => console.log(e));
+      });
+
       fetchUsers();
       fetchGroups();
+      fetchNotifications();
 
       return () => {
         if (socket.current) {
@@ -156,6 +164,7 @@ const EmployeeChat = () => {
           socket.current.off('message_updated');
           socket.current.off('message_deleted');
           socket.current.off('member_removed_from_group');
+          socket.current.off('new_notification');
         }
       };
     }
@@ -194,9 +203,37 @@ const EmployeeChat = () => {
     }
   };
 
+  // Add notification fetching
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}api/notifications/${currentEmployee._id}`
+      );
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  // Add function to mark notifications as read
+  const markNotificationsAsRead = async (senderId) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_BASE_URL}api/markNotificationsRead`, {
+        userId: currentEmployee._id,
+        senderId
+      });
+      setNotifications(prev => 
+        prev.filter(n => n.senderId !== senderId)
+      );
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+    }
+  };
+
   // Modify handleUserSelect
   const handleUserSelect = (user, userType) => {
     setSelectedUser({ ...user, userType });
+    markNotificationsAsRead(user._id);
     if (userType === 'Group') {
       fetchGroupMessages(user._id);
     } else {
@@ -417,6 +454,8 @@ const EmployeeChat = () => {
 
   const renderUserItem = (user, selectedUser, onUserSelect) => {
     const isAdmin = activeTab === 'admins';
+    const userNotifications = notifications.filter(n => n.senderId === user._id).length;
+
     return (
       <li
         key={user._id}
@@ -425,12 +464,19 @@ const EmployeeChat = () => {
         onClick={() => onUserSelect(user, isAdmin ? 'AdminUser' : 'Client')}
       >
         <div className="d-flex align-items-center">
-          <img
-            src={`${import.meta.env.VITE_BASE_URL}${(isAdmin ? user.profileImage : user.clientImage).replace('uploads/', '')}`}
-            className="avatar rounded-circle"
-            style={{ objectFit: 'contain' }}
-            alt={isAdmin ? user.username : user.clientName}
-          />
+          <div className="position-relative">
+            <img
+              src={`${import.meta.env.VITE_BASE_URL}${(isAdmin ? user.profileImage : user.clientImage).replace('uploads/', '')}`}
+              className="avatar rounded-circle"
+              style={{ objectFit: 'contain' }}
+              alt={isAdmin ? user.username : user.clientName}
+            />
+            {userNotifications > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {userNotifications}
+              </span>
+            )}
+          </div>
           <div className="flex-fill ms-3">
             <h6 className="mb-0 fw-semibold" style={{ fontSize: '14px' }}>
               {isAdmin ? user.username : user.clientName}

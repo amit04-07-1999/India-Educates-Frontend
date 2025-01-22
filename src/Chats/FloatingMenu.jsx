@@ -89,11 +89,16 @@
 // export default FloatingMenu;
 
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const FloatingMenu = ({ userType }) => {
     const navigate = useNavigate();
+    const [notificationCount, setNotificationCount] = useState(0);
+    const currentUser = JSON.parse(localStorage.getItem('user')) ||
+        JSON.parse(localStorage.getItem('emp_user')) ||
+        JSON.parse(localStorage.getItem('client_user'));
 
     const getChatRoute = () => {
         switch (userType) {
@@ -108,6 +113,25 @@ const FloatingMenu = ({ userType }) => {
         }
     };
 
+    // Fetch notifications count
+    const fetchNotifications = async () => {
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}api/notifications/${currentUser._id}`
+            );
+            setNotificationCount(response.data.length);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        // Poll for new notifications every 10 seconds
+        const interval = setInterval(fetchNotifications, 10000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div style={{
             position: 'fixed',
@@ -119,24 +143,40 @@ const FloatingMenu = ({ userType }) => {
             alignItems: 'flex-end',
             gap: '1rem'
         }}>
-            <button
-                className="btn rounded-circle shadow-lg"
-                style={{
-                    width: '50px',
-                    height: '50px',
-                    // backgroundColor: '#1daa61',
-                    // backgroundColor: '#a8acaa91',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-                onClick={() => navigate(getChatRoute())}
-            >
-                {/* <i className="bi bi-chat" style={{ fontSize: '1.5rem' }}></i> */}
-                <img src="/Images/meesage.gif" alt="chat" style={{ width: '3rem', height: '3rem' }} />
-                
-            </button>
+            <div className="position-relative">
+                <button
+                    className="btn rounded-circle shadow-lg"
+                    style={{
+                        width: '50px',
+                        height: '50px',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onClick={() => navigate(getChatRoute())}
+                >
+                    <img src="/Images/meesage.gif" alt="chat" style={{ width: '3rem', height: '3rem' }} />
+                </button>
+                {notificationCount > 0 && (
+                    <span 
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style={{
+                            fontSize: '0.8rem',
+                            padding: '0.35em 0.65em',
+                            transform: 'translate(-50%, -50%)',
+                            border: '2px solid white',
+                            minWidth: '22px',
+                            height: '22px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        {notificationCount > 99 ? '99+' : notificationCount}
+                    </span>
+                )}
+            </div>
         </div>
     );
 };

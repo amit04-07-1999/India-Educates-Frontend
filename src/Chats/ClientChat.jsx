@@ -20,12 +20,14 @@ const ClientChat = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [showFilePreview, setShowFilePreview] = useState(false);
     const [groups, setGroups] = useState([]);
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
         socket.current = io(import.meta.env.VITE_BASE_URL);
 
         if (socket.current) {
             socket.current.emit('join_chat', currentClient._id);
+            socket.current.emit('join_notifications', currentClient._id);
 
             const currentUser = JSON.parse(localStorage.getItem('user')) ||
                 JSON.parse(localStorage.getItem('emp_user')) ||
@@ -108,8 +110,14 @@ const ClientChat = () => {
                 });
             });
 
+            socket.current.on('new_notification', (notification) => {
+                setNotifications(prev => [...prev, notification]);
+                new Audio('/notification-sound.mp3').play().catch(e => console.log(e));
+            });
+
             fetchUsers();
             fetchGroups();
+            fetchNotifications();
 
             // Add listener for member removal
             socket.current.on('member_removed_from_group', (data) => {
@@ -149,6 +157,7 @@ const ClientChat = () => {
                     socket.current.off('receive_group_message');
                     socket.current.off('group_message_sent');
                     socket.current.off('member_removed_from_group');
+                    socket.current.off('new_notification');
                 }
             };
         }
@@ -380,6 +389,8 @@ const ClientChat = () => {
 
     const renderUserItem = (user, selectedUser, onUserSelect) => {
         const isAdmin = activeTab === 'admins';
+        const userNotifications = notifications.filter(n => n.senderId === user._id).length;
+
         return (
             <li
                 key={user._id}
@@ -388,12 +399,19 @@ const ClientChat = () => {
                 onClick={() => onUserSelect(user, isAdmin ? 'AdminUser' : 'Employee')}
             >
                 <div className="d-flex align-items-center">
-                    <img
-                        src={`${import.meta.env.VITE_BASE_URL}${(isAdmin ? user.profileImage : user.employeeImage).replace('uploads/', '')}`}
-                        className="avatar rounded-circle"
-                        style={{ objectFit: 'contain' }}
-                        alt={isAdmin ? user.username : user.employeeName}
-                    />
+                    <div className="position-relative">
+                        <img
+                            src={`${import.meta.env.VITE_BASE_URL}${(isAdmin ? user.profileImage : user.employeeImage).replace('uploads/', '')}`}
+                            className="avatar rounded-circle"
+                            style={{ objectFit: 'contain' }}
+                            alt={isAdmin ? user.username : user.employeeName}
+                        />
+                        {userNotifications > 0 && (
+                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {userNotifications}
+                            </span>
+                        )}
+                    </div>
                     <div className="flex-fill ms-3">
                         <h6 className="mb-0 fw-semibold" style={{ fontSize: '14px' }}>
                             {isAdmin ? user.username : user.employeeName}
@@ -431,6 +449,7 @@ const ClientChat = () => {
     // Modify handleUserSelect
     const handleUserSelect = (user, userType) => {
         setSelectedUser({ ...user, userType });
+        markNotificationsAsRead(user._id);
         if (userType === 'Group') {
             fetchGroupMessages(user._id);
         } else {
@@ -467,6 +486,33 @@ const ClientChat = () => {
             // Handle the settings...
         } catch (error) {
             console.error('Error fetching chat settings:', error);
+        }
+    };
+
+    // Add notification fetching
+    const fetchNotifications = async () => {
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}api/notifications/${currentClient._id}`
+            );
+            setNotifications(response.data);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    // Add function to mark notifications as read
+    const markNotificationsAsRead = async (senderId) => {
+        try {
+            await axios.post(`${import.meta.env.VITE_BASE_URL}api/markNotificationsRead`, {
+                userId: currentClient._id,
+                senderId
+            });
+            setNotifications(prev => 
+                prev.filter(n => n.senderId !== senderId)
+            );
+        } catch (error) {
+            console.error('Error marking notifications as read:', error);
         }
     };
 

@@ -20,6 +20,7 @@ const Chat = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showFilePreview, setShowFilePreview] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const fetchUsers = async () => {
     try {
@@ -75,6 +76,17 @@ const Chat = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}api/notifications/${currentUser._id}`
+      );
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
   useEffect(() => {
     socket.current = io(import.meta.env.VITE_BASE_URL);
 
@@ -90,6 +102,7 @@ const Chat = () => {
       });
 
       socket.current.emit('join_chat', currentUser._id);
+      socket.current.emit('join_notifications', currentUser._id);
 
       socket.current.on('receive_message', (message) => {
         console.log('Received message:', message);
@@ -189,8 +202,14 @@ const Chat = () => {
         }
       });
 
+      socket.current.on('new_notification', (notification) => {
+        setNotifications(prev => [...prev, notification]);
+        new Audio('/notification-sound.mp3').play().catch(e => console.log(e));
+      });
+
       fetchUsers();
       fetchGroups();
+      fetchNotifications();
     }
 
     return () => {
@@ -206,6 +225,7 @@ const Chat = () => {
 
   const handleUserSelect = (user, userType) => {
     setSelectedUser({ ...user, userType });
+    markNotificationsAsRead(user._id);
     if (userType === 'Group') {
       fetchGroupMessages(user._id);
     } else {
@@ -289,6 +309,8 @@ const Chat = () => {
 
   const renderUserItem = (user, selectedUser, onUserSelect) => {
     const isEmployee = activeTab === 'employees';
+    const userNotifications = notifications.filter(n => n.senderId === user._id).length;
+
     return (
       <li
         key={user._id}
@@ -297,12 +319,19 @@ const Chat = () => {
         onClick={() => onUserSelect(user, isEmployee ? 'Employee' : 'Client')}
       >
         <div className="d-flex align-items-center">
-          <img
-            src={`${import.meta.env.VITE_BASE_URL}${(isEmployee ? user.employeeImage : user.clientImage).replace('uploads/', '')}`}
-            className="avatar rounded-circle"
-            style={{ objectFit: 'contain' }}
-            alt={isEmployee ? user.employeeName : user.clientName}
-          />
+          <div className="position-relative">
+            <img
+               src={`${import.meta.env.VITE_BASE_URL}${(isEmployee ? user.employeeImage : user.clientImage).replace('uploads/', '')}`}
+               className="avatar rounded-circle"
+               style={{ objectFit: 'contain' }}
+               alt={isEmployee ? user.employeeName : user.clientName}
+            />
+            {userNotifications > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {userNotifications}
+              </span>
+            )}
+          </div>
           <div className="flex-fill ms-3">
             <h6 className="mb-0 fw-semibold" style={{ fontSize: '14px' }}>{isEmployee ? user.employeeName : user.clientName}</h6>
             <small className="">{isEmployee ? user.phone ? user.phone : user.emailid : user.clientPhone ? user.clientPhone : user.clientEmail}</small>
@@ -497,6 +526,20 @@ const Chat = () => {
       // Handle the settings...
     } catch (error) {
       console.error('Error fetching chat settings:', error);
+    }
+  };
+
+  const markNotificationsAsRead = async (senderId) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_BASE_URL}api/markNotificationsRead`, {
+        userId: currentUser._id,
+        senderId
+      });
+      setNotifications(prev => 
+        prev.filter(n => n.senderId !== senderId)
+      );
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
     }
   };
 
