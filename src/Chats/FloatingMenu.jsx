@@ -127,8 +127,8 @@ const FloatingMenu = ({ userType }) => {
 
     useEffect(() => {
         fetchNotifications();
-        // Poll for new notifications every 10 seconds
-        const interval = setInterval(fetchNotifications, 10000);
+        // Poll for new notifications every 3 seconds
+        const interval = setInterval(fetchNotifications, 3000);
         return () => clearInterval(interval);
     }, []);
 
