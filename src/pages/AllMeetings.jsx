@@ -23,11 +23,27 @@ const AllMeetings = () => {
 
   const isMeetingPassed = (date, startTime) => {
     const now = new Date();
-    const [hours, minutes] = startTime.split(':');
     const meetingDate = new Date(date);
-    meetingDate.setHours(parseInt(hours), parseInt(minutes), 0);
     
-    return meetingDate < now;
+    // Parse time properly considering AM/PM
+    const [time, period] = startTime.split(' ');
+    const [hours, mins] = time.split(':');
+    let hour = parseInt(hours);
+    
+    // Convert to 24-hour format for calculation
+    if (period.toLowerCase() === 'pm' && hour !== 12) {
+      hour += 12;
+    } else if (period.toLowerCase() === 'am' && hour === 12) {
+      hour = 0;
+    }
+    
+    meetingDate.setHours(hour, parseInt(mins), 0);
+    
+    // Add meeting duration to get end time
+    const meetingEndTime = new Date(meetingDate);
+    meetingEndTime.setMinutes(meetingEndTime.getMinutes() + 30); // assuming 30 minutes duration
+    
+    return now > meetingEndTime;
   };
 
   const getStatusStyle = (status) => {
@@ -240,17 +256,18 @@ const AllMeetings = () => {
                           <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{index + 1}</td>
                           <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.title}</td>
                           <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{new Date(meeting.date).toLocaleDateString()}</td>
-                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{formatTime12Hour(meeting.startTime)}
-                          {/* <div className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>
-                            {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
-                              <span className="badge bg-secondary">Meeting {meeting.status}</span>
-                            ) : (
-                              <CountdownTimer 
-                                meetingDate={meeting.date} 
-                                meetingTime={meeting.startTime} 
-                              />
-                            )}
-                          </div> */}
+                          <td className={isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>
+                            {formatTime12Hour(meeting.startTime)}
+                            <div>
+                              {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
+                                <span className="badge bg-secondary">Meeting {meeting.status}</span>
+                              ) : (
+                                <CountdownTimer 
+                                  meetingDate={meeting.date} 
+                                  meetingTime={meeting.startTime} 
+                                />
+                              )}
+                            </div>
                           </td>
                           <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.duration} minutes</td>
                           <td className= {isMeetingPassed(meeting.date, meeting.startTime) ? 'bg-danger bg-opacity-25 text-center' : 'text-center'}>{meeting.guestName}</td>
@@ -333,8 +350,10 @@ const AllMeetings = () => {
 
                             <div className="mt-3">
                               <strong>Time Left:</strong>
-                              {['completed', 'cancelled'].includes(meeting.status.toLowerCase()) ? (
-                                <span className="badge bg-secondary ms-2">Meeting {meeting.status}</span>
+                              {meeting.status.toLowerCase() === 'cancelled' ? (
+                                <span className="badge bg-secondary ms-2">Meeting cancelled</span>
+                              ) : meeting.status.toLowerCase() === 'completed' ? (
+                                <span className="badge bg-secondary ms-2">Meeting completed</span>
                               ) : (
                                 <CountdownTimer 
                                   meetingDate={meeting.date} 

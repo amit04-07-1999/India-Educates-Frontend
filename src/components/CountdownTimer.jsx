@@ -6,51 +6,65 @@ const CountdownTimer = ({ meetingDate, meetingTime }) => {
   useEffect(() => {
     const calculateTimeLeft = () => {
       try {
-        // Create date objects for meeting time and current time
-        const meetingDateTime = new Date(meetingDate);
-        meetingDateTime.setHours(...meetingTime.split(':'));
         const now = new Date();
-
-        // Calculate the time difference in milliseconds
+        const meetingDateTime = new Date(meetingDate);
+        
+        // Convert meeting time to Date object
+        const [time, period] = meetingTime.split(' ');
+        const [hours, mins] = time.split(':');
+        let hour = parseInt(hours);
+        
+        // Convert to 24-hour format for calculation
+        if (period.toLowerCase() === 'pm' && hour !== 12) {
+          hour += 12;
+        } else if (period.toLowerCase() === 'am' && hour === 12) {
+          hour = 0;
+        }
+        
+        meetingDateTime.setHours(hour, parseInt(mins), 0);
         const difference = meetingDateTime - now;
 
-        // Move this check to the top and return immediately if difference is negative
-        if (difference <= 0) {
+        if (difference < 0) {
           return 'Meeting time passed';
         }
 
-        // Only calculate time components if meeting is in future
+        // Calculate time components
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const remainingHours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const remainingMinutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-        // Format the output string only if all calculations are valid
-        if (isNaN(days) || isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
-          return 'Meeting time passed';
-        }
-
+        // Format the output string
         let timeString = '';
         if (days > 0) timeString += `${days}d `;
-        if (hours > 0 || days > 0) timeString += `${hours}h `;
-        if (minutes > 0 || hours > 0 || days > 0) timeString += `${minutes}m `;
+        
+        // Convert hours to 12-hour format for display
+        let displayHours = remainingHours;
+        if (displayHours > 12) {
+          displayHours = displayHours % 12 || 12;
+        }
+        
+        if (remainingHours > 0 || days > 0) timeString += `${displayHours}h `;
+        if (remainingMinutes > 0 || remainingHours > 0 || days > 0) timeString += `${remainingMinutes}m `;
         timeString += `${seconds}s`;
 
         return timeString;
 
       } catch (error) {
         console.error('Error in calculateTimeLeft:', error);
-        console.error('Meeting Date:', meetingDate);
-        console.error('Meeting Time:', meetingTime);
         return 'Error calculating time';
       }
     };
 
-    // Update the component every second
+    // Initial calculation
+    setTimeLeft(calculateTimeLeft());
+
+    // Update every second
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
+    // Cleanup
     return () => clearInterval(timer);
   }, [meetingDate, meetingTime]);
 
@@ -61,4 +75,4 @@ const CountdownTimer = ({ meetingDate, meetingTime }) => {
   );
 };
 
-export default CountdownTimer; 
+export default CountdownTimer;
