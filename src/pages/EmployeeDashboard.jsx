@@ -162,7 +162,7 @@ const EmployeeDashboard = () => {
   // Add these state variables at the top with other states
   const [notepadColor, setNotepadColor] = useState('');
   const [todoColor, setTodoColor] = useState('');
-  const [excelSheetColor, setExcelSheetColor] = useState('');
+  const [excelSheetColors, setExcelSheetColors] = useState([]);
 
   // Add these new state variables for NotePad
   const [showNotePadPicker, setShowNotePadPicker] = useState(false);
@@ -197,6 +197,12 @@ const EmployeeDashboard = () => {
   const [selectedCells, setSelectedCells] = useState({ start: null, end: null });
   const [copiedData, setCopiedData] = useState(null);
   const [isSelecting, setIsSelecting] = useState(false);
+
+  // Add this new state to track which table's color picker is open
+  const [activeColorPicker, setActiveColorPicker] = useState({
+    type: null,
+    tableIndex: null
+  });
 
   // Add these new functions before the return statement
   const handleCellMouseDown = (tableIndex, rowIndex, colIndex) => {
@@ -428,34 +434,32 @@ const EmployeeDashboard = () => {
   }, []);
 
   // Add this function to handle color updates
-  const updateColors = async (type, color) => {
+  const updateColors = async (type, color, tableIndex = null) => {
     try {
-      const employeeId = JSON.parse(localStorage.getItem("emp_user")).employeeId;
-      const colors = {
-        notepadColor: type === 'notepad' ? color : notepadColor,
-        todoColor: type === 'todo' ? color : todoColor,
-        excelSheetColor: type === 'excel' ? color : excelSheetColor
-      };
+      let updatedColors;
+      if (type === 'excel') {
+        const newExcelColors = [...excelSheetColors];
+        newExcelColors[tableIndex] = color;
+        setExcelSheetColors(newExcelColors);
+        updatedColors = {
+          notepadColor,
+          todoColor,
+          excelSheetColors: newExcelColors
+        };
+      } else {
+        if (type === 'notepad') setNotepadColor(color);
+        if (type === 'todo') setTodoColor(color);
+        updatedColors = {
+          notepadColor: type === 'notepad' ? color : notepadColor,
+          todoColor: type === 'todo' ? color : todoColor,
+          excelSheetColors
+        };
+      }
 
       await axios.put(
-        `${import.meta.env.VITE_BASE_URL}api/employeeColors/${employeeId}`,
-        colors
+        `${import.meta.env.VITE_BASE_URL}api/employeeColors/${currentEmployeeId}`,
+        updatedColors
       );
-
-      // Update local state based on type
-      switch (type) {
-        case 'notepad':
-          setNotepadColor(color);
-          break;
-        case 'todo':
-          setTodoColor(color);
-          break;
-        case 'excel':
-          setExcelSheetColor(color);
-          break;
-        default:
-          break;
-      }
     } catch (error) {
       console.error('Error updating colors:', error);
     }
@@ -476,7 +480,7 @@ const EmployeeDashboard = () => {
         if (colorResponse.data) {
           setNotepadColor(colorResponse.data.notepadColor);
           setTodoColor(colorResponse.data.todoColor);
-          setExcelSheetColor(colorResponse.data.excelSheetColor);
+          setExcelSheetColors(colorResponse.data.excelSheetColors);
         }
 
         // Fetch Excel Sheet data with employeeId
@@ -1667,6 +1671,15 @@ const EmployeeDashboard = () => {
     };
   }, []);
 
+  // Modify the color picker toggle function
+  const toggleColorPicker = (type, tableIndex = null) => {
+    if (activeColorPicker.type === type && activeColorPicker.tableIndex === tableIndex) {
+      setActiveColorPicker({ type: null, tableIndex: null });
+    } else {
+      setActiveColorPicker({ type, tableIndex });
+    }
+  };
+
   return (
     <>
       <div id="mytask-layout">
@@ -2118,7 +2131,7 @@ const EmployeeDashboard = () => {
                               <div className="position-relative btn-group">
                                 <button
                                   className="btn btn-secondary btn-sm me-1"
-                                  onClick={() => setShowNotePadPicker(!showNotePadPicker)}
+                                  onClick={() => toggleColorPicker('notepad')}
                                   title="Change background color"
                                 >
                                   <i className="bi bi-palette-fill"></i>
@@ -2130,11 +2143,11 @@ const EmployeeDashboard = () => {
                                 >
                                   <i className="bi bi-download"></i>
                                 </button>
-                                {showNotePadPicker && (
+                                {activeColorPicker.type === 'notepad' && (
                                   <CustomColorPicker
                                     color={notepadColor}
                                     onChange={(color) => updateColors('notepad', color)}
-                                    onClose={() => setShowNotePadPicker(false)}
+                                    onClose={() => setActiveColorPicker({ type: null, tableIndex: null })}
                                   />
                                 )}
                               </div>
@@ -2418,15 +2431,15 @@ const EmployeeDashboard = () => {
                               <div className="position-relative">
                                 <button
                                   className="btn btn-secondary btn-sm"
-                                  onClick={() => setShowTodoPicker(!showTodoPicker)}
+                                  onClick={() => toggleColorPicker('todo')}
                                 >
                                   <i className="bi bi-palette-fill" title='Color'></i>
                                 </button>
-                                {showTodoPicker && (
+                                {activeColorPicker.type === 'todo' && (
                                   <CustomColorPicker
                                     color={todoColor}
                                     onChange={(color) => updateColors('todo', color)}
-                                    onClose={() => setShowTodoPicker(false)}
+                                    onClose={() => setActiveColorPicker({ type: null, tableIndex: null })}
                                   />
                                 )}
                               </div>
@@ -2448,11 +2461,11 @@ const EmployeeDashboard = () => {
 
 
                       {/* Excel Sheet */}
-                      <div className="card shadow-lg mb-5" style={{ backgroundColor: excelSheetColor }}>
+                      <div className="card shadow-lg mb-5" style={{ backgroundColor: excelSheetColors[0] || '#d4edda' }}>
                         <div className="card-body">
                           <div className="d-flex justify-content-between align-items-center mb-3">
                             {/* Excel Sheet Heading */}
-                            <h5 className="card-title text-center flex-grow-1" style={{ color: isLightColor(excelSheetColor) ? '#000' : '#fff' }}>
+                            <h5 className="card-title text-center flex-grow-1" style={{ color: isLightColor(excelSheetColors[0] || '#d4edda') ? '#000' : '#fff' }}>
                               Excel Sheet
                             </h5>
                           </div>
@@ -2494,7 +2507,7 @@ const EmployeeDashboard = () => {
                                             fontSize: '1.1rem',
                                             fontWeight: 'bold',
                                             width: 'auto',
-                                            color: isLightColor(excelSheetColor) ? '#000' : '#fff'
+                                            color: isLightColor(excelSheetColors[tableIndex] || '#d4edda') ? '#000' : '#fff'
                                           }}
                                         />
 
@@ -2503,26 +2516,27 @@ const EmployeeDashboard = () => {
                                         maxHeight: table.rows > 10 ? '400px' : 'auto',
                                         overflowY: table.rows > 10 ? 'auto' : 'visible',
                                         overflowX: 'auto',
-                                        msOverflowStyle: 'none',  // Hide scrollbar in IE/Edge
-                                        scrollbarWidth: 'none',   // Hide scrollbar in Firefox
-                                        '&::-webkit-scrollbar': { // Hide scrollbar in Chrome/Safari/Newer Edge
-                                          display: 'none'
-                                        }
+                                        msOverflowStyle: 'none',
+                                        scrollbarWidth: 'none',
+                                        backgroundColor: excelSheetColors[tableIndex] || '#d4edda',
+                                        padding: '15px',
+                                        borderRadius: '8px'
                                       }}>
                                         <table className="table table-bordered" style={{
                                           minWidth: '100%',
-                                          width: 'max-content'
+                                          width: 'max-content',
+                                          backgroundColor: excelSheetColors[tableIndex] || '#d4edda' // Also apply to table
                                         }}>
-                                          <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                                          <thead style={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: excelSheetColors[tableIndex] || '#d4edda' }}>
                                             <tr >
-                                              <th style={{ width: '30px', backgroundColor: '#f8f9fa' }}></th>
+                                              <th style={{ width: '30px', backgroundColor: excelSheetColors[tableIndex] || '#d4edda' }}></th>
                                               {Array(table.cols).fill().map((_, colIndex) => (
                                                 <th key={colIndex} className="text-center" style={{
-                                                  backgroundColor: '#f8f9fa',
+                                                  backgroundColor: excelSheetColors[tableIndex] || '#d4edda', // Apply to column headers
                                                   padding: '2px',
                                                   fontSize: '12px',
                                                   width: '80px',
-                                                  color: isLightColor(excelSheetColor) ? '#000' : '#fff'  // Add this line
+                                                  color: isLightColor(excelSheetColors[tableIndex] || '#d4edda') ? '#000' : '#fff'  // Add this line
                                                 }}>
                                                   {getColumnLabel(colIndex)}
                                                   <button
@@ -2540,7 +2554,7 @@ const EmployeeDashboard = () => {
                                             {Array(table.rows).fill().map((_, rowIndex) => (
                                               <tr key={rowIndex}>
                                                 <td className="text-center" style={{
-                                                  backgroundColor: '#f8f9fa',
+                                                  backgroundColor: excelSheetColors[tableIndex] || '#d4edda', // Apply to row headers
                                                   padding: '2px',
                                                   fontSize: '12px'
                                                 }}>
@@ -2560,7 +2574,8 @@ const EmployeeDashboard = () => {
                                                       ...styles.resizableCell,
                                                       width: columnWidths[`${tableIndex}-${colIndex}`] || '80px',
                                                       maxWidth: 'none',
-                                                      position: 'relative'
+                                                      position: 'relative',
+                                                      backgroundColor: excelSheetColors[tableIndex] || '#d4edda', // Apply to cell
                                                     }}
                                                   >
                                                     <div
@@ -2592,7 +2607,7 @@ const EmployeeDashboard = () => {
                                                           resize: 'none',
                                                           overflow: 'hidden',
                                                           fontSize: '12px',
-                                                          color: isValidUrl(table.data[rowIndex][colIndex]) ? '#0d6efd' : (isLightColor(excelSheetColor) ? '#000' : '#fff'),
+                                                          color: isValidUrl(table.data[rowIndex][colIndex]) ? '#0d6efd' : (isLightColor(excelSheetColors[tableIndex] || '#d4edda') ? '#000' : '#fff'),
                                                           textDecoration: isValidUrl(table.data[rowIndex][colIndex]) ? 'underline' : 'none',
                                                           backgroundColor: isCellSelected(tableIndex, rowIndex, colIndex) ? 'rgba(0, 123, 255, 0.1)' : 'transparent',
                                                         }}
@@ -2669,7 +2684,7 @@ const EmployeeDashboard = () => {
                                         <div className="position-relative btn-group">
                                           <button
                                             className="btn btn-secondary me-1"
-                                            onClick={() => setShowExcelPicker(!showExcelPicker)}
+                                            onClick={() => toggleColorPicker('excel', tableIndex)}
                                             title='Color The Sheet'
                                           >
                                             <i className="bi bi-palette-fill"></i>
@@ -2683,13 +2698,14 @@ const EmployeeDashboard = () => {
                                             <i className="bi bi-download"></i>
                                             <span className="ms-1">Excel</span>
                                           </button>
-                                          {showExcelPicker && (
-                                            <CustomColorPicker
-                                              color={excelSheetColor}
-                                              onChange={(color) => updateColors('excel', color)}
-                                              onClose={() => setShowExcelPicker(false)}
-                                            />
-                                          )}
+                                          {activeColorPicker.type === 'excel' &&
+                                            activeColorPicker.tableIndex === tableIndex && (
+                                              <CustomColorPicker
+                                                color={excelSheetColors[tableIndex] || '#d4edda'}
+                                                onChange={(color) => updateColors('excel', color, tableIndex)}
+                                                onClose={() => setActiveColorPicker({ type: null, tableIndex: null })}
+                                              />
+                                            )}
                                         </div>
 
                                         <div className='btn-group'>
@@ -3085,6 +3101,20 @@ const EmployeeDashboard = () => {
             color: #0a58ca;
           }
         `}
+      </style>
+
+      <style>
+        {`
+            .table-bordered td, 
+            .table-bordered th {
+              border-color: ${isLightColor(excelSheetColors[0] || '#d4edda') ? '#dee2e6' : '#ffffff33'} !important;
+            }
+            
+            .cell-input {
+              background-color: transparent !important;
+              color: ${isLightColor(excelSheetColors[0] || '#d4edda') ? '#000' : '#fff'} !important;
+            }
+          `}
       </style>
 
       {/* Delete Confirmation Modal */}
