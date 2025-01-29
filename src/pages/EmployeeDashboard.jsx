@@ -2281,7 +2281,7 @@ const EmployeeDashboard = () => {
                           <div className="card-body" style={{ backgroundColor: todoColor }}>
                             {/* Todo List Heading */}
                             <h5 className="card-title m-0 mb-3" style={{ color: isLightColor(todoColor) ? '#000' : '#fff' }}>
-                              Todo List
+                              CREDIT LINE
                             </h5>
 
                             {loading.todoList ? (
