@@ -23,6 +23,7 @@
             "dest": "/index.html"
         }
     ],
+
     "rewrites": [
         {
             "source": "/(.*)",
