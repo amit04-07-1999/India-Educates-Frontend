@@ -9,7 +9,7 @@ const Signin = () => {
   const [form, setForm] = useState({
     role: "",
     email: "",
-    password: "",
+    password: "",cs
   });
   const [error, setError] = useState("");
   const [roles, setRoles] = useState([]);
@@ -166,7 +166,7 @@ const Signin = () => {
                           onChange={handleChange}
                         >
                           <option value="">Select Role</option>
-                          <option value="superadmin">Super Admin</option>
+{/*                           <option value="superadmin">Super Admin</option> */}
                           <option value="admin">Admin</option>
                         </select>
                       </div>
