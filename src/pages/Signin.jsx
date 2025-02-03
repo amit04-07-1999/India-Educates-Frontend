@@ -9,7 +9,7 @@ const Signin = () => {
   const [form, setForm] = useState({
     role: "",
     email: "",
-    password: "",cs
+    password: "",
   });
   const [error, setError] = useState("");
   const [roles, setRoles] = useState([]);
