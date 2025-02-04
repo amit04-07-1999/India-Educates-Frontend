@@ -5,7 +5,7 @@ import './Sidebar.css';
 import CustomColorPicker, { isLightColor } from '../pages/colorpicker/CustomColorPicker';
 import Header from './Header';
 import { useTheme } from '../context/ThemeContext';
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
@@ -139,7 +139,7 @@ const Sidebar = () => {
       localStorage.removeItem("user");
       navigation("/");
     } catch (error) {
-      alert("Incorrect Old Password");
+      toast.error("Incorrect Old Password");
     }
   };
 
