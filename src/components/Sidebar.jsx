@@ -96,7 +96,7 @@ const Sidebar = () => {
     if (!imagePath) return "Images/superadminimg.jpg";
     const cleanPath = imagePath.replace(/\\/g, '/');
     const pathWithoutUploads = cleanPath.replace('uploads/', '');
-    return `${import.meta.env.VITE_BASE_URL}${pathWithoutUploads}`;
+    return `${import.meta.env.VITE_BASE_URL}profile/${pathWithoutUploads}`;
   };
 
   // Inside the Sidebar component, add these handlers from Header

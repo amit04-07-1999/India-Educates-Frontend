@@ -30,8 +30,8 @@ const Header = () => {
     // Remove 'uploads/' from the path if it exists
     const pathWithoutUploads = cleanPath.replace('uploads/', '');
 
-    // Combine with the backend URL
-    const imageUrl = `${import.meta.env.VITE_BASE_URL}${pathWithoutUploads}`;
+    // Add 'profile/' to the path and combine with the backend URL
+    const imageUrl = `${import.meta.env.VITE_BASE_URL}profile/${pathWithoutUploads}`;
     // console.log("imageUrl", imageUrl);
     return imageUrl;
   };
