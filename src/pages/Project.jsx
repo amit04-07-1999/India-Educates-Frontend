@@ -356,31 +356,48 @@ const Project = () => {
   }, [toEdit]);
   const projectHandleChange = (e) => {
     const { name, value, files } = e.target;
-    // console.log(value);
-    setProjectFormData((prevState) => ({
-      ...prevState,
-      [name]: files ? files[0] : value,
-    }));
+    if (name === 'projectImage') {
+      setProjectFormData(prevState => ({
+        ...prevState,
+        [name]: files
+      }));
+    } else {
+      setProjectFormData(prevState => ({
+        ...prevState,
+        [name]: files ? files[0] : value
+      }));
+    }
   };
   const projectHandleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
-      delete projectFormData?.taskAssignPerson;
-      delete projectFormData?.clientAssignPerson;
-      for (const key in projectFormData) {
-        formDataToSend.append(key, projectFormData[key]);
+      
+      // Add all non-file fields
+      Object.keys(projectFormData).forEach(key => {
+        if (key !== 'projectImage' && key !== 'projectIcon' && key !== 'taskAssignPerson' && key !== 'clientAssignPerson') {
+          formDataToSend.append(key, projectFormData[key]);
+        }
+      });
+
+      // Add project images if they exist
+      if (projectFormData.projectImage) {
+        Array.from(projectFormData.projectImage).forEach(file => {
+          formDataToSend.append('projectImage', file);
+        });
       }
+
+      // Add project icon if it exists
+      if (projectFormData.projectIcon instanceof File) {
+        formDataToSend.append('projectIcon', projectFormData.projectIcon);
+      }
+
+      // Add assignees
       for (let obj of selectedEmployees) {
         formDataToSend.append("taskAssignPerson", obj.value);
       }
       for (let obj of selectedClients) {
         formDataToSend.append("clientAssignPerson", obj.value);
-      }
-
-      // Log the data being sent
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
       }
 
       const response = await axios.put(
@@ -1794,8 +1811,9 @@ const Project = () => {
                         className="form-control"
                         type="file"
                         id="formFileMultiple456"
-                        name="projectImages"
-                        onChange={handleFileChange}
+                        name="projectImage"
+                        onChange={projectHandleChange}
+                        multiple
                       />
                     </div>
                     <div className="deadline-form">
