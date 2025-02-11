@@ -4,11 +4,10 @@ import Header from "../employeeCompt/EmployeeHeader";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Loading.css";
-import io from 'socket.io-client';
-import FloatingMenu from '../Chats/FloatingMenu'
+import io from "socket.io-client";
+import FloatingMenu from "../Chats/FloatingMenu";
 
 const Tasks = () => {
-  
   const [viewMode, setViewMode] = useState("row");
   const [employees, setEmployees] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -19,7 +18,7 @@ const Tasks = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [selectedTask, setSelectedTask] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [files, setFiles] = useState([]);
   const [notifications, setNotifications] = useState({});
   const messageContainerRef = useRef(null);
@@ -33,7 +32,9 @@ const Tasks = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/employees`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}api/employees`
+        );
         setEmployees(response.data);
       } catch (error) {
         console.error("Error:", error);
@@ -46,16 +47,21 @@ const Tasks = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const token = localStorage.getItem('emp_token');
-        const token1 = localStorage.getItem('emp_user_id');
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}api/author`, {
-          // headers: { Authorization: token }
-          _id: token1
-        });
+        const token = localStorage.getItem("emp_token");
+        const token1 = localStorage.getItem("emp_user_id");
+        const response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}api/author`,
+          {
+            // headers: { Authorization: token }
+            _id: token1,
+          }
+        );
 
         // console.log('API response:', response.data);
 
-        const tasksData = Array.isArray(response.data.tasks) ? response.data.tasks : [];
+        const tasksData = Array.isArray(response.data.tasks)
+          ? response.data.tasks
+          : [];
 
         // Sort tasks by taskDate (assuming taskDate exists, otherwise use taskEndDate)
         const sortedTasks = tasksData.sort((a, b) => {
@@ -66,7 +72,7 @@ const Tasks = () => {
 
         setTasks(sortedTasks);
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error("Error fetching tasks:", error);
       }
     };
 
@@ -75,7 +81,7 @@ const Tasks = () => {
 
   useEffect(() => {
     const statuses = {};
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       statuses[task._id] = task.taskStatus;
     });
     setTaskStatuses(statuses);
@@ -86,10 +92,10 @@ const Tasks = () => {
     let isCompleted = value === "Completed";
 
     try {
-      await axios.put(
-        `${import.meta.env.VITE_BASE_URL}api/update/${id}`,
-        { taskStatus: value, isCompleted }
-      );
+      await axios.put(`${import.meta.env.VITE_BASE_URL}api/update/${id}`, {
+        taskStatus: value,
+        isCompleted,
+      });
 
       setTasks(
         tasks.map((task) =>
@@ -99,7 +105,7 @@ const Tasks = () => {
 
       setTaskStatuses({
         ...taskStatuses,
-        [id]: value
+        [id]: value,
       });
     } catch (error) {
       setError(error.message);
@@ -108,46 +114,50 @@ const Tasks = () => {
 
   const fetchMessages = async (taskId) => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}api/taskMessages/${taskId}`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}api/taskMessages/${taskId}`
+      );
       setMessages(response.data);
       // Reset notification count for this task
-      setNotifications(prev => ({ ...prev, [taskId]: 0 }));
+      setNotifications((prev) => ({ ...prev, [taskId]: 0 }));
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-  const userData = JSON.parse(localStorage.getItem('emp_user')); // Assuming 'user' is the key where user info is stored
-  const userName = userData.employeeName
-    ;
-
+  const userData = JSON.parse(localStorage.getItem("emp_user")); // Assuming 'user' is the key where user info is stored
+  const userName = userData.employeeName;
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!content.trim() || !selectedTask) return;
 
-    const userData = JSON.parse(localStorage.getItem('emp_user'));
+    const userData = JSON.parse(localStorage.getItem("emp_user"));
     const senderId = userData.employeeName;
 
     const formData = new FormData();
-    formData.append('content', content);
-    formData.append('senderId', senderId);
-    formData.append('taskId', selectedTask._id);
+    formData.append("content", content);
+    formData.append("senderId", senderId);
+    formData.append("taskId", selectedTask._id);
 
     for (let file of files) {
-      formData.append('files', file);
+      formData.append("files", file);
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_BASE_URL}api/taskMessage`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setContent('');
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}api/taskMessage`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setContent("");
       setFiles([]);
       // Reset the file input element
-      const fileInput = document.getElementById('fileUpload');
+      const fileInput = document.getElementById("fileUpload");
       if (fileInput) {
-        fileInput.value = '';
+        fileInput.value = "";
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -158,9 +168,12 @@ const Tasks = () => {
     setFiles(Array.from(e.target.files));
   };
 
+  // asd
+
   useEffect(() => {
     if (messageContainerRef.current) {
-      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -176,13 +189,16 @@ const Tasks = () => {
 
     const handleNewTaskMessage = (message) => {
       if (message.taskId) {
-        setMessages(prevMessages => [...prevMessages, message]);
+        setMessages((prevMessages) => [...prevMessages, message]);
 
         // Only update notification if the chat modal is not open for this specific task
-        if (!isChatModalOpen || (selectedTask && message.taskId !== selectedTask._id)) {
-          setNotifications(prev => ({
+        if (
+          !isChatModalOpen ||
+          (selectedTask && message.taskId !== selectedTask._id)
+        ) {
+          setNotifications((prev) => ({
             ...prev,
-            [message.taskId]: (prev[message.taskId] || 0) + 1
+            [message.taskId]: (prev[message.taskId] || 0) + 1,
           }));
         }
       }
@@ -191,57 +207,62 @@ const Tasks = () => {
     const handleNewTaskNotification = ({ taskId }) => {
       // Only show notification if chat modal is closed or if it's for a different task
       if (!isChatModalOpen || (selectedTask && taskId !== selectedTask._id)) {
-        setNotifications(prev => ({
+        setNotifications((prev) => ({
           ...prev,
-          [taskId]: (prev[taskId] || 0) + 1
+          [taskId]: (prev[taskId] || 0) + 1,
         }));
       }
     };
 
-    socket.on('new task message', handleNewTaskMessage);
-    socket.on('new task notification', handleNewTaskNotification);
+    socket.on("new task message", handleNewTaskMessage);
+    socket.on("new task notification", handleNewTaskNotification);
 
     return () => {
-      socket.off('new task message', handleNewTaskMessage);
-      socket.off('new task notification', handleNewTaskNotification);
+      socket.off("new task message", handleNewTaskMessage);
+      socket.off("new task notification", handleNewTaskNotification);
     };
   }, [socket, isChatModalOpen, selectedTask]);
 
   useEffect(() => {
     if (!socket) return;
 
-    tasks.forEach(task => {
-      socket.emit('join task', task._id);
+    tasks.forEach((task) => {
+      socket.emit("join task", task._id);
     });
 
     return () => {
-      tasks.forEach(task => {
-        socket.emit('leave task', task._id);
+      tasks.forEach((task) => {
+        socket.emit("leave task", task._id);
       });
     };
   }, [socket, tasks]);
 
   // Modify filtering logic based on filterStatus and searchQuery
-  const filteredTasks = Array.isArray(tasks) ? tasks.filter((task) => {
-    const searchTerms = searchQuery.toLowerCase().split(' ');
-    const taskData = [
-      task.projectName.toLowerCase(),
-      task.taskStatus.toLowerCase(),
-      task.description.toLowerCase(),
-      new Date(task.taskEndDate).toLocaleDateString().toLowerCase(),
-      task.taskAssignPerson.employeeName.toLowerCase(),
-      task.assignedBy.toLowerCase(),
-      task.taskPriority.toLowerCase()
-    ].join(' ');
+  const filteredTasks = Array.isArray(tasks)
+    ? tasks.filter((task) => {
+        const searchTerms = searchQuery.toLowerCase().split(" ");
+        const taskData = [
+          task.projectName.toLowerCase(),
+          task.taskStatus.toLowerCase(),
+          task.description.toLowerCase(),
+          new Date(task.taskEndDate).toLocaleDateString().toLowerCase(),
+          task.taskAssignPerson.employeeName.toLowerCase(),
+          task.assignedBy.toLowerCase(),
+          task.taskPriority.toLowerCase(),
+        ].join(" ");
 
-    const matchesSearch = searchTerms.every(term => taskData.includes(term));
-    const matchesFilter = filterStatus === "All" || task.taskStatus === filterStatus;
+        const matchesSearch = searchTerms.every((term) =>
+          taskData.includes(term)
+        );
+        const matchesFilter =
+          filterStatus === "All" || task.taskStatus === filterStatus;
 
-    return matchesSearch && matchesFilter;
-  }) : [];
+        return matchesSearch && matchesFilter;
+      })
+    : [];
 
   const handleImageClick = useCallback((imageUrl) => {
-    window.open(imageUrl, '_blank');
+    window.open(imageUrl, "_blank");
   }, []);
 
   // Pagination logic
@@ -253,15 +274,21 @@ const Tasks = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Next page
-  const nextPage = () => setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(filteredTasks.length / tasksPerPage)));
+  const nextPage = () =>
+    setCurrentPage((prevPage) =>
+      Math.min(prevPage + 1, Math.ceil(filteredTasks.length / tasksPerPage))
+    );
 
   // Previous page
-  const prevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  const prevPage = () =>
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
 
   // Handle tasks per page change
   const handleTasksPerPageChange = (e) => {
     const value = e.target.value;
-    setTasksPerPage(value === 'all' ? filteredTasks.length : parseInt(value, 10));
+    setTasksPerPage(
+      value === "all" ? filteredTasks.length : parseInt(value, 10)
+    );
     setCurrentPage(1); // Reset to first page when changing the number of tasks per page
   };
 
@@ -270,8 +297,8 @@ const Tasks = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Modify the handleOpenMessages function
@@ -279,24 +306,27 @@ const Tasks = () => {
     setSelectedTask(task);
     fetchMessages(task._id);
     // Only clear notifications when modal is actually opened
-    if (document.getElementById('taskMessages').classList.contains('show')) {
-      setNotifications(prev => ({ ...prev, [task._id]: 0 }));
+    if (document.getElementById("taskMessages").classList.contains("show")) {
+      setNotifications((prev) => ({ ...prev, [task._id]: 0 }));
     }
     setIsChatModalOpen(true);
   };
 
   // Add event listener for modal close
   useEffect(() => {
-    const taskMessagesModal = document.getElementById('taskMessages');
+    const taskMessagesModal = document.getElementById("taskMessages");
     if (taskMessagesModal) {
       const handleModalHidden = () => {
         setIsChatModalOpen(false);
       };
 
-      taskMessagesModal.addEventListener('hidden.bs.modal', handleModalHidden);
+      taskMessagesModal.addEventListener("hidden.bs.modal", handleModalHidden);
 
       return () => {
-        taskMessagesModal.removeEventListener('hidden.bs.modal', handleModalHidden);
+        taskMessagesModal.removeEventListener(
+          "hidden.bs.modal",
+          handleModalHidden
+        );
       };
     }
   }, []);
@@ -304,7 +334,7 @@ const Tasks = () => {
   // Add this to persist notifications in localStorage
   useEffect(() => {
     // Load notifications from localStorage on component mount
-    const savedNotifications = localStorage.getItem('taskNotifications');
+    const savedNotifications = localStorage.getItem("taskNotifications");
     if (savedNotifications) {
       setNotifications(JSON.parse(savedNotifications));
     }
@@ -312,7 +342,7 @@ const Tasks = () => {
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('taskNotifications', JSON.stringify(notifications));
+    localStorage.setItem("taskNotifications", JSON.stringify(notifications));
   }, [notifications]);
 
   return (
@@ -333,10 +363,10 @@ const Tasks = () => {
                       <h3 className="fw-bold mb-0">Task Management</h3>
                       <div>
                         <div className="d-flex">
-                          {viewMode === 'row' ? (
+                          {viewMode === "row" ? (
                             <button
                               className="btn btn-outline-primary"
-                              onClick={() => setViewMode('list')}
+                              onClick={() => setViewMode("list")}
                               title="Switch to List View"
                             >
                               <i className="bi bi-list-task"></i>
@@ -344,7 +374,7 @@ const Tasks = () => {
                           ) : (
                             <button
                               className="btn btn-outline-primary"
-                              onClick={() => setViewMode('row')}
+                              onClick={() => setViewMode("row")}
                               title="Switch to Grid View"
                             >
                               <i className="bi bi-grid-3x3-gap-fill"></i>
@@ -390,7 +420,7 @@ const Tasks = () => {
                           className="form-select d-md-none"
                           value={filterStatus}
                           onChange={(e) => setFilterStatus(e.target.value)}
-                          style={{ width: 'auto' }}
+                          style={{ width: "auto" }}
                         >
                           <option value="All">All</option>
                           <option value="Not Started">Not Started</option>
@@ -398,10 +428,16 @@ const Tasks = () => {
                           <option value="Completed">Completed</option>
                         </select>
 
-                        <ul className="nav nav-tabs tab-body-header rounded prtab-set d-none d-md-flex" style={{ cursor: 'pointer', height: "fit-content" }} role="tablist">
+                        <ul
+                          className="nav nav-tabs tab-body-header rounded prtab-set d-none d-md-flex"
+                          style={{ cursor: "pointer", height: "fit-content" }}
+                          role="tablist"
+                        >
                           <li className="nav-item">
                             <a
-                              className={`nav-link ${filterStatus === "All" ? "active" : ""}`}
+                              className={`nav-link ${
+                                filterStatus === "All" ? "active" : ""
+                              }`}
                               onClick={() => setFilterStatus("All")}
                               role="tab"
                             >
@@ -410,7 +446,9 @@ const Tasks = () => {
                           </li>
                           <li className="nav-item">
                             <a
-                              className={`nav-link ${filterStatus === "Not Started" ? "active" : ""}`}
+                              className={`nav-link ${
+                                filterStatus === "Not Started" ? "active" : ""
+                              }`}
                               onClick={() => setFilterStatus("Not Started")}
                               role="tab"
                             >
@@ -419,7 +457,9 @@ const Tasks = () => {
                           </li>
                           <li className="nav-item">
                             <a
-                              className={`nav-link ${filterStatus === "In Progress" ? "active" : ""}`}
+                              className={`nav-link ${
+                                filterStatus === "In Progress" ? "active" : ""
+                              }`}
                               onClick={() => setFilterStatus("In Progress")}
                               role="tab"
                             >
@@ -428,7 +468,9 @@ const Tasks = () => {
                           </li>
                           <li className="nav-item">
                             <a
-                              className={`nav-link ${filterStatus === "Completed" ? "active" : ""}`}
+                              className={`nav-link ${
+                                filterStatus === "Completed" ? "active" : ""
+                              }`}
                               onClick={() => setFilterStatus("Completed")}
                               role="tab"
                             >
@@ -438,7 +480,6 @@ const Tasks = () => {
                         </ul>
                       </div>
                     </div>
-
                   </div>
                 </div>{" "}
                 {/* Row end  */}
@@ -446,7 +487,10 @@ const Tasks = () => {
                   {viewMode === "list" ? (
                     // List View Rendering
                     <div className="table-responsive">
-                      <table className="table table-hover align-middle mb-0" style={{ width: "100%" }}>
+                      <table
+                        className="table table-hover align-middle mb-0"
+                        style={{ width: "100%" }}
+                      >
                         <thead>
                           <tr>
                             <th>Sr.No</th>
@@ -462,36 +506,45 @@ const Tasks = () => {
                           {currentTasks.map((task, index) => {
                             const getFormattedDate = (date) => {
                               const newDate = new Date(date);
-                              return `${newDate.getDate()}/${newDate.getMonth() + 1}/${newDate.getFullYear()}`;
+                              return `${newDate.getDate()}/${
+                                newDate.getMonth() + 1
+                              }/${newDate.getFullYear()}`;
                             };
                             return (
                               <tr key={task._id}>
-                                <td><span className="fw-bold fs-6">{index + 1}.</span></td>
+                                <td>
+                                  <span className="fw-bold fs-6">
+                                    {index + 1}.
+                                  </span>
+                                </td>
                                 <td>
                                   {task.projectName}
                                   <br />
                                   <span
-                                    className={`badge ${taskStatuses[task._id] === "Not Started"
-                                      ? "bg-warning text-dark"
-                                      : taskStatuses[task._id] === "In Progress"
+                                    className={`badge ${
+                                      taskStatuses[task._id] === "Not Started"
+                                        ? "bg-warning text-dark"
+                                        : taskStatuses[task._id] ===
+                                          "In Progress"
                                         ? "bg-info text-dark"
                                         : "bg-success"
-                                      }`}
+                                    }`}
                                   >
                                     {taskStatuses[task._id]}
                                   </span>
                                 </td>
                                 <td>
-                                  <span className="fw-bold text-uppercase ">{task.taskTitle}</span>
+                                  <span className="fw-bold text-uppercase ">
+                                    {task.taskTitle}
+                                  </span>
                                   <p
                                     className="py-2 mb-0 task-description"
                                     style={{
                                       maxHeight: "5em",
                                       overflowY: "auto",
-                                      width: "200px",  // Adjust this value as needed
+                                      width: "200px", // Adjust this value as needed
                                     }}
                                   >
-
                                     {task.description}
                                   </p>
                                 </td>
@@ -500,35 +553,55 @@ const Tasks = () => {
                                     className="form-select"
                                     aria-label="Default select Status"
                                     name="taskStatus"
-                                    onChange={(e) => handleTaskUpdate(e, task._id)}
+                                    onChange={(e) =>
+                                      handleTaskUpdate(e, task._id)
+                                    }
                                     value={taskStatuses[task._id]}
                                   >
-                                    <option value="Not Started">Not Started</option>
-                                    <option value="In Progress">In Progress</option>
+                                    <option value="Not Started">
+                                      Not Started
+                                    </option>
+                                    <option value="In Progress">
+                                      In Progress
+                                    </option>
                                     <option value="Completed">Completed</option>
                                   </select>
                                 </td>
                                 <td>{getFormattedDate(task.taskEndDate)}</td>
                                 <td className="">
                                   <img
-                                    src={`${import.meta.env.VITE_BASE_URL}${task.taskAssignPerson.employeeImage.replace('uploads/', '')}`}
+                                    src={`${
+                                      import.meta.env.VITE_BASE_URL
+                                    }${task.taskAssignPerson.employeeImage.replace(
+                                      "uploads/",
+                                      ""
+                                    )}`}
                                     alt=""
                                     className="avatar rounded-circle"
                                     style={{
-                                      width: '40px',
-                                      height: '40px',
-                                      transition: 'transform 0.3s ease-in-out',
-                                      cursor: 'pointer',
+                                      width: "40px",
+                                      height: "40px",
+                                      transition: "transform 0.3s ease-in-out",
+                                      cursor: "pointer",
                                     }}
                                     onMouseEnter={(e) => {
-                                      e.target.style.transform = 'scale(4)';
-                                      e.target.style.zIndex = '100';
+                                      e.target.style.transform = "scale(4)";
+                                      e.target.style.zIndex = "100";
                                     }}
                                     onMouseLeave={(e) => {
-                                      e.target.style.transform = 'scale(1)';
-                                      e.target.style.zIndex = '1';
+                                      e.target.style.transform = "scale(1)";
+                                      e.target.style.zIndex = "1";
                                     }}
-                                    onClick={() => handleImageClick(`${import.meta.env.VITE_BASE_URL}${task.taskAssignPerson.employeeImage.replace('uploads/', '')}`)}
+                                    onClick={() =>
+                                      handleImageClick(
+                                        `${
+                                          import.meta.env.VITE_BASE_URL
+                                        }${task.taskAssignPerson.employeeImage.replace(
+                                          "uploads/",
+                                          ""
+                                        )}`
+                                      )
+                                    }
                                   />
                                   <br />
                                   {task.taskAssignPerson.employeeName}
@@ -581,56 +654,97 @@ const Tasks = () => {
 
                         return (
                           <div className="col-md-4 mb-4" key={task._id}>
-                            <div className="card task-card" style={{ width: "18rem" }}>
+                            <div
+                              className="card task-card"
+                              style={{ width: "18rem" }}
+                            >
                               <div className="card-body dd-handle">
                                 <div className="">
-                                  <h5 className="fw-bold">{index + 1}. {task.projectName}</h5>
-                                  <div className="text-muted" style={{ marginTop: "-0.8rem", marginLeft: "1.5rem" }}>{getFormattedDate(task.taskDate)}</div>
+                                  <h5 className="fw-bold">
+                                    {index + 1}. {task.projectName}
+                                  </h5>
+                                  <div
+                                    className="text-muted"
+                                    style={{
+                                      marginTop: "-0.8rem",
+                                      marginLeft: "1.5rem",
+                                    }}
+                                  >
+                                    {getFormattedDate(task.taskDate)}
+                                  </div>
                                 </div>
                                 <div className="task-info d-flex align-items-center justify-content-between">
                                   <h6 className="py-1 px-2 rounded-1 d-inline-block fw-bold small-14 mb-0">
-                                    <span className={`badge ${taskStatuses[task._id] === "Not Started" ? "bg-warning text-dark" : taskStatuses[task._id] === "In Progress" ? "bg-info text-dark" : "bg-success"}`}>
+                                    <span
+                                      className={`badge ${
+                                        taskStatuses[task._id] === "Not Started"
+                                          ? "bg-warning text-dark"
+                                          : taskStatuses[task._id] ===
+                                            "In Progress"
+                                          ? "bg-info text-dark"
+                                          : "bg-success"
+                                      }`}
+                                    >
                                       {taskStatuses[task._id]}
-
                                     </span>
                                   </h6>
                                   <div className="task-priority d-flex flex-column align-items-center justify-content-center">
                                     <div className="avatar-list avatar-list-stacked m-0">
                                       <img
                                         className="avatar rounded-circle small-avt"
-                                        src={`${import.meta.env.VITE_BASE_URL}${task.taskAssignPerson.employeeImage.replace('uploads/', '')}`}
+                                        src={`${
+                                          import.meta.env.VITE_BASE_URL
+                                        }${task.taskAssignPerson.employeeImage.replace(
+                                          "uploads/",
+                                          ""
+                                        )}`}
                                         alt=""
                                         style={{
-                                          transition: 'transform 0.3s ease-in-out',
-                                          cursor: 'pointer',
+                                          transition:
+                                            "transform 0.3s ease-in-out",
+                                          cursor: "pointer",
                                         }}
                                         onMouseEnter={(e) => {
-                                          e.target.style.transform = 'scale(8)';
-                                          e.target.style.zIndex = '100';
+                                          e.target.style.transform = "scale(8)";
+                                          e.target.style.zIndex = "100";
                                         }}
                                         onMouseLeave={(e) => {
-                                          e.target.style.transform = 'scale(1)';
-                                          e.target.style.zIndex = '1';
+                                          e.target.style.transform = "scale(1)";
+                                          e.target.style.zIndex = "1";
                                         }}
-                                        onClick={() => handleImageClick(`${import.meta.env.VITE_BASE_URL}${task.taskAssignPerson.employeeImage.replace('uploads/', '')}`)}
+                                        onClick={() =>
+                                          handleImageClick(
+                                            `${
+                                              import.meta.env.VITE_BASE_URL
+                                            }${task.taskAssignPerson.employeeImage.replace(
+                                              "uploads/",
+                                              ""
+                                            )}`
+                                          )
+                                        }
                                       />
                                     </div>
-                                    <div>{task.taskAssignPerson.employeeName}</div>
+                                    <div>
+                                      {task.taskAssignPerson.employeeName}
+                                    </div>
                                     <span className="badge bg-danger text-end mt-2">
                                       {task.taskPriority}
                                     </span>
                                   </div>
                                 </div>
-                                <span className="fw-bold text-uppercase ">{task.taskTitle}</span>
+                                <span className="fw-bold text-uppercase ">
+                                  {task.taskTitle}
+                                </span>
                                 <p
                                   className="py-2 mb-0 task-description"
                                   style={{
-                                    maxHeight: showFullDescription ? "none" : "11em",
+                                    maxHeight: showFullDescription
+                                      ? "none"
+                                      : "11em",
                                     overflowY: "auto",
                                   }}
                                 >
                                   {task.description}
-
                                 </p>
                                 <div className="tikit-info row g-3 align-items-center">
                                   <div className="col-sm">
@@ -640,14 +754,18 @@ const Tasks = () => {
                                           <div className="d-flex align-items-center fw-bold">
                                             Due Date:
                                             <span className="ms-1">
-                                              {getFormattedDate(task.taskEndDate)}
+                                              {getFormattedDate(
+                                                task.taskEndDate
+                                              )}
                                             </span>
                                           </div>
                                           <button
                                             className="btn btn-outline-secondary btn-sm me-2 position-relative"
                                             data-bs-toggle="modal"
                                             data-bs-target="#taskMessages"
-                                            onClick={() => handleOpenMessages(task)}
+                                            onClick={() =>
+                                              handleOpenMessages(task)
+                                            }
                                           >
                                             <i className="bi bi-chat-left-dots"></i>
                                             {notifications[task._id] > 0 && (
@@ -659,24 +777,37 @@ const Tasks = () => {
                                         </div>
                                       </li>
                                     </ul>
-                                    <div className="fw-bold">Task Given By - {task.assignedBy}</div>
+                                    <div className="fw-bold">
+                                      Task Given By - {task.assignedBy}
+                                    </div>
                                   </div>
 
                                   <div className="d-flex justify-content-between align-items-center">
-
                                     <select
                                       className="form-select"
                                       aria-label="Default select Status"
                                       name="taskStatus"
-                                      onChange={(e) => handleTaskUpdate(e, task._id)}
+                                      onChange={(e) =>
+                                        handleTaskUpdate(e, task._id)
+                                      }
                                       value={taskStatuses[task._id]}
                                     >
-                                      <option value="Not Started">Not Started</option>
-                                      <option value="In Progress">In Progress</option>
-                                      <option value="Completed">Completed</option>
+                                      <option value="Not Started">
+                                        Not Started
+                                      </option>
+                                      <option value="In Progress">
+                                        In Progress
+                                      </option>
+                                      <option value="Completed">
+                                        Completed
+                                      </option>
                                     </select>
 
-                                    <div className="btn-group" role="group" aria-label="Basic outlined example">
+                                    <div
+                                      className="btn-group"
+                                      role="group"
+                                      aria-label="Basic outlined example"
+                                    >
                                       <Link
                                         to="/images"
                                         className="btn btn-outline-secondary"
@@ -698,10 +829,11 @@ const Tasks = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="d-flex justify-content-between align-items-center mt-3">
                   <div className="mb-3">
-                    <label htmlFor="tasksPerPage" className="form-label">Tasks per page:</label>
+                    <label htmlFor="tasksPerPage" className="form-label">
+                      Tasks per page:
+                    </label>
                     <select
                       id="tasksPerPage"
                       className="form-select"
@@ -718,75 +850,156 @@ const Tasks = () => {
 
                   <nav>
                     <ul className="pagination">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={prevPage}>&laquo;</button>
+                      <li
+                        className={`page-item ${
+                          currentPage === 1 ? "disabled" : ""
+                        }`}
+                      >
+                        <button className="page-link" onClick={prevPage}>
+                          &laquo;
+                        </button>
                       </li>
-                      {Array.from({ length: Math.ceil(filteredTasks.length / tasksPerPage) }, (_, i) => (
-                        <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                          <button className="page-link bg-white" onClick={() => paginate(i + 1)}>{i + 1}</button>
-                        </li>
-                      ))}
-                      <li className={`page-item ${currentPage === Math.ceil(filteredTasks.length / tasksPerPage) ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={nextPage}>&raquo;</button>
+                      {Array.from(
+                        {
+                          length: Math.ceil(
+                            filteredTasks.length / tasksPerPage
+                          ),
+                        },
+                        (_, i) => (
+                          <li
+                            key={i}
+                            className={`page-item ${
+                              currentPage === i + 1 ? "active" : ""
+                            }`}
+                          >
+                            <button
+                              className="page-link bg-white"
+                              onClick={() => paginate(i + 1)}
+                            >
+                              {i + 1}
+                            </button>
+                          </li>
+                        )
+                      )}
+                      <li
+                        className={`page-item ${
+                          currentPage ===
+                          Math.ceil(filteredTasks.length / tasksPerPage)
+                            ? "disabled"
+                            : ""
+                        }`}
+                      >
+                        <button className="page-link" onClick={nextPage}>
+                          &raquo;
+                        </button>
                       </li>
                     </ul>
                   </nav>
                 </div>
-
               </div>
             </div>
-
-
-
           </>
         </div>
         <FloatingMenu userType="employee" isMobile={isMobile} />
       </div>
 
       {/* Message Modal */}
-      <div className="modal fade" id="taskMessages" tabIndex="-1" aria-labelledby="taskMessagesLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="taskMessages"
+        tabIndex="-1"
+        aria-labelledby="taskMessagesLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="taskMessagesLabel">Task Messages</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title" id="taskMessagesLabel">
+                Task Messages
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
             <div className="modal-body">
-              <div ref={messageContainerRef} style={{ height: '300px', overflowY: 'auto' }}>
+              <div
+                ref={messageContainerRef}
+                style={{ height: "300px", overflowY: "auto" }}
+              >
                 {messages.map((message, index) => (
                   <div key={index} className="mb-2">
                     <strong>{message.senderId}: </strong>
                     {message.content}
-                    <span className="px-3 text-muted">{new Date(message.createdAt).toLocaleString()}</span>
-                    {message.fileUrls && message.fileUrls.map((fileUrl, fileIndex) => {
-                      if (fileUrl) {
-                        const cleanFileUrl = `${import.meta.env.VITE_BASE_URL}${fileUrl.replace('uploads/', '')}`;
-                        const fileExtension = cleanFileUrl.split('.').pop().toLowerCase();
+                    <span className="px-3 text-muted">
+                      {new Date(message.createdAt).toLocaleString()}
+                    </span>
+                    {message.fileUrls &&
+                      message.fileUrls.map((fileUrl, fileIndex) => {
+                        if (fileUrl) {
+                          const cleanFileUrl = `${
+                            import.meta.env.VITE_BASE_URL
+                          }${fileUrl.replace("uploads/", "")}`;
+                          const fileExtension = cleanFileUrl
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
 
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-                          return (
-                            <div key={fileIndex} className="px-3">
-                              <a href={cleanFileUrl} target="_blank" rel="noopener noreferrer">
-                                <img src={cleanFileUrl} alt={`Attachment ${fileIndex + 1}`} style={{ maxWidth: '5rem', cursor: 'pointer' }} />
-                              </a>
-                            </div>
-                          );
-                        } else if (fileExtension === 'pdf') {
-                          return (
-                            <div key={fileIndex} className="px-3">
-                              <a href={cleanFileUrl} target="_blank" rel="noopener noreferrer" className="">PDF File</a>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div key={fileIndex} className="px-3">
-                              <a href={cleanFileUrl} target="_blank" rel="noopener noreferrer" className="">Download File</a>
-                            </div>
-                          );
+                          if (
+                            ["jpg", "jpeg", "png", "gif"].includes(
+                              fileExtension
+                            )
+                          ) {
+                            return (
+                              <div key={fileIndex} className="px-3">
+                                <a
+                                  href={cleanFileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={cleanFileUrl}
+                                    alt={`Attachment ${fileIndex + 1}`}
+                                    style={{
+                                      maxWidth: "5rem",
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                </a>
+                              </div>
+                            );
+                          } else if (fileExtension === "pdf") {
+                            return (
+                              <div key={fileIndex} className="px-3">
+                                <a
+                                  href={cleanFileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className=""
+                                >
+                                  PDF File
+                                </a>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div key={fileIndex} className="px-3">
+                                <a
+                                  href={cleanFileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className=""
+                                >
+                                  Download File
+                                </a>
+                              </div>
+                            );
+                          }
                         }
-                      }
-                      return null;
-                    })}
+                        return null;
+                      })}
                   </div>
                 ))}
               </div>
@@ -794,7 +1007,9 @@ const Tasks = () => {
             <div className="modal-footer">
               <form onSubmit={handleSendMessage} className="w-100">
                 <div className="mb-3">
-                  <label htmlFor="currentMessage" className="form-label">Add Message</label>
+                  <label htmlFor="currentMessage" className="form-label">
+                    Add Message
+                  </label>
                   <textarea
                     className="form-control"
                     id="currentMessage"
@@ -807,7 +1022,9 @@ const Tasks = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="fileUpload" className="form-label">Upload Files</label>
+                  <label htmlFor="fileUpload" className="form-label">
+                    Upload Files
+                  </label>
                   <input
                     type="file"
                     className="form-control"
@@ -816,7 +1033,9 @@ const Tasks = () => {
                     multiple
                   />
                 </div>
-                <button type="submit" className="btn btn-primary">Send</button>
+                <button type="submit" className="btn btn-primary">
+                  Send
+                </button>
               </form>
             </div>
           </div>

@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import CustomColorPicker from "../pages/colorpicker/CustomColorPicker";
 import { MultiSelect } from "react-multi-select-component";
+import { BsCameraVideoFill } from "react-icons/bs";
 
 const ChatLayout = ({
   users,
@@ -30,6 +31,7 @@ const ChatLayout = ({
   groups,
   setSelectedUser,
   fetchChatSettings,
+  children, // This will receive the video call button
 }) => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -1018,7 +1020,7 @@ const ChatLayout = ({
                     </div>
                     <div className="flex-fill ms-3">
                       <h6 className="mb-0 fw-bold">
-                        {selectedUser?.name || // For groups
+                        {selectedUser?.name ||
                           selectedUser?.employeeName ||
                           selectedUser?.clientName ||
                           selectedUser?.username ||
@@ -1054,6 +1056,11 @@ const ChatLayout = ({
                         )}
                       </small>
                     </div>
+                  </div>
+
+                  {/* Add the video call button here, before the dropdown */}
+                  <div className="d-flex align-items-center me-3">
+                    {children} {/* This will render the video call button */}
                   </div>
 
                   <Dropdown>

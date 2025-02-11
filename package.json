@@ -39,6 +39,7 @@
     "react-color": "^2.19.3",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.4.0",
     "react-konva": "^18.2.10",
     "react-multi-select-component": "^4.3.4",
     "react-pdf": "^9.1.1",
